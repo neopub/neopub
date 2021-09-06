@@ -1,0 +1,19 @@
+import SubscriberList from "components/subscriberList";
+import { usePublicKeyHex } from "lib/auth";
+import { useToken } from "lib/storage";
+
+export default function Subs() {
+  const pubKeyHex = usePublicKeyHex();
+  const token = useToken();
+  
+  if (!(pubKeyHex && token)) {
+    return <div>Not identified. Can't access subscribers.</div>
+  }
+
+  return (
+    <>
+      <h1 className="mb-4">subscribers</h1>
+      <SubscriberList />
+    </>
+  );
+}

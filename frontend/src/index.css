@@ -1,0 +1,78 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: rgb(85, 221, 85);
+    background-color: #111;
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  a {
+    text-decoration: underline;
+  }
+  
+  a:hover {
+    @apply text-green-200;
+  }
+
+  h1 {
+    @apply text-5xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+
+  h1, h2 {
+    @apply font-mono font-semibold;
+  }
+
+  button {
+    @apply my-2 px-2 py-1 border-2 rounded-lg border-green-300;
+  }
+
+  button:hover {
+    @apply bg-gray-800;
+  }
+
+  button:active {
+    @apply bg-gray-600;
+  }
+
+  textarea {
+    @apply bg-gray-800 p-2;
+  }
+}

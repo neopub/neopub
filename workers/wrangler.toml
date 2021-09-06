@@ -1,0 +1,19 @@
+name = "api"
+type = "javascript"
+zone_id = ""
+account_id = ""
+route = ""
+workers_dev = true
+
+kv_namespaces = [
+  { binding = "KV", id = "f406f3de382e4b68a42b1b50fa3bdd82" }
+]
+
+[build]
+command = "yarn install && yarn run build"
+[build.upload]
+format = "service-worker"
+
+[env.dev]
+name = "api-dev"
+route = "npd"
