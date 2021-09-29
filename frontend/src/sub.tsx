@@ -2,6 +2,7 @@ import Hexatar from "components/hexatar";
 import HexString from "components/hexString";
 import { sendSubRequest } from "lib/api";
 import { usePublicKeyHex } from "lib/auth";
+import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 
@@ -36,6 +37,7 @@ export default function Sub() {
       return;
     }
     await sendSubRequest(pubId, pubKeyHex, msg);
+    addSubscriptionPubKey(pubKeyHex);
     setSentReq(true);
   }
 

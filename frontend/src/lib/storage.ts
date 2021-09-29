@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
 import { key2buf } from "core/crypto";
+import DB from "lib/db";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -68,6 +69,10 @@ export const useWorldKey = () => useLocalStorage(worldKeyKey);
 export function getSubscriberPubKeyList(): Record<string, boolean> {
   const subs = JSON.parse(localStorage[subListKey] ?? "{}") as Record<string, boolean>;
   return subs;
+}
+
+export function addSubscriptionPubKey(pubKey: string) {
+  DB.subscriptions.add({ pubKey });
 }
 
 function setSubscriberPubKeyList(subs: Record<string, boolean>) {
