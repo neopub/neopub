@@ -35,7 +35,16 @@ export default function EncryptedPost({
       );
 
       try {
-        await DB.posts.add({ post, hash: postHashHex, publisherPubKey: pubKey });
+        // Cache post iff subscribed to poster.
+        const sub = await DB.subscriptions.get(pubKey);
+        if (sub) {
+          await DB.posts.add({
+            post,
+            hash: postHashHex,
+            publisherPubKey: pubKey,
+            createdAt: post?.createdAt,
+         });
+        }
       } catch (err) {
         console.log(err, postHashHex)
       }

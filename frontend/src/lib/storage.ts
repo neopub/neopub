@@ -72,7 +72,8 @@ export function getSubscriberPubKeyList(): Record<string, boolean> {
 }
 
 export function addSubscriptionPubKey(pubKey: string) {
-  DB.subscriptions.add({ pubKey });
+  DB.subscriptions.add({ pubKey })
+    .catch(() => {});
 }
 
 function setSubscriberPubKeyList(subs: Record<string, boolean>) {

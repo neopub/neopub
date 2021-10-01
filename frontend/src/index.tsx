@@ -24,10 +24,12 @@ import SubArch from 'subArch';
 import PostArch from 'postArch';
 import Arch from 'arch';
 import Host from 'host';
+import Feed from 'feed';
 
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
   { path: "/", text: "me" },
+  { path: "/feed", text: "feed" },
   { path: "/post", text: "post" },
   { path: "/creds/dump", text: "creds" },
   { path: "/reqs", text: "reqs" },
@@ -68,6 +70,9 @@ ReactDOM.render(
         <Switch>
           <Route exact path="/">
             <App />
+          </Route>
+          <Route exact path="/feed">
+            <Feed />
           </Route>
           <Route exact path="/post">
             <Post />

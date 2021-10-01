@@ -37,7 +37,7 @@ export default function Sub() {
       return;
     }
     await sendSubRequest(pubId, pubKeyHex, msg);
-    addSubscriptionPubKey(pubKeyHex);
+    addSubscriptionPubKey(pubId);
     setSentReq(true);
   }
 
