@@ -24,6 +24,7 @@ import {
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
+import DB from "./db";
 
 export async function unwrapReq(
   reqName: string,
@@ -172,6 +173,8 @@ export async function publishPostAndKeys(
     privKey,
     token,
   );
+
+  DB.posts.add({ post, hash: postHash }, [postHash]);
 
   if (visibility === "world") {
     await publishPostWorldKey(

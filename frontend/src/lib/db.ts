@@ -1,8 +1,9 @@
 import Dexie from "dexie";
 
-const db = new Dexie("neopub");
-db.version(1).stores({
+const DB = new Dexie("neopub");
+DB.version(1).stores({
   subscriptions: "pubKey",
+  posts: "hash, publisherPubKey, post",
 });
 
-export default db as any;
+export default DB as any;

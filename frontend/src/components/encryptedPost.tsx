@@ -3,6 +3,7 @@ import { fetchAndDecryptWorldOrSubPost } from "lib/api";
 import { usePrivateKey } from "lib/auth";
 import { useEffect, useState } from "react";
 import Post from "components/post";
+import DB from "lib/db";
 
 export default function EncryptedPost({
   enc,
@@ -18,13 +19,27 @@ export default function EncryptedPost({
   const [post, setPost] = useState<TPost>();
   useEffect(() => {
     async function fetchAndDec() {
-      const { id } = enc;
+      const { id: postHashHex } = enc;
+
+      const postRow = await DB.posts.get(postHashHex);
+      if (postRow) {
+        setPost(postRow.post);
+        return;
+      }
+
       const post = await fetchAndDecryptWorldOrSubPost(
-        id,
+        postHashHex,
         pubKey,
         privDH,
         worldKeyHex,
       );
+
+      try {
+        await DB.posts.add({ post, hash: postHashHex, publisherPubKey: pubKey });
+      } catch (err) {
+        console.log(err, postHashHex)
+      }
+
       setPost(post);
     }
 
