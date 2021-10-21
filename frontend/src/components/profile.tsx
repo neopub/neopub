@@ -54,6 +54,10 @@ export default function Profile({ id }: IProps) {
         <HexString hex={<a href={`/users/${id}`}>{id ?? ""}</a>} />
       </div>
 
+      <div>
+        {isAuthedUser && <Link to="/creds/dump">Creds</Link>}
+      </div>
+
       {!isAuthedUser && <Link to={`/users/${id}/sub`}>Subscribe</Link>}
 
       {isAuthedUser && <Link to="/post">New Post</Link>}

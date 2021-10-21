@@ -59,7 +59,7 @@ export default function DumpCreds() {
         Also included: the encryption key for your public posts.
       </p>
       <CredDumper />
-      <Link className="self-end" to={next ? next : `/users/${pubKeyHex}`}>Continue to profile &gt;</Link>
+      <Link className="self-end" to={next ? next : `/users/${pubKeyHex}`}>Profile &gt;</Link>
     </div>
   );
 }
