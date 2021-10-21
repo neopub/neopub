@@ -47,6 +47,7 @@ function Menu() {
 
   return (
     <div className="flex flex-row mb-2 space-x-4 font-mono">
+      <Link to="/"><img src="keyboard.png" style={{ width: 48 }} /></Link>
       {
         items.map(({ path, text }) => {
           const highlight = loc.pathname === path;
