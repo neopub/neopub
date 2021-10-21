@@ -29,7 +29,6 @@ type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
   { path: "/", text: "me" },
   { path: "/feed", text: "feed" },
-  { path: "/post", text: "post" },
   { path: "/subs", text: "subs" },
   { path: "/arch", text: "arch" },
   { path: "/exit", text: "exit" },
