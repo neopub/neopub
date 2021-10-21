@@ -16,7 +16,6 @@ import DumpCreds from 'dumpCreds';
 import UserProfile from 'userProfile';
 import Post from 'post';
 import Subs from 'subs';
-import Reqs from 'reqs';
 import Exit from './exit';
 import { isAuthenticated } from 'lib/auth';
 import Sub from 'sub';
@@ -32,7 +31,6 @@ const authedMenu: MenuItems = [
   { path: "/feed", text: "feed" },
   { path: "/post", text: "post" },
   { path: "/creds/dump", text: "creds" },
-  { path: "/reqs", text: "reqs" },
   { path: "/subs", text: "subs" },
   { path: "/arch", text: "arch" },
   { path: "/host", text: "host" },
@@ -76,9 +74,6 @@ ReactDOM.render(
           </Route>
           <Route exact path="/post">
             <Post />
-          </Route>
-          <Route exact path="/reqs">
-            <Reqs />
           </Route>
           <Route exact path="/subs">
             <Subs />
