@@ -29,8 +29,8 @@ import PostDetails from 'postDetails';
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
   { path: "/", text: "me" },
-  { path: "/feed", text: "feed" },
   { path: "/subs", text: "subs" },
+  { path: "/feed", text: "feed" },
   { path: "/arch", text: "arch" },
   { path: "/exit", text: "exit" },
 ];
