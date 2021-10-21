@@ -24,6 +24,7 @@ import PostArch from 'postArch';
 import Arch from 'arch';
 import Host from 'host';
 import Feed from 'feed';
+import PostDetails from 'postDetails';
 
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
@@ -71,6 +72,9 @@ ReactDOM.render(
           </Route>
           <Route exact path="/post">
             <Post />
+          </Route>
+          <Route exact path="/posts/:userId/:postId">
+            <PostDetails />
           </Route>
           <Route exact path="/subs">
             <Subs />

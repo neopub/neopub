@@ -25,7 +25,7 @@ export default function Feed() {
     <div>
       <h1 className="mb-8">feed</h1>
       {posts.map(post => {
-        return <Post key={post.hash} post={post.post as TPost} pubKey={pubKeyHex} />;
+        return <Post key={post.hash} id={post.hash} post={post.post as TPost} pubKey={pubKeyHex} />;
       })}
     </div>
   );

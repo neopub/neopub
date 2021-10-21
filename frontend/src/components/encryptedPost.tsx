@@ -55,5 +55,5 @@ export default function EncryptedPost({
     fetchAndDec();
   }, [enc, pubKey, worldKeyHex, privDH]);
 
-  return <Post post={post} pubKey={pubKey} />;
+  return <Post id={enc.id} post={post} pubKey={pubKey} />;
 }

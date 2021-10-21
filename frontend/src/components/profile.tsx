@@ -1,10 +1,10 @@
- import type { IProfile, IIndex } from "core/types";
-import MaybeEncryptedPost from "components/maybeEncryptedPost";
+ import type { IProfile, IIndex, IEncPost } from "core/types";
 import { useJSON } from "lib/useJSON";
 import { usePublicKeyHex } from "lib/auth";
 import HexString from "components/hexString";
 import Hexatar from "./hexatar";
 import { Link } from "react-router-dom";
+import EncryptedPost from "./encryptedPost";
 
 function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
   if (index.posts?.length === 0) {
@@ -17,9 +17,9 @@ function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, world
         index.posts?.map(
           (p, i) =>
             id && (
-              <MaybeEncryptedPost
+              <EncryptedPost
                 key={i}
-                post={p}
+                enc={p as IEncPost}
                 pubKey={id}
                 worldKeyHex={worldKeyHex}
               />
