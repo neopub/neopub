@@ -17,6 +17,9 @@ export default function Arch() {
       <div>
         <Link to="/arch/sub">Read about subscription security architecture.</Link>
       </div>
+      <div>
+        <Link to="/host">Read about hosting.</Link>
+      </div>
     </div>
   );
 }

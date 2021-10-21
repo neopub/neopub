@@ -33,14 +33,12 @@ const authedMenu: MenuItems = [
   { path: "/creds/dump", text: "creds" },
   { path: "/subs", text: "subs" },
   { path: "/arch", text: "arch" },
-  { path: "/host", text: "host" },
   { path: "/exit", text: "exit" },
 ];
 
 const unauthedMenu: MenuItems = [
   { path: "/", text: "neopub" },
   { path: "/arch", text: "arch" },
-  { path: "/host", text: "host" },
 ]
 
 function Menu() {
