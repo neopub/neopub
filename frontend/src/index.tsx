@@ -82,7 +82,7 @@ ReactDOM.render(
           <Route exact path="/exit">
             <Exit />
           </Route>
-          <Route exact path="/creds/dump">
+          <Route exact path="/creds/dump*">
             <DumpCreds />
           </Route>
           <Route exact path="/creds/load">

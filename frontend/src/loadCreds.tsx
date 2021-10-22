@@ -59,6 +59,23 @@ export default function LoadCreds() {
     fileInputRef.current?.click();
   }
 
+  const [pwManagerPayload, setPWManagerPayload] = useState("");
+  function handlePassChange(e: any) {
+    setPWManagerPayload(e.target.value);
+
+  }
+
+  function handleLoad(e: any) {
+    e.preventDefault();
+    
+    setStatus("Loading creds...")
+    loadState(pwManagerPayload);
+    setStatus("Loaded creds.")
+    setLoaded(true);
+    
+    fetchToken();
+  }
+
   return (
     <div className="flex flex-col my-4">
       <button onClick={handleLoadClicked}>
@@ -73,6 +90,22 @@ export default function LoadCreds() {
         multiple={false}
         onChange={handleFileSelected}
       />
+      <form>
+        <input
+          id="username"
+          name="pubkey"
+          type="text"
+          autoComplete="username"
+        />
+        <input
+          id="password"
+          name="privkey"
+          type="password"
+          autoComplete="password"
+          onChange={handlePassChange}
+        />
+        <button onClick={handleLoad}>Load</button>
+      </form>
       {status}
     </div>
   );
