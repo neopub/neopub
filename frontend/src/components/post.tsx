@@ -11,7 +11,7 @@ function Contents({post, id, posterId}: {post?: TPost, id: string, posterId: str
 
   return (
     <div>
-      <Link to={`/posts/${posterId}/${id}`}><Timestamp ts={post.createdAt} /></Link>
+      <Link to={`/posts/${posterId}/${id}`} className="no-underline"><Timestamp ts={post.createdAt} /></Link>
       <PostContent post={post} />
     </div>
   )

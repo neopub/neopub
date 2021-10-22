@@ -23,6 +23,7 @@ export default function PostDetails() {
       enc={{ id: postId }}
       pubKey={userId}
       worldKeyHex={worldKeyHex}
+      showEncHex
     />
   )
 }

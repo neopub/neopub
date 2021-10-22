@@ -118,7 +118,7 @@ export async function fetchAndDecryptWorldOrSubPost(
   posterPubKeyHex: string,
   privDH: CryptoKey | undefined,
   worldKeyHex?: string,
-): Promise<TPost | undefined> {
+): Promise<{ post: TPost, encBuf: ArrayBuffer } | undefined> {
   const postHash = hex2bytes(postHashHex);
   if (!postHash) {
     return;
@@ -138,7 +138,7 @@ export async function fetchAndDecryptWorldOrSubPost(
       postHash,
     );
     if (worldPost) {
-      return worldPost;
+      return { post: worldPost, encBuf };
     }
   }
 
@@ -150,7 +150,7 @@ export async function fetchAndDecryptWorldOrSubPost(
       postHash,
     );
     if (subPost) {
-      return subPost;
+      return { post: subPost, encBuf };
     }
   }
 }

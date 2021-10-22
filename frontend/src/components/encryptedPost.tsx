@@ -4,19 +4,24 @@ import { usePrivateKey } from "lib/auth";
 import { useEffect, useState } from "react";
 import Post from "components/post";
 import DB from "lib/db";
+import { buf2hex } from "core/bytes";
+import HexString from "./hexString";
 
 export default function EncryptedPost({
   enc,
   pubKey,
   worldKeyHex,
+  showEncHex,
 }: {
   enc: IEncPost;
   pubKey: string;
   worldKeyHex?: string;
+  showEncHex?: boolean;
 }) {
   const privDH = usePrivateKey("ECDH");
 
   const [post, setPost] = useState<TPost>();
+  const [encBuf, setEncBuf] = useState<ArrayBuffer>();
   useEffect(() => {
     async function fetchAndDec() {
       const { id: postHashHex } = enc;
@@ -27,12 +32,17 @@ export default function EncryptedPost({
         return;
       }
 
-      const post = await fetchAndDecryptWorldOrSubPost(
+      const res = await fetchAndDecryptWorldOrSubPost(
         postHashHex,
         pubKey,
         privDH,
         worldKeyHex,
       );
+      if (!res) {
+        return;
+      } 
+      const { post, encBuf } = res;
+      setEncBuf(encBuf);
 
       try {
         // Cache post iff subscribed to poster.
@@ -55,5 +65,18 @@ export default function EncryptedPost({
     fetchAndDec();
   }, [enc, pubKey, worldKeyHex, privDH]);
 
-  return <Post id={enc.id} post={post} pubKey={pubKey} />;
+  const encHex = encBuf ? buf2hex(encBuf) : "";
+
+  const postEl = <Post id={enc.id} post={post} pubKey={pubKey} />;
+
+  if (showEncHex) {
+    return (
+      <div>
+        {postEl}
+        <HexString hex={encHex} />
+      </div>
+    );
+  }
+
+  return postEl;
 }
