@@ -8,6 +8,7 @@ import EncryptedPost from "./encryptedPost";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
 import { fileLoc, getFileJSON } from "lib/net";
+import HexQR from "./hexQR";
 
 function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
   if (index.posts?.length === 0) {
@@ -80,21 +81,20 @@ export default function Profile({ id }: IProps) {
     <main>
       <h1 className="mb-8">profile</h1>
 
-      <div className="flex flex-row space-x-1 mb-4">
-        <Hexatar hex={id} />
-        <HexString hex={<a href={`/users/${id}`}>{id ?? ""}</a>} />
+      <div className="flex mb-8">
+        <a href={`/users/${id}`}><HexQR hex={`https://${document.location.host}/users/${id}`} /></a>
       </div>
 
-      <div>
+      <div className="flex flex-row space-x-1 mb-4">
+        <Hexatar hex={id} />
         {isAuthedUser && <Link to="/creds/dump">Creds</Link>}
       </div>
 
       {!isAuthedUser && <Link to={`/users/${id}/sub`}>Subscribe</Link>}
 
-      {isAuthedUser && <Link to="/post">New Post</Link>}
-
       <div>
         <h2 className="mb-3">Posts</h2>
+        {isAuthedUser && <div className="mb-4"><Link to="/post">New Post</Link></div>}
         {index === "notfound" || !index ? <div>No posts</div> : <PostList id={id} worldKeyHex={worldKeyHex} index={index} />}
       </div>
     </main>
