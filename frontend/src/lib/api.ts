@@ -174,7 +174,8 @@ export async function publishPostAndKeys(
     token,
   );
 
-  DB.posts.add({ post, hash: postHash }, [postHash]);
+  const postHashHex = buf2hex(postHash)
+  DB.posts.add({ post, hash: postHashHex }, [postHash]);
 
   if (visibility === "world") {
     await publishPostWorldKey(
