@@ -1,6 +1,6 @@
 import { TPost, IEncPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost } from "lib/api";
-import { usePrivateKey } from "lib/auth";
+import { usePrivateKey, usePublicKeyHex } from "lib/auth";
 import { useEffect, useState } from "react";
 import Post from "components/post";
 import DB from "lib/db";
@@ -19,6 +19,7 @@ export default function EncryptedPost({
   showEncHex?: boolean;
 }) {
   const privDH = usePrivateKey("ECDH");
+  const selfPubKeyHex = usePublicKeyHex();
 
   const [post, setPost] = useState<TPost>();
   const [encBuf, setEncBuf] = useState<ArrayBuffer>();
@@ -44,16 +45,25 @@ export default function EncryptedPost({
       const { post, encBuf } = res;
       setEncBuf(encBuf);
 
+      async function cachePost() {
+        return DB.posts.add({
+          post,
+          hash: postHashHex,
+          publisherPubKey: pubKey,
+          createdAt: post?.createdAt,
+        });
+      }
+
       try {
-        // Cache post iff subscribed to poster.
-        const sub = await DB.subscriptions.get(pubKey);
-        if (sub) {
-          await DB.posts.add({
-            post,
-            hash: postHashHex,
-            publisherPubKey: pubKey,
-            createdAt: post?.createdAt,
-         });
+        const isOwnPost = pubKey === selfPubKeyHex;
+        if (isOwnPost) {
+          await cachePost();
+        } else {
+          // Cache post if subscribed to poster.
+          const sub = await DB.subscriptions.get(pubKey);
+          if (sub) {
+            await cachePost();
+          }
         }
       } catch (err) {
         console.log(err, postHashHex)
@@ -62,8 +72,12 @@ export default function EncryptedPost({
       setPost(post);
     }
 
+    if (!selfPubKeyHex) {
+      return;
+    }
+
     fetchAndDec();
-  }, [enc, pubKey, worldKeyHex, privDH]);
+  }, [selfPubKeyHex, enc, pubKey, worldKeyHex, privDH]);
 
   const encHex = encBuf ? buf2hex(encBuf) : "";
 
