@@ -30,6 +30,7 @@ export type TPost = ITextPost | ICodePost;
 
 export interface IIndex {
   posts: Array<TPost | IEncPost>;
+  updatedAt: string;
 }
 
 export type PostVisibility = "world" | "subs";

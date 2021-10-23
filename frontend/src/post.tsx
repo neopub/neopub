@@ -5,6 +5,7 @@ import { useToken, useWorldKey } from "lib/storage";
 import { useJSON } from "lib/useJSON";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import DB from "lib/db";
 
 export default function Post() {
   const pubKeyHex = usePublicKeyHex();
@@ -12,7 +13,7 @@ export default function Post() {
   const privDH = usePrivateKey("ECDH");
   const token = useToken();
   const worldKeyHex = useWorldKey();
-  const [_, setIndex] = useJSON<IIndex>(pubKeyHex, "index.json", { posts: [] });
+  const [_, setIndex] = useJSON<IIndex>(pubKeyHex, "index.json", { posts: [], updatedAt: "" });
   const history = useHistory();
 
   const [text, setText] = useState("");
@@ -45,6 +46,8 @@ export default function Post() {
       visibility,
     );
     setIndex(newIndex);
+
+    DB.indexes.put({ pubKey: pubKeyHex, index: newIndex })
 
     history.push(`/users/${pubKeyHex}`);
   }

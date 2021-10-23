@@ -282,7 +282,7 @@ export async function publishPost(
   const body = JSON.stringify(post);
   const ciphertext = await encryptString(body, postKey);
 
-  let index: IIndex = { posts: [] };
+  let index: IIndex = { posts: [], updatedAt: new Date().toISOString() };
   const idx = await Net.getIndex(pubKey);
   if (idx && idx !== "notfound") {
     index = idx;

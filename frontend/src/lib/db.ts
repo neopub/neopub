@@ -4,6 +4,7 @@ const DB = new Dexie("neopub");
 DB.version(1).stores({
   subscriptions: "pubKey",
   posts: "hash, publisherPubKey, createdAt, post",
+  indexes: "pubKey, index, updatedAt",
 });
 
 export default DB as any;

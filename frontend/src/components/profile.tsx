@@ -5,6 +5,9 @@ import HexString from "components/hexString";
 import Hexatar from "./hexatar";
 import { Link } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
+import { useEffect, useState } from "react";
+import DB from "lib/db";
+import { fileLoc, getFileJSON } from "lib/net";
 
 function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
   if (index.posts?.length === 0) {
@@ -37,7 +40,35 @@ export default function Profile({ id }: IProps) {
   const isAuthedUser = id === pubKeyHex;
 
   const [profile] = useJSON<IProfile>(id, "profile.json", { handle: "", avatarURL: "", worldKey: "" });
-  const [index] = useJSON<IIndex>(id, "index.json", { posts: [] });
+
+  const [index, setIndex] = useState<IIndex | "notfound">({ posts: [], updatedAt: "" });
+  useEffect(() => {
+    // TODO: manage potential local/remote index conflicts.
+    async function load() {
+      let updatedAt = "";
+
+      // Must put an updatedAt timestamp on index, to know which should win.
+      const row = await DB.indexes.get(id);
+      if (row) {
+        setIndex(row.index);
+        updatedAt = row.updatedAt;
+      }
+
+      const location = fileLoc(id, "index.json");
+      const remoteIndex = await getFileJSON<IIndex>(location);
+      if (remoteIndex && remoteIndex !== "notfound" && remoteIndex.updatedAt > updatedAt) {
+        setIndex(remoteIndex);
+      }
+    }
+
+    if (!id) {
+      return;
+    }
+
+    load();
+  }, [id]);
+
+  // const [index] = useJSON<IIndex>(id, "index.json", { posts: [] });
 
   if (profile === "notfound") {
     return <div>Not found.</div>
