@@ -46,35 +46,42 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
 
   return (
     <div className="flex flex-col my-4">
-      <button onClick={handleSave} className="mb-4">
-        Export Creds
-      </button>
       <textarea
         className="w-full h-48 rounded font-mono text-xs"
         value={reveal ? credState : placeholder}
         readOnly
       />
-      <button onClick={() => setReveal(!reveal)}>
-        {reveal ? "Conceal" : "Reveal"}
-      </button>
-      <form action="#" onSubmit={handleSubmit}>
+      <div className="flex mb-4 space-x-2">
+        <button onClick={handleSave} className="flex-1">
+          Export Creds
+        </button>
+        <button onClick={() => setReveal(!reveal)} className="flex-1">
+          {reveal ? "Conceal" : "Reveal"}
+        </button>
+      </div>
+
+      <p className="mb-2">Store these credentials in your password manager, by entering an ID below and hitting Save Creds. No one can help you regain access to your account.</p>
+
+      <form action="#" onSubmit={handleSubmit} className="sm:max-w-full max-w-96">
+        <label htmlFor="id">ID</label>
         <input
           id="new-username"
-          name="pubkey"
+          name="id"
           type="text"
           autoComplete="username"
           value={username}
-          placeholder="Enter a name to store this identity in your browser"
+          placeholder="Enter an ID for your password manager"
           onChange={handleUsernameChange}
-          className="block w-96 px-2 py-1 my-2"
+          className="block px-2 py-1 my-2 w-full"
         />
+        <label htmlFor="secrets">Creds</label>
         <input
           id="new-password"
-          name="privkey"
+          name="creds"
           type="password"
           autoComplete="new-password"
           value={credState}
-          className="block w-96 px-2 py-1 my-2"
+          className="block px-2 py-1 my-2 w-full"
         />
         <button type="submit" disabled={!username || !credState}>
           Save Creds
@@ -93,12 +100,7 @@ export default function DumpCreds() {
   return (
     <div className="max-w-lg flex flex-col">
       <h1 className="mb-4">credentials</h1>
-      <p className="mb-2">This is your identity (an ECDSA keypair).</p>
-      <p className="mb-2">Store it securely. If you lose it, you are lost.</p>
-      <p className="mb-2">No one can help you regain access to your account.</p>
-      <p className="mb-2">
-        Also included: the encryption key for your public posts.
-      </p>
+      <p className="">These are your credentials (an ECDSA keypair, etc...).</p>
       <CredDumper nextURL={next ? next : `/users/${pubKeyHex}`} />
     </div>
   );
