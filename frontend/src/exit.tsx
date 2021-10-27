@@ -17,14 +17,14 @@ export default function Exit() {
   }
 
   function handleExit(id?: string, creds?: string) {
-    if (!creds || !credState) {
+    if (!manualOverride && (!creds || !credState)) {
       return;
     }
 
     try {
       const credsMatch =
-        JSON.stringify(JSON.parse(creds)) ===
-        JSON.stringify(JSON.parse(credState));
+        JSON.stringify(JSON.parse(creds ?? "")) ===
+        JSON.stringify(JSON.parse(credState ?? " "));
       const exitOk = manualOverride || credsMatch;
       if (!exitOk) {
         return;
