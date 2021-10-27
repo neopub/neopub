@@ -1,11 +1,11 @@
+import CredFields from "components/credFields";
 import { getPrivateKey, getPublicKey, getToken } from "lib/auth";
 import { loadState, setToken } from "lib/storage";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 
 export default function LoadCreds() {
   const history = useHistory();
-  const [loaded, setLoaded] = useState(false);
   const [status, setStatus] = useState("");
 
   const next = new URLSearchParams(history.location.search).get('next');
@@ -29,83 +29,21 @@ export default function LoadCreds() {
     history.push(next ? next : "/");
   }
 
-  async function handleFileSelected(evt: React.ChangeEvent<HTMLInputElement>) {
-    const file = evt.target.files?.[0];
-    if (!file) {
+  function handleLoad(id?: string, creds?: string) {
+    if (!creds) {
       return;
     }
-    
-    const fr = new FileReader();
-    fr.onload = function (evt) {
-      const creds = evt.target?.result as string;
-      if (!creds) {
-        setStatus("No creds.");
-        return;
-      }
-  
-      setStatus("Loading creds...")
-      loadState(creds);
-      setStatus("Loaded creds.")
-      setLoaded(true);
-      
-      fetchToken();
-    };
-    fr.readAsText(file);
-  }
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  function handleLoadClicked(evt: React.MouseEvent) {
-    evt.preventDefault();
-    fileInputRef.current?.click();
-  }
-
-  const [pwManagerPayload, setPWManagerPayload] = useState("");
-  function handlePassChange(e: any) {
-    setPWManagerPayload(e.target.value);
-
-  }
-
-  function handleLoad(e: any) {
-    e.preventDefault();
-    
     setStatus("Loading creds...")
-    loadState(pwManagerPayload);
+    loadState(creds);
     setStatus("Loaded creds.")
-    setLoaded(true);
     
     fetchToken();
   }
 
   return (
     <div className="flex flex-col my-4">
-      <button onClick={handleLoadClicked}>
-        Load creds (neopub.json)
-      </button>
-      <input
-        ref={fileInputRef}
-        className="hidden"
-        name="load"
-        type="file"
-        accept=".json"
-        multiple={false}
-        onChange={handleFileSelected}
-      />
-      <form>
-        <input
-          id="username"
-          name="pubkey"
-          type="text"
-          autoComplete="username"
-        />
-        <input
-          id="password"
-          name="privkey"
-          type="password"
-          autoComplete="password"
-          onChange={handlePassChange}
-        />
-        <button onClick={handleLoad}>Load</button>
-      </form>
+      <CredFields onSubmit={handleLoad} ctaText="Load Creds" />
       {status}
     </div>
   );
