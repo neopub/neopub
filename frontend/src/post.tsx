@@ -61,9 +61,9 @@ export default function Post() {
         onChange={(e) => setText(e.target.value)}
         className="h-48 rounded p-2 mt-4"
       />
-      <div style={{ display: "flex", flexDirection: "row", justifyContent: "flex-end" }}>
-        <button onClick={() => handlePostClicked("world")}>Post (Public)</button>
-        <button onClick={() => handlePostClicked("subs")}>Post (Subscribers)</button>
+      <div className="flex space-x-2">
+        <button className="flex-1" onClick={() => handlePostClicked("world")}>Post (Public)</button>
+        <button className="flex-1" onClick={() => handlePostClicked("subs")}>Post (Subscribers)</button>
       </div>
     </div>
   );
