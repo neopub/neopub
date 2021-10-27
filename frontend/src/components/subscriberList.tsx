@@ -1,13 +1,14 @@
 import { useSubscribers } from "lib/storage";
+import { Link } from "react-router-dom";
 import Hexatar from "./hexatar";
 import HexString from "./hexString";
 
 function SubscriberItem({ pubKeyHex }: { pubKeyHex: string }) {
   return (
-    <div className="flex flex-row items-center space-x-2">
+    <Link className="flex flex-row items-center space-x-2 no-underline" to={`/users/${pubKeyHex}`}>
       <Hexatar hex={pubKeyHex} />
       <HexString hex={pubKeyHex} />
-    </div>
+    </Link>
   )
 }
 
