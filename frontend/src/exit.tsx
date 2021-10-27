@@ -41,12 +41,16 @@ export default function Exit() {
     <div className="max-w-lg">
       <h1 className="mb-4">exit</h1>
       <p>
-        To prove you have stored your credentials, autofill them here from your
-        password manager. If you don't have your creds, there is absolutely no
-        way to regain access to your account. Game over, man.
+        To prove you stored your credentials, use your password manager to fill
+        them here.
       </p>
 
       <CredFields onSubmit={handleExit} ctaText="Exit" />
+
+      <p className="mt-2">
+        If you exit without having stored your creds, there is absolutely no way
+        to regain access to your account. Game over, man.
+      </p>
 
       <label className="block">
         <input

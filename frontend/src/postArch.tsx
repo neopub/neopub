@@ -11,7 +11,7 @@ export default function PostArch() {
         <a href="/post-diag.png"><img src="/req-diag.png" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
         <a href="/symbols-diag.png"><img src="/symbols-diag.png" className="max-w-sm border-2 border-green-400 rounded-lg my-4" /></a>
         <p>To read someone's private posts, you must send them a subscription request, and they must accept it. Then you're a subscriber.</p>
-        <Link to="/arch/sub">Read about subscription architecture.</Link>
+        <Link to="/arch/sub">Read about subscription architecture »</Link>
       </div>
     </div>
   );

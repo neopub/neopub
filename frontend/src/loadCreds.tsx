@@ -42,7 +42,9 @@ export default function LoadCreds() {
   }
 
   return (
-    <div className="flex flex-col my-4">
+    <div className="max-w-lg flex flex-col">
+      <h1 className="mb-4">load</h1>
+      <p className="mb-4">Load credentials from your password manager. If you don't have creds, go back and create some.</p>
       <CredFields onSubmit={handleLoad} ctaText="Load Creds" />
       {status}
     </div>
