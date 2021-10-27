@@ -27,6 +27,7 @@ export default function Exit() {
         JSON.stringify(JSON.parse(credState ?? " "));
       const exitOk = manualOverride || credsMatch;
       if (!exitOk) {
+        alert("Creds don't match. Try again.");
         return;
       }
     } catch (e) {
