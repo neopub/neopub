@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
-import { saveAs } from "file-saver";
 import { useHistory } from "react-router-dom";
 import CredFields from "components/credFields";
 
