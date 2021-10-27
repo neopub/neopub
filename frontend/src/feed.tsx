@@ -5,7 +5,7 @@ import DB from "lib/db";
 import { useEffect, useState } from "react"
 
 export default function Feed() {
-  const pubKeyHex = usePublicKeyHex();
+  const { hex: pubKeyHex } = usePublicKeyHex();
   
   const [posts, setPosts] = useState<any[]>([])
   useEffect(() => {

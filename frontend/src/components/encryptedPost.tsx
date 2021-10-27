@@ -19,7 +19,7 @@ export default function EncryptedPost({
   showEncHex?: boolean;
 }) {
   const privDH = usePrivateKey("ECDH");
-  const selfPubKeyHex = usePublicKeyHex();
+  const { hex: selfPubKeyHex } = usePublicKeyHex();
 
   const [post, setPost] = useState<TPost>();
   const [encBuf, setEncBuf] = useState<ArrayBuffer>();

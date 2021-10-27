@@ -50,21 +50,26 @@ export function getWorldKey(): string | undefined {
   return localStorage[worldKeyKey];
 }
 
-function useLocalStorage(key: string): string | undefined {
-  const [val, setVal] = useState<string>();
+function useLocalStorage(key: string): { val: string | null, loading: boolean } {
+  const [state, setState] = useState<{ val: string | null, loading: boolean }>({ val: null, loading: true });
 
   useEffect(() => {
     const val = localStorage.getItem(key);
-    if (val != null) {
-      setVal(val);
-    }
+    setState({ val, loading: false });
   }, [key]);
 
-  return val;
+  return state;
 }
 
-export const useToken = () => useLocalStorage(tokenKey);
-export const useWorldKey = () => useLocalStorage(worldKeyKey);
+export function useToken() {
+  const { val: token, loading } = useLocalStorage(tokenKey);
+  return { token, loading };
+}
+
+export function useWorldKey() {
+  const { val: worldKeyHex, loading } = useLocalStorage(worldKeyKey);
+  return { worldKeyHex, loading };
+}
 
 export function getSubscriberPubKeyList(): Record<string, boolean> {
   const subs = JSON.parse(localStorage[subListKey] ?? "{}") as Record<string, boolean>;

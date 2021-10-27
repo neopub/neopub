@@ -37,7 +37,7 @@ interface IProps {
   id: string;
 }
 export default function Profile({ id }: IProps) {
-  const pubKeyHex = usePublicKeyHex();
+  const { hex: pubKeyHex } = usePublicKeyHex();
   const isAuthedUser = id === pubKeyHex;
 
   const [profile] = useJSON<IProfile>(id, "profile.json", { handle: "", avatarURL: "", worldKey: "" });

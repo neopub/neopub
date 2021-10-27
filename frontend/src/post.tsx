@@ -8,11 +8,11 @@ import { Link, useHistory } from "react-router-dom";
 import DB from "lib/db";
 
 export default function Post() {
-  const pubKeyHex = usePublicKeyHex();
+  const { hex: pubKeyHex } = usePublicKeyHex();
   const privKey = usePrivateKey("ECDSA");
   const privDH = usePrivateKey("ECDH");
-  const token = useToken();
-  const worldKeyHex = useWorldKey();
+  const { token } = useToken();
+  const { worldKeyHex } = useWorldKey();
   const [_, setIndex] = useJSON<IIndex>(pubKeyHex, "index.json", { posts: [], updatedAt: "" });
   const history = useHistory();
 

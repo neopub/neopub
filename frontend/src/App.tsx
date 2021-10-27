@@ -4,10 +4,15 @@ import { usePublicKeyHex } from "./lib/auth";
 import Profile from "./components/profile";
 
 function App() {
-  const token = useToken();
-  const hasAccess = token != null;
+  const { token, loading: loadingToken } = useToken();
+  const { hex: pubKeyHex, loading: loadingPubKey } = usePublicKeyHex();
 
-  const pubKeyHex = usePublicKeyHex();
+  const loading = loadingToken || loadingPubKey;
+  if (loading) {
+    return null;
+  }
+
+  const hasAccess = token != null;
 
   return hasAccess ? (
     pubKeyHex ? <Profile id={pubKeyHex} /> : null

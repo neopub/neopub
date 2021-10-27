@@ -8,7 +8,7 @@ import { Link, useHistory, useParams } from "react-router-dom";
 
 export default function Sub() {
   const history = useHistory();
-  const pubKeyHex = usePublicKeyHex();
+  const { hex: pubKeyHex } = usePublicKeyHex();
   const [sentReq, setSentReq] = useState(false);
   
   const { id: pubId } = useParams<{ id: string }>();

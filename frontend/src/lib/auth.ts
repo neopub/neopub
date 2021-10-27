@@ -36,8 +36,8 @@ export async function storeCredentials(idKeys: CryptoKeyPair, token: string, wor
   await setWorldKey(worldKey);
 }
 
-export function usePublicKeyHex(): string | undefined {
-  const [bytes, setBytes] = useState<string>();
+export function usePublicKeyHex(): { hex?: string, loading: boolean } {
+  const [state, setState] = useState<{ hex?: string, loading: boolean}>({ hex: undefined, loading: true })
 
   useEffect(() => {
     async function json2bytes(json: string): Promise<string | undefined> {
@@ -57,11 +57,13 @@ export function usePublicKeyHex(): string | undefined {
 
     const json = getPublicKeyJWK();
     if (json) {
-      json2bytes(json).then((bytes) => setBytes(bytes));
+      json2bytes(json).then((hex) => setState({ hex, loading: false }));
+    } else {
+      setState({ hex: undefined, loading: false })
     }
   }, []);
 
-  return bytes;
+  return state;
 }
 
 async function json2key(json: string, keyType: "ECDSA" | "ECDH", usages: KeyUsage[]): Promise<CryptoKey | undefined> {
@@ -105,19 +107,6 @@ export async function getPrivateKey(keyType: "ECDSA" | "ECDH"): Promise<CryptoKe
   }
   const usage = keyType === "ECDSA" ? "sign" : "deriveKey";
   return json2key(json, keyType, [usage]);
-}
-
-export function usePublicKey(): CryptoKey | undefined {
-  const [key, setKey] = useState<CryptoKey>();
-
-  useEffect(() => {
-    const json = getPublicKeyJWK();
-    if (json) {
-      json2key(json, "ECDSA", []).then((key) => setKey(key));
-    }
-  }, []);
-
-  return key;
 }
 
 export function usePrivateKey(

@@ -48,7 +48,7 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
 }
 
 export default function DumpCreds() {
-  const pubKeyHex = usePublicKeyHex();
+  const { hex: pubKeyHex } = usePublicKeyHex();
   const location = useLocation();
 
   const next = new URLSearchParams(location.search).get("next");
