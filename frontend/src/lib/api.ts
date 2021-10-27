@@ -308,7 +308,7 @@ async function postKeyLocation(
   postHash: ArrayBuffer,
 ): Promise<string> {
   const encKeyBytes = await key2buf(outerKey);
-  const locBytes = concatArrayBuffers(encKeyBytes, postHash);
+  const locBytes = await sha(concatArrayBuffers(encKeyBytes, postHash));
   const locHex = buf2hex(locBytes);
   return locHex;
 }
