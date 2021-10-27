@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function PostArch() {
   return (
     <div className="max-w-lg">
-      <h1>arch/posting</h1>
+      <h1>posting</h1>
       <div>
         <p>In neopub, all posts are encrypted with a "post key".</p>
         <p>When someone posts publicly, they publish the post key publicly.</p>

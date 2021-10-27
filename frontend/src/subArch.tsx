@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 export default function SubArch() {
   return (
     <div className="max-w-lg">
-      <h1>arch/subscription</h1>
+      <h1>subscribing</h1>
       <div className="mt-4">
         <p>Neopub is designed for a hostile hosting environment.</p>
         <p>Encrypting posts prevents the host from reading them.</p>
