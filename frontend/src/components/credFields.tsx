@@ -56,7 +56,7 @@ export default function CredFields({
         onChange={isLoading ? handleCredsChange : undefined}
         className="block px-2 py-1 my-2 w-full"
       />
-      <button type="submit" disabled={submitDisabled}>
+      <button type="submit" className="w-full" disabled={submitDisabled}>
         {ctaText}
       </button>
     </form>
