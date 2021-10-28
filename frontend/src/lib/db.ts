@@ -1,23 +1,15 @@
 import Dexie from "dexie";
 
-let DB: Dexie;
+const DB = new Dexie("neopub");
+DB.version(2).stores({
+  subscriptions: "pubKey",
+  posts: "hash, publisherPubKey, createdAt, post",
+  indexes: "pubKey, index, updatedAt",
+});
 
-function init() {
-  const DB = new Dexie("neopub");
-  DB.version(2).stores({
-    subscriptions: "pubKey",
-    posts: "hash, publisherPubKey, createdAt, post",
-    indexes: "pubKey, index, updatedAt",
-  });
-
-  return DB;
+export async function wipeDB() {
+  await DB.delete();
+  return DB.open();
 }
-
-export function wipeDB() {
-  DB.delete();
-  DB = init();
-}
-
-DB = init();
 
 export default DB as any;

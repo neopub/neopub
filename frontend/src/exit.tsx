@@ -18,9 +18,9 @@ export default function Exit() {
   }
 
   function handleExit(id?: string, creds?: string) {
-    function exit() {
+    async function exit() {
       localStorage.clear();
-      wipeDB();
+      await wipeDB();
       history.push("/");
     }
 
