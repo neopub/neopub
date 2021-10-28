@@ -25,6 +25,7 @@ import Arch from 'arch';
 import Host from 'host';
 import Feed from 'feed';
 import PostDetails from 'postDetails';
+import DataArch from 'dataArch';
 
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
@@ -105,6 +106,9 @@ ReactDOM.render(
           </Route>
           <Route exact path="/arch/post">
             <PostArch />
+          </Route>
+          <Route exact path="/arch/data">
+            <DataArch />
           </Route>
         </Switch>
       </Router>
