@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
 import { useHistory } from "react-router-dom";
 import CredFields from "components/credFields";
+import { wipeDB } from "lib/db";
 
 export default function Exit() {
   const [credState, setCredState] = useState<string>();
@@ -19,6 +20,7 @@ export default function Exit() {
   function handleExit(id?: string, creds?: string) {
     function exit() {
       localStorage.clear();
+      wipeDB();
       history.push("/");
     }
 
