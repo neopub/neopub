@@ -70,6 +70,18 @@ export default function Profile({ id }: IProps) {
 
   // const [index] = useJSON<IIndex>(id, "index.json", { posts: [] });
 
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    DB.subscriptions.get(id).then((sub: any) => {
+      console.log(id, sub)
+      setIsSubscribed(sub != null);
+    });
+  }, [id])
+
   if (profile === "notfound") {
     return <div>Not found.</div>
   }
@@ -87,9 +99,9 @@ export default function Profile({ id }: IProps) {
       <div className="flex flex-row space-x-1 mb-4">
         <Hexatar hex={id} />
         {isAuthedUser && <Link to="/creds/dump">Creds</Link>}
+        {!isAuthedUser && (isSubscribed ? <Link to={`/subs`}>Subscribed</Link> : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
       </div>
 
-      {!isAuthedUser && <Link to={`/users/${id}/sub`}>Subscribe</Link>}
 
       <div>
         <h2 className="mb-3">Posts</h2>
