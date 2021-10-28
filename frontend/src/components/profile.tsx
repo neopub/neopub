@@ -77,7 +77,6 @@ export default function Profile({ id }: IProps) {
     }
 
     DB.subscriptions.get(id).then((sub: any) => {
-      console.log(id, sub)
       setIsSubscribed(sub != null);
     });
   }, [id])
