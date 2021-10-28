@@ -46,7 +46,7 @@ export default function Exit() {
         them here.
       </p>
 
-      <CredFields onSubmit={handleExit} ctaText="Exit" />
+      <CredFields onSubmit={handleExit} ctaText="Exit" submitEnabledManualOverride={manualOverride} />
 
       <p className="mt-2">
         If you exit without having stored your creds, there is absolutely no way

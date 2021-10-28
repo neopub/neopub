@@ -4,10 +4,12 @@ export default function CredFields({
   onSubmit,
   fixedCreds,
   ctaText,
+  submitEnabledManualOverride,
 }: {
   onSubmit: (username?: string, creds?: string) => void;
   fixedCreds?: string;
   ctaText: string;
+  submitEnabledManualOverride?: boolean;
 }) {
   const idFieldRef = useRef<HTMLInputElement>(null);
   const credFieldRef = useRef<HTMLInputElement>(null);
@@ -27,8 +29,13 @@ export default function CredFields({
     onSubmit(id, creds);
   }
 
-  const submitDisabled = !id || !(fixedCreds ?? creds);
-
+  const missingId = !id;
+  const missingCreds = !(fixedCreds ?? creds);
+  let submitDisabled =  missingId || missingCreds;
+  if (submitEnabledManualOverride) {
+    submitDisabled = false;
+  }
+  
   const isLoading = fixedCreds == null;
 
   return (
