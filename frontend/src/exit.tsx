@@ -17,7 +17,16 @@ export default function Exit() {
   }
 
   function handleExit(id?: string, creds?: string) {
-    if (!manualOverride && (!creds || !credState)) {
+    function exit() {
+      localStorage.clear();
+      history.push("/");
+    }
+
+    if (manualOverride) {
+      exit();
+    }
+
+    if (!creds || !credState) {
       return;
     }
 
@@ -34,8 +43,7 @@ export default function Exit() {
       return;
     }
 
-    localStorage.clear();
-    history.push("/");
+    exit();
   }
 
   return (
