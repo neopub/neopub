@@ -72,10 +72,6 @@ export default function EncryptedPost({
       setPost(post);
     }
 
-    if (!selfPubKeyHex) {
-      return;
-    }
-
     fetchAndDec();
   }, [selfPubKeyHex, enc, pubKey, worldKeyHex, privDH]);
 
