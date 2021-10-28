@@ -51,10 +51,10 @@ export default function Sub() {
       </div>
 
       <div className="mt-6">
-        <div className="flex flex-row space-x-2">
+        <Link className="flex flex-row items-center space-x-2 no-underline" to={`/users/${pubId}`}>
           <Hexatar hex={pubId} />
           <HexString hex={pubId} />
-        </div>
+        </Link>
         {
           sentReq ? <div>Sent subscription request.</div> : <button onClick={handleSubscribe}>Subscribe</button>
         }
