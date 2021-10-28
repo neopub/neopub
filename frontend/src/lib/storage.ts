@@ -124,7 +124,7 @@ export function dumpState(): string | undefined {
 export function loadState(stateJSON: string) {
   try {
     const state = JSON.parse(stateJSON);
-    const { pubKey, privKey, subs, worldKey } = state;
+    const { pubKey, privKey, worldKey } = state;
     localStorage[pubKeyKey] = JSON.stringify(pubKey);
     localStorage[privKeyKey] = JSON.stringify(privKey);
     localStorage[worldKeyKey] = worldKey

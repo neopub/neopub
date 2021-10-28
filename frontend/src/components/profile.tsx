@@ -1,7 +1,6 @@
  import type { IProfile, IIndex, IEncPost } from "core/types";
 import { useJSON } from "lib/useJSON";
 import { usePublicKeyHex } from "lib/auth";
-import HexString from "components/hexString";
 import Hexatar from "./hexatar";
 import { Link } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";

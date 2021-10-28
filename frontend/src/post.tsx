@@ -13,6 +13,7 @@ export default function Post() {
   const privDH = usePrivateKey("ECDH");
   const { token } = useToken();
   const { worldKeyHex } = useWorldKey();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setIndex] = useJSON<IIndex>(pubKeyHex, "index.json", { posts: [], updatedAt: "" });
   const history = useHistory();
 

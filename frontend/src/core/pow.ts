@@ -85,7 +85,7 @@ export default class PoW {
       return;
     }
 
-    const solh = await this.hash(solution, seed);
+    // const solh = await this.hash(solution, seed);
     // console.log({ seed, solution, solh });
   }
 }

@@ -9,8 +9,8 @@ export default function SubArch() {
         <p>Encrypting posts prevents the host from reading them.</p>
         (<Link to="/arch/post">Read about posting architecture »</Link>)
         <p>Neopub also prevents the host for discovering who follows whom.</p>
-        <a href="/req-diag.png"><img src="/req-diag.png" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
-        <a href="/symbols-diag.png"><img src="/symbols-diag.png" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
+        <a href="/req-diag.png"><img src="/req-diag.png" alt="Diagram of subscription request flow" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
+        <a href="/symbols-diag.png"><img src="/symbols-diag.png" alt="Legend" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
         <ol className="list-decimal ml-8 my-2">
           <li>A user, the publisher, publishes their public key, <pre className="inline">P<sub>pub</sub></pre>.</li>
           <li>To subscribe to that user, the subscriber first generates an ephemeral key pair, <pre className="inline">(E<sub>pub</sub>, E<sub>pub</sub>)</pre>.</li>

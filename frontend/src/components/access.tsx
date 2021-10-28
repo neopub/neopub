@@ -39,7 +39,7 @@ export default function Access() {
   return (
     <div className="mt-24 flex flex-col items-center">
       <div className="flex flex-col items-center">
-        <img src="keyboard.png" className="w-40 pt-2 mb-2" />
+        <img src="keyboard.png" alt="Pixelated keyboard icon" className="w-40 pt-2 mb-2" />
         <h1 className="mb-8">neopub</h1>
       </div>
       <div className="flex flex-col">
