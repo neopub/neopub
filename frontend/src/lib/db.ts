@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 
 const DB = new Dexie("neopub");
-DB.version(1).stores({
+DB.version(2).stores({
   subscriptions: "pubKey",
   posts: "hash, publisherPubKey, createdAt, post",
   indexes: "pubKey, index, updatedAt",
