@@ -46,7 +46,7 @@ export default function EncryptedPost({
       setEncBuf(encBuf);
 
       async function cachePost() {
-        return DB.posts.add({
+        return DB.posts.put({
           post,
           hash: postHashHex,
           publisherPubKey: pubKey,
