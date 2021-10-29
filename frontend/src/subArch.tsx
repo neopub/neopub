@@ -8,7 +8,7 @@ export default function SubArch() {
         <p>Neopub is designed for a hostile hosting environment.</p>
         <p>Encrypting posts prevents the host from reading them.</p>
         (<Link to="/arch/post">Read about posting architecture »</Link>)
-        <p>Neopub also prevents the host for discovering who follows whom.</p>
+        <p>Neopub also prevents the host from discovering who follows whom.</p>
         <a href="/req-diag.png"><img src="/req-diag.png" alt="Diagram of subscription request flow" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
         <a href="/symbols-diag.png"><img src="/symbols-diag.png" alt="Legend" className="max-w-full border-2 border-green-400 rounded-lg my-4" /></a>
         <ol className="list-decimal ml-8 my-2">
