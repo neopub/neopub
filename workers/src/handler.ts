@@ -2,20 +2,13 @@ import PoW, { numHashBits } from "../core/pow";
 import { ECDSA_PUBKEY_BYTES, POW_DIFF, SOLUTION_BYTES } from "../core/consts";
 import { buf2hex, concatArrayBuffers, hex2bytes } from "../core/bytes";
 import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "../core/consts";
-import { checkSig } from "./lib";
-
-declare let SESS_TOKEN_SEED: string;
-const SESS_TOKEN_SEED_BYTES = new TextEncoder().encode(SESS_TOKEN_SEED);
+import { checkSig, checkTok, SESS_TOKEN_SEED_BYTES } from "./lib";
+import { corsHeaders, handleOptions } from "./cors";
 
 declare let POW_SEED: string;
 const POW_SEED_BYTES = new TextEncoder().encode(POW_SEED);
 
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-  "Access-Control-Max-Age": "86400",
-}
+declare let KV: KVNamespace;
 
 async function auth(req: Request): Promise<Response> {
   const rawKey = await req.arrayBuffer();
@@ -80,8 +73,6 @@ async function chal(req: Request): Promise<Response> {
   })
 }
 
-declare let KV: KVNamespace;
-
 async function put(req: Request): Promise<Response> {
   // Parse public key.
   const pubKeyHex = req.headers.get(pubKeyHeader) ?? "";
@@ -94,12 +85,8 @@ async function put(req: Request): Promise<Response> {
   const tokenHex = req.headers.get(tokenHeader) ?? "";
 
   // Check token.
-  const pow = new PoW(crypto);
-
-  // TODO: use a timing-safe string comparison.
-  const expectedToken = await pow.hash(pubKeyBytes, SESS_TOKEN_SEED_BYTES);
-  const expectedTokenHex = buf2hex(expectedToken);
-  if (tokenHex !== expectedTokenHex) {
+  const tokenValid = await checkTok(pubKeyBytes, tokenHex);
+  if (!tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
   }
 
@@ -164,14 +151,8 @@ async function reqs(req: Request): Promise<Response> {
 
   // Parse token.
   const tokenHex = req.headers.get(tokenHeader) ?? "";
-
-  // Check token.
-  const pow = new PoW(crypto);
-
-  // TODO: use a timing-safe string comparison.
-  const expectedToken = await pow.hash(pubKeyBytes, SESS_TOKEN_SEED_BYTES);
-  const expectedTokenHex = buf2hex(expectedToken);
-  if (tokenHex !== expectedTokenHex) {
+  const tokenValid = await checkTok(pubKeyBytes, tokenHex);
+  if (tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
   }
 
@@ -228,31 +209,6 @@ async function sub(req: Request): Promise<Response> {
     },
     status: 200,
   })
-}
-
-function handleOptions(request: Request): Response {
-  const headers = request.headers;
-  if (
-    headers.get("Origin") !== null &&
-    headers.get("Access-Control-Request-Method") !== null &&
-    headers.get("Access-Control-Request-Headers") !== null
-  ){
-    const respHeaders = {
-      ...corsHeaders,
-      "Access-Control-Allow-Headers": request.headers.get("Access-Control-Request-Headers") ?? "",
-    }
-
-    return new Response(null, {
-      headers: respHeaders,
-    })
-  }
-  else {
-    return new Response(null, {
-      headers: {
-        Allow: "GET, POST, OPTIONS",
-      },
-    })
-  }
 }
 
 export async function handleRequest(request: Request): Promise<Response> {
