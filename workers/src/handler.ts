@@ -1,7 +1,8 @@
 import PoW, { numHashBits } from "../core/pow";
-import { ECDSA_PUBKEY_BYTES, POW_DIFF, SOLUTION_BYTES, ecdsaParams } from "../core/consts";
+import { ECDSA_PUBKEY_BYTES, POW_DIFF, SOLUTION_BYTES } from "../core/consts";
 import { buf2hex, concatArrayBuffers, hex2bytes } from "../core/bytes";
 import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "../core/consts";
+import { checkSig } from "./lib";
 
 declare let SESS_TOKEN_SEED: string;
 const SESS_TOKEN_SEED_BYTES = new TextEncoder().encode(SESS_TOKEN_SEED);
@@ -60,19 +61,7 @@ async function chal(req: Request): Promise<Response> {
   }
 
   // Verify signature of solution.
-  const pubKey = await crypto.subtle.importKey(
-    "raw",
-    rawKey,
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["verify"],
-  );
-  const verified = await crypto.subtle.verify(
-    ecdsaParams,
-    pubKey,
-    sig,
-    solution,
-  );
+  const verified = await checkSig(rawKey, sig, solution);
   if (!verified) {
     return new Response("Invalid signature", { status: 400 });
   }
@@ -123,20 +112,7 @@ async function put(req: Request): Promise<Response> {
 
   // Check signature.
   const data = await req.arrayBuffer();
-
-  const pubKey = await crypto.subtle.importKey(
-    "raw",
-    pubKeyBytes,
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["verify"],
-  );
-  const verified = await crypto.subtle.verify(
-    ecdsaParams,
-    pubKey,
-    sigBytes,
-    data,
-  );
+  const verified = await checkSig(pubKeyBytes, sigBytes, data);
   if (!verified) {
     return new Response("Invalid signature", { status: 400 });
   }
