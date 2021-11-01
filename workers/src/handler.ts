@@ -1,12 +1,8 @@
-import PoW, { numHashBits } from "../core/pow";
-import { ECDSA_PUBKEY_BYTES, POW_DIFF, SOLUTION_BYTES } from "../core/consts";
-import { buf2hex, concatArrayBuffers, hex2bytes } from "../core/bytes";
+import { ECDSA_PUBKEY_BYTES, SOLUTION_BYTES } from "../core/consts";
+import { hex2bytes } from "../core/bytes";
 import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "../core/consts";
-import { checkSig, checkTok, SESS_TOKEN_SEED_BYTES } from "./lib";
+import { checkPoW, checkSig, checkTok, genChal, genTok } from "./lib";
 import { corsHeaders, handleOptions } from "./cors";
-
-declare let POW_SEED: string;
-const POW_SEED_BYTES = new TextEncoder().encode(POW_SEED);
 
 declare let KV: KVNamespace;
 
@@ -17,15 +13,12 @@ async function auth(req: Request): Promise<Response> {
     return new Response("Missing pubKey", { status: 400 });
   }
 
-  const pow = new PoW(crypto);
-  const chal = await pow.hash(keyBytes, POW_SEED_BYTES);
-
-  const resBytes = concatArrayBuffers(chal, new Uint8Array([POW_DIFF]));
-  return new Response(resBytes, {
+  const chal = await genChal(keyBytes);
+  return new Response(chal, {
     headers: {
       ...corsHeaders,
       "Content-Type": "application/octet-stream",
-      "Content-Length": `${chal.byteLength + 1}`,
+      "Content-Length": `${chal.byteLength}`,
     },
     status: 200,
   })
@@ -43,12 +36,7 @@ async function chal(req: Request): Promise<Response> {
   const sig = payload.slice(ECDSA_PUBKEY_BYTES + SOLUTION_BYTES);
 
   // Check proof-of-work.
-  const pow = new PoW(crypto);
-  const chal = await pow.hash(keyBytes, POW_SEED_BYTES);
-  const hash = await pow.hash(new Uint8Array(solution), chal);
-
-  const N = numHashBits - POW_DIFF;
-  const valid = pow.lessThan2ToN(hash, N);
+  const valid = await checkPoW(keyBytes, solution)
   if (!valid) {
     return new Response("Invalid solution", { status: 400 });
   }
@@ -60,8 +48,7 @@ async function chal(req: Request): Promise<Response> {
   }
 
   // Compute token.
-  const token = await pow.hash(keyBytes, SESS_TOKEN_SEED_BYTES);
-  const tokenHex = buf2hex(token);
+  const tokenHex = await genTok(keyBytes);
 
   // Return to client.
   return new Response(tokenHex, {

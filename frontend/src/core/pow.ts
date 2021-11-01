@@ -21,7 +21,7 @@ export default class PoW {
     this.crypto = crypto;
   }
 
-  public lessThan2ToN(num: Uint8Array, N: number): Boolean {
+  public lessThan2ToN(num: Uint8Array, N: number): boolean {
     const totalBits = num.byteLength * bitsPerByte;
     if (N >= totalBits) {
       return true;
