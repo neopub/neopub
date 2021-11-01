@@ -190,14 +190,6 @@ async function reqs(req: Request): Promise<Response> {
     console.error(e);
     return new Response("Error listing reqs", { status: 500 });
   }
-
-  return new Response(tokenHex, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/plain",
-    },
-    status: 200,
-  })
 }
 
 async function sub(req: Request): Promise<Response> {
