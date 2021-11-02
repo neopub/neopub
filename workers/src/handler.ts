@@ -6,6 +6,16 @@ import { corsHeaders, handleOptions } from "./cors";
 
 declare let KV: KVNamespace;
 
+function success(body: BodyInit | null, headers: HeadersInit = {}): Response {
+  return new Response(body, {
+    headers: {
+      ...corsHeaders,
+      ...headers,
+    },
+    status: 200,
+  });
+}
+
 async function auth(req: Request): Promise<Response> {
   const rawKey = await req.arrayBuffer();
   const keyBytes = new Uint8Array(rawKey);
@@ -14,14 +24,10 @@ async function auth(req: Request): Promise<Response> {
   }
 
   const chal = await genChal(keyBytes);
-  return new Response(chal, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "application/octet-stream",
-      "Content-Length": `${chal.byteLength}`,
-    },
-    status: 200,
-  })
+  return success(chal, {
+    "Content-Type": "application/octet-stream",
+    "Content-Length": `${chal.byteLength}`,
+  });
 }
 
 async function chal(req: Request): Promise<Response> {
@@ -50,14 +56,7 @@ async function chal(req: Request): Promise<Response> {
   // Compute token.
   const tokenHex = await genTok(keyBytes);
 
-  // Return to client.
-  return new Response(tokenHex, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/plain",
-    },
-    status: 200,
-  })
+  return success(tokenHex, { "Content-Type": "text/plain" });
 }
 
 async function put(req: Request): Promise<Response> {
@@ -67,11 +66,9 @@ async function put(req: Request): Promise<Response> {
   if (!pubKeyBytes) {
     return new Response("Missing pubKey", { status: 400 });
   }
-
-  // Parse token.
-  const tokenHex = req.headers.get(tokenHeader) ?? "";
-
+  
   // Check token.
+  const tokenHex = req.headers.get(tokenHeader) ?? "";
   const tokenValid = await checkTok(pubKeyBytes, tokenHex);
   if (!tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
@@ -99,13 +96,7 @@ async function put(req: Request): Promise<Response> {
     return new Response("Error writing data", { status: 500 });
   }
 
-  return new Response(tokenHex, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/plain",
-    },
-    status: 200,
-  })
+  return success(null, { "Content-Type": "text/plain" });
 }
 
 async function get(req: Request): Promise<Response> {
@@ -119,13 +110,7 @@ async function get(req: Request): Promise<Response> {
     return new Response("Not found", { status: 404, headers: corsHeaders })
   }
 
-  return new Response(data, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/plain",
-    },
-    status: 200,
-  })
+  return success(data, { "Content-Type": "text/plain" });
 }
 
 async function reqs(req: Request): Promise<Response> {
@@ -136,10 +121,10 @@ async function reqs(req: Request): Promise<Response> {
     return new Response("Missing pubKey", { status: 400 });
   }
 
-  // Parse token.
+  // Check token.
   const tokenHex = req.headers.get(tokenHeader) ?? "";
   const tokenValid = await checkTok(pubKeyBytes, tokenHex);
-  if (tokenValid) {
+  if (!tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
   }
 
@@ -147,13 +132,7 @@ async function reqs(req: Request): Promise<Response> {
   try {
     const list = await KV.list({ prefix });
     const keys = list.keys.map(k => k.name.substr(prefix.length));
-    return new Response(JSON.stringify(keys), {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "text/plain",
-      },
-      status: 200,
-    })
+    return success(JSON.stringify(keys), { "Content-Type": "text/plain" });
   } catch (e) {
     console.error(e);
     return new Response("Error listing reqs", { status: 500 });
@@ -189,13 +168,7 @@ async function sub(req: Request): Promise<Response> {
     return new Response("Error writing data", { status: 500 });
   }
   
-  return new Response(null, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/plain",
-    },
-    status: 200,
-  })
+  return success(null, { "Content-Type": "text/plain" });
 }
 
 export async function handleRequest(request: Request): Promise<Response> {
