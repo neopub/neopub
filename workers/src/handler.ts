@@ -3,9 +3,6 @@ import API, { IDataLayer, IHandlerContext } from "../shared/api";
 import { corsHeaders, handleOptions } from "./cors";
 
 declare let KV: KVNamespace;
-declare let SESS_TOKEN_SEED: string;
-declare let POW_SEED: string;
-
 const data: IDataLayer = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async writeFile(loc: string, data: any): Promise<void> {
@@ -23,7 +20,10 @@ const data: IDataLayer = {
   }
 };
 
+declare let SESS_TOKEN_SEED: string;
+declare let POW_SEED: string;
 const lib = new Lib(crypto, SESS_TOKEN_SEED, POW_SEED);
+
 const api = new API(lib, data);
 
 function success(body: BodyInit | null, headers: HeadersInit = {}): Response {
@@ -54,20 +54,5 @@ export async function handleRequest(request: Request): Promise<Response> {
   }
 
   const url = new URL(request.url);
-  switch (url.pathname) {
-    case "/auth":
-      return api.auth(context);
-    case "/chal":
-      return api.chal(context);
-    case "/get":
-      return api.get(context);
-    case "/put":
-      return api.put(context);
-    case "/reqs":
-      return api.reqs(context);
-    case "/sub":
-      return api.sub(context);
-  }
-
-  return new Response("Invalid route", { status: 404 })
+  return api.handle(url.pathname, context);
 }

@@ -34,7 +34,26 @@ export default class API {
     this.data = data;
   }
 
-  async auth({ body, success, failure }: IHandlerContext) {
+  async handle(url: string, context: IHandlerContext) {
+    switch (url) {
+      case "/auth":
+        return this.auth(context);
+      case "/chal":
+        return this.chal(context);
+      case "/get":
+        return this.get(context);
+      case "/put":
+        return this.put(context);
+      case "/reqs":
+        return this.reqs(context);
+      case "/sub":
+        return this.sub(context);
+    }
+  
+    return context.failure(404, "Invalid route");
+  }
+
+  private async auth({ body, success, failure }: IHandlerContext) {
     const rawKey = await body();
     const keyBytes = new Uint8Array(rawKey);
     if (!keyBytes) {
@@ -49,7 +68,7 @@ export default class API {
     });
   }
 
-  async chal({ body, success, failure }: IHandlerContext) {
+  private async chal({ body, success, failure }: IHandlerContext) {
     const payload = await body();
     const rawKey = payload.slice(0, ECDSA_PUBKEY_BYTES);
     const keyBytes = new Uint8Array(rawKey);
@@ -78,7 +97,7 @@ export default class API {
     return success(tokenHex, { "Content-Type": "text/plain" });
   }
 
-  async put({ body, success, failure, header }: IHandlerContext) {
+  private async put({ body, success, failure, header }: IHandlerContext) {
     // Parse public key.
     const pubKeyHex = header(pubKeyHeader);
     const pubKeyBytes = hex2bytes(pubKeyHex);
@@ -118,7 +137,7 @@ export default class API {
     return success(null, { "Content-Type": "text/plain" });
   }
 
-  async get({ success, failure, header }: IHandlerContext) {
+  private async get({ success, failure, header }: IHandlerContext) {
     const loc = header(locationHeader);
     if (!loc) {
       return failure(400, "Invalid location");
@@ -137,7 +156,7 @@ export default class API {
     }
   }
 
-  async reqs({ success, failure, header }: IHandlerContext) {
+  private async reqs({ success, failure, header }: IHandlerContext) {
     // Parse public key.
     const pubKeyHex = header(pubKeyHeader);
     const pubKeyBytes = hex2bytes(pubKeyHex);
@@ -162,7 +181,7 @@ export default class API {
     }
   }
 
-  async sub({ body, success, failure, header }: IHandlerContext) {
+  private async sub({ body, success, failure, header }: IHandlerContext) {
     // Parse public key.
     const pubKeyHex = header(pubKeyHeader);
     const pubKeyBytes = hex2bytes(pubKeyHex);

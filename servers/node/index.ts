@@ -104,22 +104,7 @@ const server = http.createServer(async (req, res) => {
     header: (header: string) => (req.headers[header] ?? "") as string,
   }
 
-  switch (req.url) {
-    case "/auth":
-      return api.auth(context);
-    case "/chal":
-      return api.chal(context);
-    case "/get":
-      return api.get(context);
-    case "/put":
-      return api.put(context);
-    case "/reqs":
-      return api.reqs(context);
-    case "/sub":
-      return api.sub(context);
-  }
-
-  res.writeHead(404, "Invalid route");
+  return api.handle(req.url ?? "", context);
 })
 
 const port = 8888;
