@@ -2,7 +2,7 @@
   "name": "node",
   "version": "1.0.0",
   "scripts": {
-    "start": "tsc && SESS_TOKEN_SEED=abc POW_SEED=def node index.js"
+    "start": "tsc && SESS_TOKEN_SEED=abc POW_SEED=def node dist/index.js"
   },
   "dependencies": {
   },
