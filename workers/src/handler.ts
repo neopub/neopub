@@ -1,10 +1,14 @@
-import { ECDSA_PUBKEY_BYTES, SOLUTION_BYTES } from "../core/consts";
-import { hex2bytes } from "../core/bytes";
-import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "../core/consts";
-import { checkPoW, checkSig, checkTok, genChal, genTok } from "./lib";
+import { ECDSA_PUBKEY_BYTES, SOLUTION_BYTES } from "../shared/core/consts";
+import { hex2bytes } from "../shared/core/bytes";
+import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "../shared/core/consts";
+import Lib from "../shared/lib";
 import { corsHeaders, handleOptions } from "./cors";
 
 declare let KV: KVNamespace;
+declare let SESS_TOKEN_SEED: string;
+declare let POW_SEED: string;
+
+const lib = new Lib(crypto, SESS_TOKEN_SEED, POW_SEED);
 
 function success(body: BodyInit | null, headers: HeadersInit = {}): Response {
   return new Response(body, {
@@ -23,7 +27,7 @@ async function auth(req: Request): Promise<Response> {
     return new Response("Missing pubKey", { status: 400 });
   }
 
-  const chal = await genChal(keyBytes);
+  const chal = await lib.genChal(keyBytes);
   return success(chal, {
     "Content-Type": "application/octet-stream",
     "Content-Length": `${chal.byteLength}`,
@@ -42,19 +46,19 @@ async function chal(req: Request): Promise<Response> {
   const sig = payload.slice(ECDSA_PUBKEY_BYTES + SOLUTION_BYTES);
 
   // Check proof-of-work.
-  const valid = await checkPoW(keyBytes, solution)
+  const valid = await lib.checkPoW(keyBytes, solution)
   if (!valid) {
     return new Response("Invalid solution", { status: 400 });
   }
 
   // Verify signature of solution.
-  const verified = await checkSig(rawKey, sig, solution);
+  const verified = await lib.checkSig(rawKey, sig, solution);
   if (!verified) {
     return new Response("Invalid signature", { status: 400 });
   }
 
   // Compute token.
-  const tokenHex = await genTok(keyBytes);
+  const tokenHex = await lib.genTok(keyBytes);
 
   return success(tokenHex, { "Content-Type": "text/plain" });
 }
@@ -69,7 +73,7 @@ async function put(req: Request): Promise<Response> {
   
   // Check token.
   const tokenHex = req.headers.get(tokenHeader) ?? "";
-  const tokenValid = await checkTok(pubKeyBytes, tokenHex);
+  const tokenValid = await lib.checkTok(pubKeyBytes, tokenHex);
   if (!tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
   }
@@ -83,7 +87,7 @@ async function put(req: Request): Promise<Response> {
 
   // Check signature.
   const data = await req.arrayBuffer();
-  const verified = await checkSig(pubKeyBytes, sigBytes, data);
+  const verified = await lib.checkSig(pubKeyBytes, sigBytes, data);
   if (!verified) {
     return new Response("Invalid signature", { status: 400 });
   }
@@ -123,7 +127,7 @@ async function reqs(req: Request): Promise<Response> {
 
   // Check token.
   const tokenHex = req.headers.get(tokenHeader) ?? "";
-  const tokenValid = await checkTok(pubKeyBytes, tokenHex);
+  const tokenValid = await lib.checkTok(pubKeyBytes, tokenHex);
   if (!tokenValid) {
     return new Response(`Invalid token`, { status: 400 });
   }
