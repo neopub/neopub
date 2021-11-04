@@ -56,7 +56,7 @@ export default class API {
   private async auth({ body, success, failure }: IHandlerContext) {
     const rawKey = await body();
     const keyBytes = new Uint8Array(rawKey);
-    if (!keyBytes) {
+    if (!keyBytes || keyBytes.byteLength < 1) {
       return failure(400, "Missing pubKey");
     }
 
