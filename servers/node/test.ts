@@ -165,6 +165,7 @@ async function test() {
 }
 
 console.log("Running tests...");
+console.log(__dirname);
 
 test()
   .then(() => {
