@@ -1,0 +1,20 @@
+name: API
+
+on: pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.4.1
+
+      - name: yarn install
+        run: yarn install --frozen-lockfile
+        working-directory: servers/node
+      
+      - name: test
+        run: yarn test
+        working-directory: servers/node
