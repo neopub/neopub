@@ -1,5 +1,5 @@
-import { hex2bytes } from "./core/bytes";
-import { ECDSA_PUBKEY_BYTES, SOLUTION_BYTES } from "./core/consts";
+import { buf2hex, hex2bytes } from "./core/bytes";
+import { ECDSA_PUBKEY_BYTES } from "./core/consts";
 import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "./core/consts";
 import Lib from "./lib";
 
@@ -53,46 +53,54 @@ export default class API {
     return context.failure(404, "Invalid route");
   }
 
-  private async auth({ body, success, failure }: IHandlerContext) {
-    const rawKey = await body();
-    const keyBytes = new Uint8Array(rawKey);
-    if (!keyBytes || keyBytes.byteLength < 1) {
+  private async auth({ body, success, failure, header }: IHandlerContext) {
+    const pubKeyHex = header(pubKeyHeader);
+    const pubKeyBytes = hex2bytes(pubKeyHex);
+    if (!pubKeyBytes || pubKeyBytes.length !== ECDSA_PUBKEY_BYTES) {
       return failure(400, "Missing pubKey");
     }
 
-    const chal = await this.lib.genChal(keyBytes);
+    const chal = await this.lib.genChal(pubKeyBytes);
+    const hex = buf2hex(chal);
 
-    return success(chal, {
-      "Content-Type": "application/octet-stream",
-      "Content-Length": `${chal.byteLength}`,
-    });
+    return success(hex, {});
   }
 
-  private async chal({ body, success, failure }: IHandlerContext) {
-    const payload = await body();
-    const rawKey = payload.slice(0, ECDSA_PUBKEY_BYTES);
-    const keyBytes = new Uint8Array(rawKey);
-    if (!keyBytes) {
+  private async chal({ body, success, failure, header }: IHandlerContext) {
+    // Parse public key.
+    const pubKeyHex = header(pubKeyHeader);
+    const pubKeyBytes = hex2bytes(pubKeyHex);
+    if (!pubKeyBytes) {
       return failure(400, "Missing pubKey");
     }
 
-    const solution = payload.slice(ECDSA_PUBKEY_BYTES, ECDSA_PUBKEY_BYTES + SOLUTION_BYTES);
-    const sig = payload.slice(ECDSA_PUBKEY_BYTES + SOLUTION_BYTES);
+    const solutionHex = new TextDecoder().decode(await body());
+    const solution = hex2bytes(solutionHex)
+    if (!solution) {
+      return failure(400, "Failed to parse solution");
+    }
 
     // Check proof-of-work.
-    const valid = await this.lib.checkPoW(keyBytes, solution)
+    const valid = await this.lib.checkPoW(pubKeyBytes, solution)
     if (!valid) {
       return failure(400, "Invalid solution");
     }
 
+    // Parse signature.
+    const sigHex = header(sigHeader);
+    const sigBytes = hex2bytes(sigHex);
+    if (!sigBytes) {
+      return failure(400, "Missing signature");
+    }
+
     // Verify signature of solution.
-    const verified = await this.lib.checkSig(rawKey, sig, solution);
+    const verified = await this.lib.checkSig(pubKeyBytes, sigBytes, solution);
     if (!verified) {
       return failure(400, "Invalid signature");
     }
 
     // Compute token.
-    const tokenHex = await this.lib.genTok(keyBytes);
+    const tokenHex = await this.lib.genTok(pubKeyBytes);
 
     return success(tokenHex, { "Content-Type": "text/plain" });
   }
