@@ -155,24 +155,23 @@ async function test() {
     }
   }
 
-  console.log("Running tests...");
-  
-  try {
-    await testAuth();
-    await testAuthMissingPubKey();
-    await testChal();
-    await testPut();
-    await testGet();
-    await testSub();
-    await testReqs();
-  } catch (err) {
-    console.log(err);
-    process.exit(1);
-  }
-
-  console.log("Done");
+  await testAuth();
+  await testAuthMissingPubKey();
+  await testChal();
+  await testPut();
+  await testGet();
+  await testSub();
+  await testReqs();
 }
 
+console.log("Running tests...");
+
 test()
-  .then(() => process.exit(0))
-  .catch(() => process.exit(1));
+  .then(() => {
+    console.log("Done");
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(1)
+  });
