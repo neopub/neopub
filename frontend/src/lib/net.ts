@@ -1,5 +1,5 @@
 import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey } from "core/consts";
-import { bytes2hex } from "core/bytes";
+import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
 import { IAuthChallenge, IIndex, NotFound } from "core/types";
 
 const hostPrefix = process.env.REACT_APP_HOST_PREFIX;
@@ -144,17 +144,20 @@ export async function putSubReq(
 export async function fetchAuthChallenge(
   pubKeyBuf: ArrayBuffer,
 ): Promise<IAuthChallenge> {
-  const pubKeyBytes = new Uint8Array(pubKeyBuf);
+  const pubKeyHex = buf2hex(pubKeyBuf);
 
   const resp = await fetch(`${hostPrefix}/auth`, {
     method: "POST",
     headers: {
-      Accept: "application/octet-stream",
-      "Content-Type": "application/octet-stream",
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [pubKeyHeader]: pubKeyHex,
     },
-    body: pubKeyBytes,
   });
-  const bytes = new Uint8Array(await resp.arrayBuffer());
+  const bytes = hex2bytes(await resp.text());
+  if (!bytes) {
+    throw new Error('failed to parse hex');
+  }
   const diff = bytes[bytes.length - 1];
   const chal = bytes.slice(0, bytes.length - 1);
 
@@ -166,22 +169,20 @@ export async function fetchSessionToken(
   sig: ArrayBuffer,
   solution: Uint8Array,
 ): Promise<string> {
-  const pubKeyBytes = new Uint8Array(pubKey);
-  const sigBytes = new Uint8Array(sig);
-  const chalReq = new Uint8Array(
-    pubKeyBytes.byteLength + solution.byteLength + sigBytes.byteLength,
-  );
-  chalReq.set(pubKeyBytes, 0);
-  chalReq.set(solution, pubKeyBytes.byteLength);
-  chalReq.set(sigBytes, pubKeyBytes.byteLength + solution.byteLength);
+  const pubKeyHex = buf2hex(pubKey);
+  const sigHex = bytes2hex(new Uint8Array(sig));
+
+  const solutionHex = buf2hex(solution);
 
   const chalResp = await fetch(`${hostPrefix}/chal`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/octet-stream",
+      [pubKeyHeader]: pubKeyHex,
+      [sigHeader]: sigHex,
     },
-    body: chalReq,
+    body: solutionHex,
   });
   return await chalResp.text();
 }
