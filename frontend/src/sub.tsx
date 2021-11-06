@@ -2,6 +2,7 @@ import Hexatar from "components/hexatar";
 import HexString from "components/hexString";
 import { sendSubRequest } from "lib/api";
 import { usePublicKeyHex } from "lib/auth";
+import { getProfile, hostPrefix } from "lib/net";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
@@ -10,7 +11,7 @@ export default function Sub() {
   const history = useHistory();
   const { hex: pubKeyHex } = usePublicKeyHex();
   const [sentReq, setSentReq] = useState(false);
-  
+
   const { id: pubId } = useParams<{ id: string }>();
   if (!pubId) {
     return null;
@@ -36,8 +37,18 @@ export default function Sub() {
     if (msg == null) {
       return;
     }
+
+    const host = hostPrefix;
+
+    const profile = await getProfile(pubId, host);
+    if (!profile || profile === "notfound") {
+      return;
+    }
+
+    const worldKeyHex = profile.worldKey;
+
     await sendSubRequest(pubId, pubKeyHex, msg);
-    addSubscriptionPubKey(pubId);
+    addSubscriptionPubKey(pubId, host, worldKeyHex);
     setSentReq(true);
   }
 

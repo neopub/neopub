@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
-import { fileLoc, getFileJSON } from "lib/net";
+import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 
 function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
@@ -87,12 +87,14 @@ export default function Profile({ id }: IProps) {
 
   const worldKeyHex = profile?.worldKey;
 
+  const host = escape(hostPrefix);
+
   return (
     <main>
       <h1 className="mb-8">profile</h1>
 
       <div className="flex mb-8">
-        <a href={`/users/${id}`}><HexQR hex={`https://${document.location.host}/users/${id}`} /></a>
+        <a href={`/users/${id}?host=${host}`}><HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} /></a>
       </div>
 
       <div className="flex flex-row space-x-1 mb-4">

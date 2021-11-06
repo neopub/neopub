@@ -1,8 +1,8 @@
 import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey } from "core/consts";
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
-import { IAuthChallenge, IIndex, NotFound } from "core/types";
+import { IAuthChallenge, IIndex, IProfile, NotFound } from "core/types";
 
-const hostPrefix = process.env.REACT_APP_HOST_PREFIX;
+export const hostPrefix = process.env.REACT_APP_HOST_PREFIX ?? "NOHOST";
 
 export function fileLoc(pubKeyHex: string, path: string): string {
   return `/users/${pubKeyHex}/${path}`;
@@ -24,9 +24,14 @@ export async function fetchPostKey(
   return getFile(location);
 }
 
-export async function getIndex(pubKeyHex: string): Promise<IIndex | undefined | NotFound> {
+export async function getIndex(pubKeyHex: string, host?: string): Promise<IIndex | undefined | NotFound> {
   const location = fileLoc(pubKeyHex, "index.json");
-  return getFileJSON<IIndex>(location);
+  return getFileJSON<IIndex>(location, host);
+}
+
+export async function getProfile(pubKeyHex: string, host?: string): Promise<IProfile | undefined | NotFound> {
+  const location = fileLoc(pubKeyHex, "profile.json");
+  return getFileJSON<IProfile>(location, host);
 }
 
 export async function fetchPost(
@@ -56,9 +61,9 @@ async function getFile(location: string): Promise<ArrayBuffer | undefined> {
   }
 }
 
-export async function getFileJSON<T>(location: string): Promise<T | undefined | NotFound> {
+export async function getFileJSON<T>(location: string, host?: string): Promise<T | undefined | NotFound> {
   try {
-    const resp = await fetch(`${hostPrefix}/get`, {
+    const resp = await fetch(`${host ?? hostPrefix}/get`, {
       method: "GET",
       headers: {
         Accept: "application/json",
