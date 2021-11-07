@@ -250,6 +250,7 @@ export async function sendSubRequest(
   pubPubKeyHex: string,
   subPubKeyHex: string,
   msg: string,
+  host?: string,
 ): Promise<void> {
   const userPubKey = await hex2ECDSAKey(pubPubKeyHex);
   if (!userPubKey) {
@@ -273,7 +274,7 @@ export async function sendSubRequest(
   const encReqBuf = await encryptString(reqJson, ephemDH);
 
   const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return Net.putSubReq(pubPubKeyHex, ephemDHPubBuf, encReqBuf);
+  return Net.putSubReq(pubPubKeyHex, ephemDHPubBuf, encReqBuf, host);
 }
 
 export async function publishPost(

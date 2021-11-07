@@ -130,11 +130,12 @@ export async function putSubReq(
   pubPubKeyHex: string,
   ephemDHPubBuf: ArrayBuffer,
   encReqBuf: ArrayBuffer,
+  host?: string,
 ): Promise<void> {
   const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
   const ephemDHPubHex = bytes2hex(ephemDHPubBytes);
 
-  await fetch(`${hostPrefix}/sub`, {
+  await fetch(`${host ?? hostPrefix}/sub`, {
     method: "POST",
     headers: {
       Accept: "application/json",
