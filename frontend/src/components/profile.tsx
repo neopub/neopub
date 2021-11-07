@@ -2,7 +2,7 @@
 import { useJSON } from "lib/useJSON";
 import { usePublicKeyHex } from "lib/auth";
 import Hexatar from "./hexatar";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
@@ -11,7 +11,7 @@ import HexQR from "./hexQR";
 
 function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
   if (index.posts?.length === 0) {
-    return <div className="mt-4">No posts.</div>;
+    return <div className="mt-2">No posts.</div>;
   }
 
   return (
@@ -36,6 +36,8 @@ interface IProps {
   id: string;
 }
 export default function Profile({ id }: IProps) {
+  const history = useHistory();
+  
   const { hex: pubKeyHex } = usePublicKeyHex();
   const isAuthedUser = id === pubKeyHex;
 
@@ -106,7 +108,7 @@ export default function Profile({ id }: IProps) {
 
       <div>
         <h2 className="mb-3">Posts</h2>
-        {isAuthedUser && <div className="mb-4"><Link to="/post">New Post</Link></div>}
+        {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
         {index === "notfound" || !index ? <div>No posts</div> : <PostList id={id} worldKeyHex={worldKeyHex} index={index} />}
       </div>
     </main>
