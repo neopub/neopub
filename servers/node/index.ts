@@ -10,7 +10,7 @@ if (!SESS_TOKEN_SEED || !POW_SEED) {
 
 const lib = new Lib(crypto.webcrypto, SESS_TOKEN_SEED, POW_SEED);
 
-const port = 8888;
+const port = parseInt(process.env.PORT ?? "8888");
 const host = 'localhost';
 const server = new Server(host, port, lib);
 
