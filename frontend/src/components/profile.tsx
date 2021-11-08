@@ -6,9 +6,28 @@ import { Link, useHistory } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
-import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
+import { fetchInbox, fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import { sendReply } from "lib/api";
+import { useToken } from "lib/storage";
+
+function Inbox({ pubKeyHex, token }: { pubKeyHex: string, token: string }) {
+  const [inbox, setInbox] = useState<string[]>([]);
+  useEffect(() => {
+    fetchInbox(pubKeyHex, token).then((inb: string[]) => {
+      setInbox(inb);
+    });
+  }, [pubKeyHex, token]);
+
+  return (
+    <div>
+      <h2 className="mb-3">Inbox</h2>
+      {
+        inbox.map(item => <div>{item}</div>)
+      }
+    </div>
+  )
+}
 
 function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
   if (index.posts?.length === 0) {
@@ -58,7 +77,9 @@ export default function Profile({ id }: IProps) {
   const history = useHistory();
   
   const { hex: pubKeyHex } = usePublicKeyHex();
-  const isAuthedUser = id === pubKeyHex;
+  const isAuthedUser = pubKeyHex && id === pubKeyHex;
+
+  const { token } = useToken();
 
   const [profile] = useJSON<IProfile>(id, "profile.json", { handle: "", avatarURL: "", worldKey: "" });
 
@@ -124,6 +145,7 @@ export default function Profile({ id }: IProps) {
         {!isAuthedUser && (isSubscribed ? <Link to={`/subs`}>Subscribed</Link> : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
       </div>
 
+      {isAuthedUser && pubKeyHex && token && <Inbox pubKeyHex={pubKeyHex} token={token} />}
 
       <div>
         <h2 className="mb-3">Posts</h2>

@@ -126,6 +126,24 @@ export async function fetchReqs(pubKey: string, token: string): Promise<any> {
   }
 }
 
+export async function fetchInbox(pubKey: string, token: string): Promise<any> {
+  const resp = await fetch(`${hostPrefix}/inbox`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [pubKeyHeader]: pubKey,
+      [tokenHeader]: token,
+    },
+  });
+  try {
+    const inbox = await resp.json();
+    return inbox;
+  } catch {
+    return []
+  }
+}
+
 export async function putReply(
   pubPubKeyHex: string,
   ephemDHPubBuf: ArrayBuffer,
