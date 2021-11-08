@@ -111,6 +111,6 @@ export default class Server {
       header: (header: string) => (req.headers[header] ?? "") as string,
     }
 
-    return this.api.handle(req.url ?? "", context);
+    return this.api.handle(req.url ?? "", req.method ?? "", context);
   }
 }

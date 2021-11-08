@@ -54,5 +54,5 @@ export async function handleRequest(request: Request): Promise<Response> {
   }
 
   const url = new URL(request.url);
-  return api.handle(url.pathname, context);
+  return api.handle(url.pathname, request.method, context);
 }

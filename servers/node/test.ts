@@ -20,13 +20,13 @@ interface IResponse {
   statusMessage?: string;
   data: any;
 }
-async function post(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
+async function req(path: string, method: "GET" | "POST", headers: Record<string, string> = {}, data?: any): Promise<IResponse> {
   return new Promise((resolve, reject) => {
     const opts = {
       hostname: host,
       port,
       path,
-      method: 'POST',
+      method,
       headers,
     };
 
@@ -50,6 +50,14 @@ async function post(path: string, data: any, headers: Record<string, string> = {
 
     req.end();
   });
+}
+
+async function post(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
+  return req(path, "POST", headers, data);
+}
+
+async function get(path: string, headers: Record<string, string> = {}): Promise<IResponse> {
+  return req(path, "GET", headers);
 }
 
 async function test() {
@@ -155,7 +163,10 @@ async function test() {
     }
   }
 
+  await fs.promises.rm(`public/users/${pubKeyHex}/inbox`, { recursive: true, force: true });
+
   const replyHex = "A8FDC58B05B8CDA246ABED2F752D12DA0E8292305F4BFC04C131F4882080A594177C5D37E71AC8D5054CF54FA6877FD88778E521AFF00C016DBDCFE1586A6FC2755D025C89E1471AD9077C88A4EA7CF1CAA1C83509F5F1DC48E71B9CCC418A85816C2EF4B18320D60E5932FD85BC776BFE4F658A4A688D11DA83109622ACB929D808C46DAE44DF485A0D09AAE2611316E954C4D844D5AACC14A7AE810EF45ACD248DD6BAE9417EFA3398940ED98AD85B9645C16E050B9193E532B9DA9AFCB96F979580006F9D7993AF3308D4B654E2272E9203B87D117255E723C1D7AB982BC820B683A731FC1DFD82B7D3054A1300E7D8C5DD4E5DB0BB3ABFD940D8E7AEB0DB";
+  const replyIdHex = "492E079D452244C8ACE0EFB0CFA7B1DDAB0EC05EF25AEAFDDCD0D9EA9F3B3D15";
   const inboxHeaders = {
     "neopub-pub-key": pubKeyHex,
   };
@@ -163,6 +174,23 @@ async function test() {
     const reply = hex2bytes(replyHex) as Uint8Array;
     const { statusCode, statusMessage } = await post('/inbox', reply, inboxHeaders);
     if (statusCode !== 200) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+  }
+
+  async function testInboxGet() {
+    const headers = {
+      ...inboxHeaders,
+      'neopub-token': expectedToken,
+    }
+    const { statusCode, statusMessage, data } = await get('/inbox', headers);
+    if (statusCode !== 200) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+
+    const inbox = JSON.parse(new TextDecoder().decode(data));
+
+    if (inbox.length !== 1 || inbox[0] !== replyIdHex) {
       throw new Error(`[${statusCode}] ${statusMessage}`);
     }
   }
@@ -175,6 +203,7 @@ async function test() {
   await testSub();
   await testReqs();
   await testInboxPost();
+  await testInboxGet();
 }
 
 console.log("Running tests...");

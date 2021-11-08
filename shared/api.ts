@@ -48,25 +48,26 @@ export default class API {
     this.data = data;
   }
 
-  async handle(url: string, context: IHandlerContext) {
-    switch (url) {
-      case "/auth":
-        return this.auth(context);
-      case "/chal":
-        return this.chal(context);
-      case "/get":
-        return this.get(context);
-      case "/put":
-        return this.put(context);
-      case "/reqs":
-        return this.reqs(context);
-      case "/sub":
-        return this.sub(context);
-      case "/inbox":
-        return this.inbox(context);
+  async handle(url: string, method: string, context: IHandlerContext) {
+    type Handler = (context: IHandlerContext) => Promise<void>;
+    const handlers: Record<string, Handler> = {
+      "POST /auth": this.auth,
+      "POST /chal": this.chal,
+      "POST /get": this.get,
+      "POST /put": this.put,
+      "POST /reqs": this.reqs,
+      "POST /sub": this.sub,
+      "POST /inbox": this.inbox,
+      "GET /inbox": this.inboxGet,
+    };
+
+    const key = `${method.toUpperCase()} ${url}`;
+    const handler = handlers[key];
+    if (!handler) {
+      return context.failure(404, "Invalid route");
     }
-  
-    return context.failure(404, "Invalid route");
+
+    return handler.bind(this)(context);
   }
 
   private async auth({ body, success, failure, header }: IHandlerContext) {
@@ -253,5 +254,28 @@ export default class API {
     }
     
     return success(null, {});
+  }
+
+  private async inboxGet({ body, success, failure, header }: IHandlerContext) {
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
+    }
+
+    // Check token.
+    const tokenHex = header(tokenHeader);
+    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
+    if (!tokenValid) {
+      return failure(400, "Invalid token");
+    }
+
+    const prefix = `/users/${pubKey.hex}/inbox/`;
+    try {
+      const keys = await this.data.listFiles(prefix);
+      return success(JSON.stringify(keys), { "Content-Type": "text/plain" });
+    } catch (e) {
+      console.error(e);
+      return failure(500, "Error listing inbox");
+    }
   }
 }
