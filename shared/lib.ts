@@ -58,4 +58,8 @@ export default class Lib {
 
     return concatArrayBuffers(chal, new Uint8Array([POW_DIFF]));
   }
+
+  async sha(data: ArrayBuffer): Promise<ArrayBuffer> {
+    return this.crypto.subtle.digest("SHA-256", data);
+  }
 }

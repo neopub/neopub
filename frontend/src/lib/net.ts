@@ -8,6 +8,14 @@ export function fileLoc(pubKeyHex: string, path: string): string {
   return `/users/${pubKeyHex}/${path}`;
 }
 
+export async function fetchInboxItem(
+  pubKeyHex: string,
+  id: string,
+): Promise<ArrayBuffer | undefined> {
+  const location = fileLoc(pubKeyHex, `inbox/${id}`);
+  return getFile(location);
+}
+
 export async function fetchSubReq(
   pubKeyHex: string,
   reqName: string,
@@ -124,6 +132,45 @@ export async function fetchReqs(pubKey: string, token: string): Promise<any> {
   } catch {
     return []
   }
+}
+
+export async function fetchInbox(pubKey: string, token: string): Promise<any> {
+  const resp = await fetch(`${hostPrefix}/inbox`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [pubKeyHeader]: pubKey,
+      [tokenHeader]: token,
+    },
+  });
+  try {
+    const inbox = await resp.json();
+    return inbox;
+  } catch {
+    return []
+  }
+}
+
+export async function putReply(
+  pubPubKeyHex: string,
+  ephemDHPubBuf: ArrayBuffer,
+  encReqBuf: ArrayBuffer,
+  host?: string,
+): Promise<void> {
+  const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
+  const ephemDHPubHex = bytes2hex(ephemDHPubBytes);
+
+  await fetch(`${host ?? hostPrefix}/inbox`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [pubKeyHeader]: pubPubKeyHex,
+      [subDhKey]: ephemDHPubHex,
+    },
+    body: encReqBuf,
+  });
 }
 
 export async function putSubReq(

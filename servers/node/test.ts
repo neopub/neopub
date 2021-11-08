@@ -9,7 +9,7 @@ const sessTokenSeed = "abc";
 const powSeed = "123";
 const lib = new Lib(crypto.webcrypto, sessTokenSeed, powSeed);
 
-const port = 8888;
+const port = Math.floor((Math.random() * (65535 - 1024)) + 1024)
 const host = 'localhost';
 const server = new Server(host, port, lib);
 
@@ -20,13 +20,13 @@ interface IResponse {
   statusMessage?: string;
   data: any;
 }
-async function post(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
+async function req(path: string, method: "GET" | "POST", headers: Record<string, string> = {}, data?: any): Promise<IResponse> {
   return new Promise((resolve, reject) => {
     const opts = {
       hostname: host,
       port,
       path,
-      method: 'POST',
+      method,
       headers,
     };
 
@@ -50,6 +50,14 @@ async function post(path: string, data: any, headers: Record<string, string> = {
 
     req.end();
   });
+}
+
+async function post(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
+  return req(path, "POST", headers, data);
+}
+
+async function get(path: string, headers: Record<string, string> = {}): Promise<IResponse> {
+  return req(path, "GET", headers);
 }
 
 async function test() {
@@ -119,7 +127,7 @@ async function test() {
     'neopub-location': loc,
   }
   async function testGet() {
-    const { statusCode, statusMessage, data } = await post('/get', null, getHeaders);
+    const { statusCode, statusMessage, data } = await get('/get', getHeaders);
     if (statusCode !== 200 || data.equals(postEnc) !== true) {
       throw new Error(`[${statusCode}] ${statusMessage}`);
     }
@@ -155,6 +163,39 @@ async function test() {
     }
   }
 
+  await fs.promises.rm(`public/users/${pubKeyHex}/inbox`, { recursive: true, force: true });
+
+  const replyHex = "9AAB13B04EC37A8827F6517BA5E8ABD035C590D409543F94292E6CE29AE30BADFA382538AB3801EF3606458B9F736A87320393B5EB889B87365FBB1D955C5E170E082A5363BEE9E72DA574CF0DE03AC89972A9B20EB6FF358F8DCF7EAF3F2396B64CFF5BA51B984402C4A5826D1378C0A6B414CC06174CF79F5400E718EB4BFA7F59C5165BB4DA655FB8DCE14032C6D27BAABD3B896B0DA56F4D76711A23DC8F9346BBA199C08E3729158334785A940548D54D04FFE3768FEEDAE8F50744652D1DBAEDF833831CE2140EFDB2FF6337869D548F9389E6502A8A48CD7631F01462FDC50D51D5BDE5854EB730CFE7C011CB2FCC55AF85A74890CF5233D8DE258898";
+  const replyIdHex = "04FEAC3B63980AE84CDDED68D2291535C4188269D355BDB9350A206A765FC825B204A57BD981AB6D62BE661F9FE4A8487B6A69913145D7B0B117CAA8E0F4497723";
+  const inboxHeaders = {
+    "neopub-pub-key": pubKeyHex,
+    "neopub-sub-key": replyIdHex,
+  };
+  async function testInboxPost() {
+    const reply = hex2bytes(replyHex) as Uint8Array;
+    const { statusCode, statusMessage } = await post('/inbox', reply, inboxHeaders);
+    if (statusCode !== 200) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+  }
+
+  async function testInboxGet() {
+    const headers = {
+      ...inboxHeaders,
+      'neopub-token': expectedToken,
+    }
+    const { statusCode, statusMessage, data } = await get('/inbox', headers);
+    if (statusCode !== 200) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+
+    const inbox = JSON.parse(new TextDecoder().decode(data));
+
+    if (inbox.length !== 1 || inbox[0] !== replyIdHex) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+  }
+
   await testAuth();
   await testAuthMissingPubKey();
   await testChal();
@@ -162,6 +203,8 @@ async function test() {
   await testGet();
   await testSub();
   await testReqs();
+  await testInboxPost();
+  await testInboxGet();
 }
 
 console.log("Running tests...");
