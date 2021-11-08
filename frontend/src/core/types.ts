@@ -55,4 +55,10 @@ export interface ISubReq {
   msg: string;
 }
 
+export interface IReply {
+  senderPubKey: string;
+  msg: string;
+  postId: string;
+}
+
 export type NotFound = "notfound";

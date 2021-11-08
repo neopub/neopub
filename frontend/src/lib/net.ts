@@ -126,6 +126,27 @@ export async function fetchReqs(pubKey: string, token: string): Promise<any> {
   }
 }
 
+export async function putReply(
+  pubPubKeyHex: string,
+  ephemDHPubBuf: ArrayBuffer,
+  encReqBuf: ArrayBuffer,
+  host?: string,
+): Promise<void> {
+  const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
+  const ephemDHPubHex = bytes2hex(ephemDHPubBytes);
+
+  await fetch(`${host ?? hostPrefix}/inbox`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [pubKeyHeader]: pubPubKeyHex,
+      [subDhKey]: ephemDHPubHex,
+    },
+    body: encReqBuf,
+  });
+}
+
 export async function putSubReq(
   pubPubKeyHex: string,
   ephemDHPubBuf: ArrayBuffer,

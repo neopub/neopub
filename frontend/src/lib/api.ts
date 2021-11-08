@@ -21,6 +21,7 @@ import {
   IAuthChallenge,
   ISubReq,
   IProfile,
+  IReply,
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
@@ -244,6 +245,39 @@ export async function publishPostSubKey(
   const encDH = await deriveDHKey(subDHPub, privDH, ["encrypt", "decrypt"]);
 
   await publishPostKey(postKey, postHash, encDH, pubKey, privKey, token);
+}
+
+export async function sendReply(
+  postId: string,
+  pubPubKeyHex: string,
+  senderPubKeyHex: string,
+  msg: string,
+  host?: string,
+): Promise<void> {
+  const userPubKey = await hex2ECDSAKey(pubPubKeyHex);
+  if (!userPubKey) {
+    return;
+  }
+
+  const pubECDH = await pubECDSA2ECDH(userPubKey);
+
+  // Gen ephem keypair for outer DH.
+  const ephemKeys = await genECDHKeys();
+  const ephemDH = await deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
+
+  // Form request.
+  const req: IReply = {
+    senderPubKey: senderPubKeyHex,
+    msg,
+    postId,
+  };
+
+  // Encrypt request.
+  const reqJson = JSON.stringify(req);
+  const encReqBuf = await encryptString(reqJson, ephemDH);
+
+  const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
+  return Net.putReply(pubPubKeyHex, ephemDHPubBuf, encReqBuf, host);
 }
 
 export async function sendSubRequest(

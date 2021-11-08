@@ -234,6 +234,24 @@ export default class API {
       return failure(400, "Missing/invalid pubKey");
     }
 
-    return success(null, {})
+    // TODO: preflight to get token. Check token.
+
+    const reqData = await body();
+    if (reqData.byteLength < 1) {
+      return failure(400, "Missing payload");
+    }
+
+    const hash = await this.lib.sha(reqData);
+    const hashHex = await buf2hex(hash);
+
+    const loc = `/users/${pubKey.hex}/inbox/${hashHex}`;
+    try {
+      await this.data.writeFile(loc, reqData);
+    } catch (e) {
+      console.error(e);
+      return failure(500, "Error writing data");
+    }
+    
+    return success(null, {});
   }
 }

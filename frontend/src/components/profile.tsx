@@ -8,11 +8,27 @@ import { useEffect, useState } from "react";
 import DB from "lib/db";
 import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
+import { sendReply } from "lib/api";
 
-function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, worldKeyHex?: string }) {
+function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
   if (index.posts?.length === 0) {
     return <div className="mt-2">No posts.</div>;
   }
+
+  function handleReply(postId: string, pubKey: string) {
+    if (!pubKeyHex) {
+      return;
+    }
+
+    const reply = prompt("Reply");
+    if (!reply) {
+      return;
+    }
+
+    sendReply(postId, id, pubKeyHex, reply, host);
+  }
+
+  const showReply = id !== pubKeyHex;
 
   return (
     <>
@@ -20,12 +36,15 @@ function PostList({ index, id, worldKeyHex }: { index: IIndex, id: string, world
         index.posts?.map(
           (p, i) =>
             id && (
-              <EncryptedPost
-                key={i}
-                enc={p as IEncPost}
-                pubKey={id}
-                worldKeyHex={worldKeyHex}
-              />
+              <div key={i} className="flex flex-row items-start space-x-8">
+                <EncryptedPost
+                  key={i}
+                  enc={p as IEncPost}
+                  pubKey={id}
+                  worldKeyHex={worldKeyHex}
+                />
+                {showReply && <button onClick={() => handleReply((p as IEncPost).id, id)}>Reply</button>}
+              </div>
             ),
         )
       }
@@ -109,7 +128,7 @@ export default function Profile({ id }: IProps) {
       <div>
         <h2 className="mb-3">Posts</h2>
         {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
-        {index === "notfound" || !index ? <div>No posts</div> : <PostList id={id} worldKeyHex={worldKeyHex} index={index} />}
+        {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
       </div>
     </main>
   );
