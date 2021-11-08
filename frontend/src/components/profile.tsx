@@ -12,6 +12,7 @@ import { sendReply, unwrapInboxItem } from "lib/api";
 import { useToken } from "lib/storage";
 import { sha } from "core/crypto";
 import { buf2hex } from "core/bytes";
+import Post from "components/post";
 
 // TODO: extract.
 function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
@@ -46,7 +47,18 @@ function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
       .catch(err => { console.log(err) });
   }, [id, privKey, pubKeyHex]);
 
-  return <div>{JSON.stringify(item)}</div>
+  if (!item) {
+    return null;
+  }
+
+  const post = {
+    content: {
+      text: item.msg,
+    },
+    createdAt: new Date(), // TODO: extract from item.,
+    type: "text",
+  };
+  return <Post id={item.postId} post={post as any} pubKey={item.senderPubKey} />
 }
 
 function Inbox({ pubKeyHex, token }: { pubKeyHex: string, token: string }) {
