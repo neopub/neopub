@@ -26,6 +26,20 @@ export interface IDataLayer {
   listFiles: (loc: string) => Promise<string[]>,
 }
 
+function parsePublicKey(header: HeaderFunc): { hex: string, bytes: Uint8Array } | undefined {
+  const hex = header(pubKeyHeader);
+  if (!hex) {
+    return;
+  }
+
+  const bytes = hex2bytes(hex);
+  if (!bytes || bytes.length !== ECDSA_PUBKEY_BYTES) {
+    return;
+  }
+
+  return { hex, bytes };
+}
+
 export default class API {
   lib: Lib;
   data: IDataLayer;
@@ -48,30 +62,29 @@ export default class API {
         return this.reqs(context);
       case "/sub":
         return this.sub(context);
+      case "/inbox":
+        return this.inbox(context);
     }
   
     return context.failure(404, "Invalid route");
   }
 
   private async auth({ body, success, failure, header }: IHandlerContext) {
-    const pubKeyHex = header(pubKeyHeader);
-    const pubKeyBytes = hex2bytes(pubKeyHex);
-    if (!pubKeyBytes || pubKeyBytes.length !== ECDSA_PUBKEY_BYTES) {
-      return failure(400, "Missing pubKey");
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
     }
 
-    const chal = await this.lib.genChal(pubKeyBytes);
+    const chal = await this.lib.genChal(pubKey.bytes);
     const hex = buf2hex(chal);
 
     return success(hex, {});
   }
 
   private async chal({ body, success, failure, header }: IHandlerContext) {
-    // Parse public key.
-    const pubKeyHex = header(pubKeyHeader);
-    const pubKeyBytes = hex2bytes(pubKeyHex);
-    if (!pubKeyBytes) {
-      return failure(400, "Missing pubKey");
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
     }
 
     const solutionHex = new TextDecoder().decode(await body());
@@ -81,7 +94,7 @@ export default class API {
     }
 
     // Check proof-of-work.
-    const valid = await this.lib.checkPoW(pubKeyBytes, solution)
+    const valid = await this.lib.checkPoW(pubKey.bytes, solution)
     if (!valid) {
       return failure(400, "Invalid solution");
     }
@@ -94,28 +107,26 @@ export default class API {
     }
 
     // Verify signature of solution.
-    const verified = await this.lib.checkSig(pubKeyBytes, sigBytes, solution);
+    const verified = await this.lib.checkSig(pubKey.bytes, sigBytes, solution);
     if (!verified) {
       return failure(400, "Invalid signature");
     }
 
     // Compute token.
-    const tokenHex = await this.lib.genTok(pubKeyBytes);
+    const tokenHex = await this.lib.genTok(pubKey.bytes);
 
     return success(tokenHex, { "Content-Type": "text/plain" });
   }
 
   private async put({ body, success, failure, header }: IHandlerContext) {
-    // Parse public key.
-    const pubKeyHex = header(pubKeyHeader);
-    const pubKeyBytes = hex2bytes(pubKeyHex);
-    if (!pubKeyBytes) {
-      return failure(400, "Missing pubKey");
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
     }
     
     // Check token.
     const tokenHex = header(tokenHeader);
-    const tokenValid = await this.lib.checkTok(pubKeyBytes, tokenHex);
+    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
     if (!tokenValid) {
       return failure(400, "Invalid token");
     }
@@ -129,7 +140,7 @@ export default class API {
 
     // Check signature.
     const data = await body();
-    const verified = await this.lib.checkSig(pubKeyBytes, sigBytes, data);
+    const verified = await this.lib.checkSig(pubKey.bytes, sigBytes, data);
     if (!verified) {
       return failure(400, "Invalid signature");
     }
@@ -165,21 +176,19 @@ export default class API {
   }
 
   private async reqs({ success, failure, header }: IHandlerContext) {
-    // Parse public key.
-    const pubKeyHex = header(pubKeyHeader);
-    const pubKeyBytes = hex2bytes(pubKeyHex);
-    if (!pubKeyBytes) {
-      return failure(400, "Missing pubKey");
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
     }
 
     // Check token.
     const tokenHex = header(tokenHeader);
-    const tokenValid = await this.lib.checkTok(pubKeyBytes, tokenHex);
+    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
     if (!tokenValid) {
       return failure(400, "Invalid token");
     }
 
-    const prefix = `/users/${pubKeyHex}/reqs/`;
+    const prefix = `/users/${pubKey.hex}/reqs/`;
     try {
       const keys = await this.data.listFiles(prefix);
       return success(JSON.stringify(keys), { "Content-Type": "text/plain" });
@@ -190,11 +199,9 @@ export default class API {
   }
 
   private async sub({ body, success, failure, header }: IHandlerContext) {
-    // Parse public key.
-    const pubKeyHex = header(pubKeyHeader);
-    const pubKeyBytes = hex2bytes(pubKeyHex);
-    if (!pubKeyBytes) {
-      return failure(400, "Missing pubKey");
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
     }
 
     const dhHex = header(subDhKey);
@@ -210,7 +217,7 @@ export default class API {
 
     const reqData = await body();
 
-    const loc = `/users/${pubKeyHex}/reqs/${dhHex}`;
+    const loc = `/users/${pubKey.hex}/reqs/${dhHex}`;
     try {
       await this.data.writeFile(loc, reqData);
     } catch (e) {
@@ -219,5 +226,14 @@ export default class API {
     }
     
     return success(null, { "Content-Type": "text/plain" });
+  }
+
+  private async inbox({ body, success, failure, header }: IHandlerContext) {
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
+    }
+
+    return success(null, {})
   }
 }

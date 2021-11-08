@@ -9,7 +9,7 @@ const sessTokenSeed = "abc";
 const powSeed = "123";
 const lib = new Lib(crypto.webcrypto, sessTokenSeed, powSeed);
 
-const port = 8888;
+const port = Math.floor((Math.random() * (65535 - 1024)) + 1024)
 const host = 'localhost';
 const server = new Server(host, port, lib);
 
@@ -155,6 +155,16 @@ async function test() {
     }
   }
 
+  const inboxHeaders = {
+    "neopub-pub-key": pubKeyHex,
+  };
+  async function testInboxPost() {
+    const { statusCode, statusMessage } = await post('/inbox', null, inboxHeaders);
+    if (statusCode !== 200) {
+      throw new Error(`[${statusCode}] ${statusMessage}`);
+    }
+  }
+
   await testAuth();
   await testAuthMissingPubKey();
   await testChal();
@@ -162,6 +172,7 @@ async function test() {
   await testGet();
   await testSub();
   await testReqs();
+  await testInboxPost();
 }
 
 console.log("Running tests...");
