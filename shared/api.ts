@@ -53,7 +53,7 @@ export default class API {
     const handlers: Record<string, Handler> = {
       "POST /auth": this.auth,
       "POST /chal": this.chal,
-      "POST /get": this.get,
+      "GET /get": this.get,
       "POST /put": this.put,
       "POST /reqs": this.reqs,
       "POST /sub": this.sub,
