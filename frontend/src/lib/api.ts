@@ -27,6 +27,29 @@ import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
 import DB from "./db";
 
+// TODO: just switch sub reqs to using this.
+export async function unwrapInboxItem(
+  id: string,
+  pubKeyHex: string,
+  privKey: CryptoKey,
+): Promise<any | undefined> {
+  const ephemDHPub = await hex2ECDHKey(id);
+  if (!ephemDHPub) {
+    return;
+  }
+
+  const ephemDH = await deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
+
+  const enc = await Net.fetchInboxItem(pubKeyHex, id);
+  if (!enc) {
+    return;
+  }
+  const decJson = await decryptString(enc, ephemDH);
+  const req = JSON.parse(decJson) as IReq;
+
+  return req;
+}
+
 export async function unwrapReq(
   reqName: string,
   pubKeyHex: string,

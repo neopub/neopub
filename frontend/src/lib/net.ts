@@ -8,6 +8,14 @@ export function fileLoc(pubKeyHex: string, path: string): string {
   return `/users/${pubKeyHex}/${path}`;
 }
 
+export async function fetchInboxItem(
+  pubKeyHex: string,
+  id: string,
+): Promise<ArrayBuffer | undefined> {
+  const location = fileLoc(pubKeyHex, `inbox/${id}`);
+  return getFile(location);
+}
+
 export async function fetchSubReq(
   pubKeyHex: string,
   reqName: string,

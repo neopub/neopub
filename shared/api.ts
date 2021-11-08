@@ -242,10 +242,13 @@ export default class API {
       return failure(400, "Missing payload");
     }
 
-    const hash = await this.lib.sha(reqData);
-    const hashHex = await buf2hex(hash);
+    // TODO: bake the DH key into the front of the payload, and use hash for filename?
+    const dhHex = header(subDhKey);
+    if (!dhHex) {
+      return failure(400, "Invalid DH key");
+    }
 
-    const loc = `/users/${pubKey.hex}/inbox/${hashHex}`;
+    const loc = `/users/${pubKey.hex}/inbox/${dhHex}`;
     try {
       await this.data.writeFile(loc, reqData);
     } catch (e) {

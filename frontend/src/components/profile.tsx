@@ -1,6 +1,6 @@
  import type { IProfile, IIndex, IEncPost } from "core/types";
 import { useJSON } from "lib/useJSON";
-import { usePublicKeyHex } from "lib/auth";
+import { usePrivateKey, usePublicKeyHex } from "lib/auth";
 import Hexatar from "./hexatar";
 import { Link, useHistory } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
@@ -8,8 +8,26 @@ import { useEffect, useState } from "react";
 import DB from "lib/db";
 import { fetchInbox, fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
-import { sendReply } from "lib/api";
+import { sendReply, unwrapInboxItem } from "lib/api";
 import { useToken } from "lib/storage";
+
+// TODO: extract.
+function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
+  const privKey = usePrivateKey("ECDH");
+
+  // TODO: do all this unwrapping in a data layer. Not UI.
+  const [item, setItem] = useState<any>();
+  useEffect(() => {
+    if (!privKey) {
+      return;
+    }
+    unwrapInboxItem(id, pubKeyHex, privKey)
+      .then((item) => setItem(item))
+      .catch(err => { console.log(err) });
+  }, [id, privKey, pubKeyHex]);
+
+  return <div>{JSON.stringify(item)}</div>
+}
 
 function Inbox({ pubKeyHex, token }: { pubKeyHex: string, token: string }) {
   const [inbox, setInbox] = useState<string[]>([]);
@@ -23,7 +41,7 @@ function Inbox({ pubKeyHex, token }: { pubKeyHex: string, token: string }) {
     <div>
       <h2 className="mb-3">Inbox</h2>
       {
-        inbox.map(item => <div>{item}</div>)
+        inbox.map(id => <InboxItem key={id} id={id} pubKeyHex={pubKeyHex} />)
       }
     </div>
   )
