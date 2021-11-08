@@ -1,9 +1,9 @@
 import Dexie from "dexie";
 
 const DB = new Dexie("neopub");
-DB.version(3).stores({
+DB.version(4).stores({
   subscriptions: "pubKey, host, worldKeyHex",
-  posts: "hash, publisherPubKey, createdAt, post",
+  posts: "hash, publisherPubKey, createdAt, post, replyToHash",
   indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
 });
 

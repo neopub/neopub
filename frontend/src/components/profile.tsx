@@ -1,4 +1,4 @@
- import type { IProfile, IIndex, IEncPost } from "core/types";
+ import type { IProfile, IIndex, IEncPost, IReply } from "core/types";
 import { useJSON } from "lib/useJSON";
 import { usePrivateKey, usePublicKeyHex } from "lib/auth";
 import Hexatar from "./hexatar";
@@ -10,6 +10,8 @@ import { fetchInbox, fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import { sendReply, unwrapInboxItem } from "lib/api";
 import { useToken } from "lib/storage";
+import { sha } from "core/crypto";
+import { buf2hex } from "core/bytes";
 
 // TODO: extract.
 function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
@@ -22,7 +24,25 @@ function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
       return;
     }
     unwrapInboxItem(id, pubKeyHex, privKey)
-      .then((item) => setItem(item))
+      .then(async (item: IReply) => {
+        const buf = new TextEncoder().encode(item.msg);
+        const hash = await sha(buf);
+        const hashHex = await buf2hex(hash);
+        DB.posts.put({
+          hash: hashHex,
+          replyToHash: item.postId,
+          publisherPubKey: item.senderPubKey,
+          post: {
+            content: {
+              text: item.msg,
+            },
+            createdAt: new Date(), // TODO: extract from item.,
+            type: "text",
+          },
+        });
+
+        setItem(item);
+      })
       .catch(err => { console.log(err) });
   }, [id, privKey, pubKeyHex]);
 
