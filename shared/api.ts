@@ -55,7 +55,7 @@ export default class API {
       "POST /chal": this.chal,
       "GET /get": this.get,
       "POST /put": this.put,
-      "POST /reqs": this.reqs,
+      "GET /reqs": this.reqs,
       "POST /sub": this.sub,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
