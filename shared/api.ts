@@ -122,7 +122,11 @@ export default class API {
     }
 
     // Check proof-of-work.
-    const valid = await this.lib.checkPoW(pubKey.bytes, solution)
+    const capDesc = {
+      type: "user",
+      pubKey: pubKey.hex,
+    } as const;
+    const valid = await this.lib.checkPoW(capDesc, solution)
     if (!valid) {
       return failure(400, "Invalid solution");
     }

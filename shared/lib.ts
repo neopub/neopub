@@ -3,6 +3,17 @@ import { ecdsaParams, POW_DIFF } from "./core/consts";
 import PoW, { numHashBits } from "./core/pow";
 
 const supportedCapabilities = new Set(["user", "message"]);
+interface IUserCapability {
+  type: "user";
+  pubKey: string;
+}
+interface IMessageCapability {
+  type: "message";
+  hash: string;
+  numBytes: number;
+}
+
+type CapabilityDescription = IUserCapability | IMessageCapability;
 
 export default class Lib {
   crypto: any;
@@ -34,6 +45,23 @@ export default class Lib {
     );
   }
 
+  private desc2pow(capDesc: CapabilityDescription): { hex: string, diff: number } {
+    switch (capDesc.type) {
+      case "user": {
+        const hex = capDesc.pubKey;
+        const diff = POW_DIFF;
+        return { hex, diff };
+      }
+      case "message": {
+        const hex = capDesc.hash;
+
+        const diff = POW_DIFF; // TODO: scale this with capDesc.numBytes.
+
+        return { hex, diff };
+      }
+    }
+  }
+
   async checkTok(pubKeyBytes: Uint8Array, tokenHex: string): Promise<boolean> {
     // TODO: use a timing-safe string comparison.
     const expectedToken = await this.pow.hash(pubKeyBytes, this.sessTokenSeedBytes);
@@ -41,11 +69,17 @@ export default class Lib {
     return tokenHex === expectedTokenHex;
   }
 
-  async checkPoW(keyBytes: Uint8Array, solution: ArrayBuffer): Promise<boolean> {
-    const chal = await this.pow.hash(keyBytes, this.powSeedBytes);
+  async checkPoW(capDesc: CapabilityDescription, solution: ArrayBuffer): Promise<boolean> {
+    const { hex, diff } = this.desc2pow(capDesc);
+    const bytes = hex2bytes(hex);
+    if (!bytes) {
+      return false;
+    }
+
+    const chal = await this.pow.hash(bytes, this.powSeedBytes);
     const hash = await this.pow.hash(new Uint8Array(solution), chal);
 
-    const N = numHashBits - POW_DIFF;
+    const N = numHashBits - diff;
     return this.pow.lessThan2ToN(hash, N);
   }
 
@@ -71,22 +105,7 @@ export default class Lib {
       return;
     }
 
-    let hex: string;
-    let diff: number;
-
-    switch (capDesc.type) {
-      case "user":
-        hex = capDesc.pubKey;
-        diff = POW_DIFF;;
-        break;
-      case "message":
-        hex = capDesc.hash;
-        diff = POW_DIFF;
-        break;
-      default:
-        return;
-    }
-
+    const { hex, diff } = this.desc2pow(capDesc);
     const bytes = hex2bytes(hex);
     if (!bytes) {
       return;
