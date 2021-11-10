@@ -1,3 +1,4 @@
+import Empty from "components/empty";
 import EncryptedPost from "components/encryptedPost";
 import Post from "components/post";
 import { IProfile } from "core/types";
@@ -42,6 +43,9 @@ export default function PostDetails() {
           replies.map(reply => {
             return <Post key={reply.hash} id={reply.hash} post={reply.post} pubKey={reply.publisherPubKey} />
           })
+        }
+        {
+          replies.length < 1 && <Empty text="No replies." />
         }
       </div>
     </>
