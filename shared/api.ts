@@ -40,12 +40,35 @@ function parsePublicKey(header: HeaderFunc): { hex: string, bytes: Uint8Array } 
   return { hex, bytes };
 }
 
+function parseSignature(header: HeaderFunc): Uint8Array | undefined {
+  const sigHex = header(sigHeader);
+  if (!sigHex) {
+    return;
+  }
+
+  const sigBytes = hex2bytes(sigHex);
+  if (!sigBytes) {
+    return;
+  }
+
+  return sigBytes;
+}
+
 export default class API {
   lib: Lib;
   data: IDataLayer;
   constructor(lib: Lib, data: IDataLayer) {
     this.lib = lib;
     this.data = data;
+  }
+
+  private async checkToken(header: HeaderFunc, pubKeyBytes: Uint8Array): Promise<boolean> {
+    const tokenHex = header(tokenHeader);
+    if (!tokenHex) {
+      return false;
+    }
+
+    return await this.lib.checkTok(pubKeyBytes, tokenHex);
   }
 
   async handle(url: string, method: string, context: IHandlerContext) {
@@ -98,9 +121,7 @@ export default class API {
       return failure(400, "Invalid solution");
     }
 
-    // Parse signature.
-    const sigHex = header(sigHeader);
-    const sigBytes = hex2bytes(sigHex);
+    const sigBytes = parseSignature(header);
     if (!sigBytes) {
       return failure(400, "Missing signature");
     }
@@ -123,16 +144,12 @@ export default class API {
       return failure(400, "Missing/invalid pubKey");
     }
     
-    // Check token.
-    const tokenHex = header(tokenHeader);
-    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
+    const tokenValid = await this.checkToken(header, pubKey.bytes);
     if (!tokenValid) {
       return failure(400, "Invalid token");
     }
 
-    // Parse signature.
-    const sigHex = header(sigHeader);
-    const sigBytes = hex2bytes(sigHex);
+    const sigBytes = parseSignature(header);
     if (!sigBytes) {
       return failure(400, "Missing signature");
     }
@@ -216,9 +233,7 @@ export default class API {
       return failure(400, "Missing/invalid pubKey");
     }
 
-    // Check token.
-    const tokenHex = header(tokenHeader);
-    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
+    const tokenValid = await this.checkToken(header, pubKey.bytes);
     if (!tokenValid) {
       return failure(400, "Invalid token");
     }
