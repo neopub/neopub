@@ -8,8 +8,10 @@ import DB from "lib/db";
 import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import { useToken } from "lib/storage";
-import Inbox from "./inbox";
 import PostList from "./postList";
+import SubscriberList from "./subscriberList";
+import SubscribeView from "./subscribeView";
+import SubscriptionList from "./subscriptionList";
 
 interface IProps {
   id: string;
@@ -86,13 +88,26 @@ export default function Profile({ id }: IProps) {
         {!isAuthedUser && (isSubscribed ? <Link to={`/subs`}>Subscribed</Link> : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
       </div>
 
-      {isAuthedUser && pubKeyHex && token && <Inbox pubKeyHex={pubKeyHex} token={token} />}
-
       <div>
         <h2 className="mb-3">Posts</h2>
         {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
         {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
       </div>
+
+      {isAuthedUser && pubKeyHex && token && (
+        <>
+          <h2 className="mb-4">Followers</h2>
+          <SubscriberList />
+        </>
+      )}
+
+      {isAuthedUser && pubKeyHex && token && (
+        <>
+          <h2 className="mb-4 mt-8">Following</h2>
+          <SubscriptionList />
+          <SubscribeView pubKeyHex={pubKeyHex} />
+        </>
+      )}
     </main>
   );
 }

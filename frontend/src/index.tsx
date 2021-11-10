@@ -15,7 +15,6 @@ import LoadCreds from 'loadCreds';
 import DumpCreds from 'dumpCreds';
 import UserProfile from 'userProfile';
 import Post from 'post';
-import Subs from 'subs';
 import Exit from './exit';
 import { isAuthenticated } from 'lib/auth';
 import Sub from 'sub';
@@ -26,11 +25,12 @@ import Host from 'host';
 import Feed from 'feed';
 import PostDetails from 'postDetails';
 import DataArch from 'dataArch';
+import Inbox from 'inbox';
 
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
   { path: "/", text: "me" },
-  { path: "/subs", text: "subs" },
+  { path: "/inbox", text: "inbox" },
   { path: "/feed", text: "feed" },
   { path: "/arch", text: "arch" },
   { path: "/exit", text: "exit" },
@@ -77,8 +77,8 @@ ReactDOM.render(
           <Route exact path="/posts/:userId/:postId">
             <PostDetails />
           </Route>
-          <Route exact path="/subs">
-            <Subs />
+          <Route exact path="/inbox">
+            <Inbox />
           </Route>
           <Route exact path="/exit">
             <Exit />
