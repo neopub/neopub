@@ -204,8 +204,11 @@ export async function fetchAuthChallenge(
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      [pubKeyHeader]: pubKeyHex,
     },
+    body: JSON.stringify({
+      type: "user",
+      pubKey: pubKeyHex,
+    }),
   });
   const bytes = hex2bytes(await resp.text());
   if (!bytes) {

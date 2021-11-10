@@ -1,6 +1,8 @@
-import { buf2hex, concatArrayBuffers } from "./core/bytes";
+import { buf2hex, concatArrayBuffers, hex2bytes } from "./core/bytes";
 import { ecdsaParams, POW_DIFF } from "./core/consts";
 import PoW, { numHashBits } from "./core/pow";
+
+const supportedCapabilities = new Set(["user", "message"]);
 
 export default class Lib {
   crypto: any;
@@ -60,10 +62,38 @@ export default class Lib {
     return hex;
   }
 
-  async genChal(keyBytes: Uint8Array): Promise<ArrayBuffer> {
-    const chal = await this.pow.hash(keyBytes, this.powSeedBytes);
+  async genChal(capDesc: any): Promise<ArrayBuffer | undefined> {
+    if (typeof capDesc !== "object" || !capDesc.type) {
+      return;
+    }
 
-    return concatArrayBuffers(chal, new Uint8Array([POW_DIFF]));
+    if (!supportedCapabilities.has(capDesc?.type)) {
+      return;
+    }
+
+    let hex: string;
+    let diff: number;
+
+    switch (capDesc.type) {
+      case "user":
+        hex = capDesc.pubKey;
+        diff = POW_DIFF;;
+        break;
+      case "message":
+        hex = capDesc.hash;
+        diff = POW_DIFF;
+        break;
+      default:
+        return;
+    }
+
+    const bytes = hex2bytes(hex);
+    if (!bytes) {
+      return;
+    }
+
+    const chal = await this.pow.hash(bytes, this.powSeedBytes);
+    return concatArrayBuffers(chal, new Uint8Array([diff]));
   }
 
   async sha(data: ArrayBuffer): Promise<ArrayBuffer> {

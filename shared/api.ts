@@ -91,16 +91,22 @@ export default class API {
     return handler.bind(this)(context);
   }
 
+  // Returns a challenge to the client, based on provided capabilities description.
   private async auth({ body, success, failure, header }: IHandlerContext) {
-    const pubKey = parsePublicKey(header);
-    if (!pubKey) {
-      return failure(400, "Missing/invalid pubKey");
+    try {
+      const buf = await body();
+      const json = new TextDecoder().decode(buf);
+      const caps = JSON.parse(json);
+
+      const chal = await this.lib.genChal(caps);
+      if (!chal) {
+        return failure(400, "Invalid capabilities description");
+      }
+      const hex = buf2hex(chal);
+      return success(hex, {});
+    } catch (err) {
+      return failure(400, "Invalid/missing capabilities description");
     }
-
-    const chal = await this.lib.genChal(pubKey.bytes);
-    const hex = buf2hex(chal);
-
-    return success(hex, {});
   }
 
   private async chal({ body, success, failure, header }: IHandlerContext) {

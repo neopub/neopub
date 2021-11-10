@@ -66,13 +66,17 @@ async function test() {
   const authHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "neopub-pub-key": pubKeyHex,
   };
 
   const expectedChal = 'FDCB74BE707DFBCFBB4425F9C5E73C752BA94C54022F711253E2A4792E311EA00E';
 
   async function testAuth() {
-    const { statusCode, statusMessage, data } = await post('/auth', null, authHeaders);
+    const capDesc = JSON.stringify({
+      type: "user",
+      pubKey: pubKeyHex,
+    });
+
+    const { statusCode, statusMessage, data } = await post('/auth', capDesc, authHeaders);
     const chal = new TextDecoder().decode(data);
     if (statusCode !== 200 || chal !== expectedChal) {
       throw new Error(`[${statusCode}] ${statusMessage}`);
@@ -92,7 +96,7 @@ async function test() {
   const expectedToken = 'B1966B5AF3F57E6EE67C7A65AB5E3137559F037F1A72B7C00BB9E2DC44E5E02D';
 
   const chalHeaders = {
-    ...authHeaders,
+    "neopub-pub-key": pubKeyHex,
     "neopub-sig": sigHex,
   }
   async function testChal() {
@@ -109,8 +113,8 @@ async function test() {
 
   const loc = `/users/043D333E9AE10134CD2E6E637AF0790B00956C6B6445587973B09FB6B306B80CB2B895AD609B34AAF1659516E7CB2A39DE11F3E902A35D97B5031B99FFEC5A8578/posts/6D47EBF93C1B1BFAA30A5FA3A8CE6BF868352ACF8DD2A999D1728918173D65C7`;
   const putHeaders = {
-    ...authHeaders,
     "Content-Type": "application/octet-stream",
+    "neopub-pub-key": pubKeyHex,
     'neopub-sig': postSig,
     'neopub-token': expectedToken,
     'neopub-location': loc,
