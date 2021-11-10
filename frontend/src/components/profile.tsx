@@ -80,7 +80,7 @@ export default function Profile({ id }: IProps) {
       name: "Posts",
       el: (
         <>
-          {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
+          {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
             {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
         </>
       ),
