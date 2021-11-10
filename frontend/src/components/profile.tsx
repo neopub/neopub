@@ -12,6 +12,7 @@ import PostList from "./postList";
 import SubscriberList from "./subscriberList";
 import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
+import Tabs, { ITab } from "./tabs";
 
 interface IProps {
   id: string;
@@ -74,6 +75,35 @@ export default function Profile({ id }: IProps) {
 
   const host = escape(hostPrefix);
 
+  const tabs: ITab[] = [
+    {
+      name: "Posts",
+      el: (
+        <>
+          {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
+            {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
+        </>
+      ),
+    },
+  ];
+
+  if (isAuthedUser && pubKeyHex && token) {
+    tabs.push({
+      name: "Followers",
+      el: <SubscriberList />,
+    });
+
+    tabs.push({
+      name: "Following",
+      el: (
+        <>
+          <SubscriptionList />
+          <SubscribeView pubKeyHex={pubKeyHex} />
+        </>
+      ),
+    });
+  }
+
   return (
     <main>
       <h1 className="mb-8">profile</h1>
@@ -88,26 +118,7 @@ export default function Profile({ id }: IProps) {
         {!isAuthedUser && (isSubscribed ? <Link to={`/subs`}>Subscribed</Link> : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
       </div>
 
-      <div>
-        <h2 className="mb-3">Posts</h2>
-        {isAuthedUser && <button onClick={() => history.push("/post")} className="button">New Post</button>}
-        {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
-      </div>
-
-      {isAuthedUser && pubKeyHex && token && (
-        <>
-          <h2 className="mb-4">Followers</h2>
-          <SubscriberList />
-        </>
-      )}
-
-      {isAuthedUser && pubKeyHex && token && (
-        <>
-          <h2 className="mb-4 mt-8">Following</h2>
-          <SubscriptionList />
-          <SubscribeView pubKeyHex={pubKeyHex} />
-        </>
-      )}
+      <Tabs tabs={tabs} initialActiveTab="Posts" />
     </main>
   );
 }
