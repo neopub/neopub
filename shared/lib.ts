@@ -48,6 +48,13 @@ export default class Lib {
   }
 
   async genTok(keyBytes: Uint8Array): Promise<string> {
+    // NOTE: token is generated, instead of simply using the PoW solution as a token,
+    // because the token can be rotated.
+    // Wait.
+    // The PoW seed could just be rotated.
+    // Then there's no need for this second piece of state.
+    // Client can just solve PoW and retain the solution as its token.
+    // TODO: do that (just ensure PoW check is efficient--should be).
     const token = await this.pow.hash(keyBytes, this.sessTokenSeedBytes);
     const hex = buf2hex(token);
     return hex;
