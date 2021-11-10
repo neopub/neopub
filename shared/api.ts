@@ -55,8 +55,6 @@ export default class API {
       "POST /chal": this.chal,
       "GET /get": this.get,
       "POST /put": this.put,
-      "GET /reqs": this.reqs,
-      "POST /sub": this.sub,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
     };
@@ -176,59 +174,6 @@ export default class API {
     }
   }
 
-  private async reqs({ success, failure, header }: IHandlerContext) {
-    const pubKey = parsePublicKey(header);
-    if (!pubKey) {
-      return failure(400, "Missing/invalid pubKey");
-    }
-
-    // Check token.
-    const tokenHex = header(tokenHeader);
-    const tokenValid = await this.lib.checkTok(pubKey.bytes, tokenHex);
-    if (!tokenValid) {
-      return failure(400, "Invalid token");
-    }
-
-    const prefix = `/users/${pubKey.hex}/reqs/`;
-    try {
-      const keys = await this.data.listFiles(prefix);
-      return success(JSON.stringify(keys), { "Content-Type": "text/plain" });
-    } catch (e) {
-      console.error(e);
-      return failure(500, "Error listing reqs");
-    }
-  }
-
-  private async sub({ body, success, failure, header }: IHandlerContext) {
-    const pubKey = parsePublicKey(header);
-    if (!pubKey) {
-      return failure(400, "Missing/invalid pubKey");
-    }
-
-    const dhHex = header(subDhKey);
-    if (!dhHex) {
-      return failure(400, "Invalid DH key");
-    }
-
-    // NOTE: can't check signature, or server would know identity of subscriber.
-    // But it could be signed with subscriber's DH pub key. Does that add anything?
-    // Yes. Because sub's DH pub key is used as the path, someone could overwrite
-    // a legitimate key if they knew the DH pub key to target. But it's ephemeral,
-    // and transmitted over HTTPS, so that doesn't seem like a real risk.
-
-    const reqData = await body();
-
-    const loc = `/users/${pubKey.hex}/reqs/${dhHex}`;
-    try {
-      await this.data.writeFile(loc, reqData);
-    } catch (e) {
-      console.error(e);
-      return failure(500, "Error writing data");
-    }
-    
-    return success(null, { "Content-Type": "text/plain" });
-  }
-
   private async inbox({ body, success, failure, header }: IHandlerContext) {
     const pubKey = parsePublicKey(header);
     if (!pubKey) {
@@ -241,6 +186,12 @@ export default class API {
     if (reqData.byteLength < 1) {
       return failure(400, "Missing payload");
     }
+
+    // NOTE: can't check signature, or server would know identity of sender.
+    // But it could be signed with sender's DH pub key. Does that add anything?
+    // Yes. Because sender's DH pub key is used as the path, someone could overwrite
+    // a legitimate key if they knew the DH pub key to target. But it's ephemeral,
+    // and transmitted over HTTPS, so that doesn't seem like a real risk.
 
     // TODO: bake the DH key into the front of the payload, and use hash for filename?
     const dhHex = header(subDhKey);

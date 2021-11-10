@@ -133,36 +133,6 @@ async function test() {
     }
   }
 
-  await fs.promises.rm(`public/users/${pubKeyHex}/reqs`, { recursive: true, force: true });
-
-  const subPubKeyHex = '043D333E9AE10134CD2E6E637AF0790B00956C6B6445587973B09FB6B306B80CB2B895AD609B34AAF1659516E7CB2A39DE11F3E902A35D97B5031B99FFEC5A8578';
-  const reqHex = '60EC674AFA21B6B7905658ACD94A242C90B5F0857D4A67E5AD8998BCA4D2C81A014BA10A1F0590217804014B95122B22622B17B83FC6EDC6FAC5E081FD102CCF73139A4810C84CF71B5BB73074CF46747C72BB672CDB0E9EB4068F67A11A92AD3E42F4E50931C1BAD97D6720A2FF874C17FAD893B47F0B8533FE2891766AAD94F99F4AA49C8A113F57A6E99F6BF1E029596F4FDA20009B6A6B055223D250E2F637915C07747349E73AD6955D2F3679E3';
-  const req = hex2bytes(reqHex) as Uint8Array;
-
-  const subHeaders = {
-    'neopub-pub-key': subPubKeyHex,
-    'neopub-sub-key': pubKeyHex,
-  };
-
-  async function testSub() {
-    const { statusCode, statusMessage, data } = await post('/sub', req, subHeaders);
-    if (statusCode !== 200) {
-      throw new Error(`[${statusCode}] ${statusMessage}`);
-    }
-  }
-
-  const reqsHeaders = {
-    ...authHeaders,
-    'neopub-token': expectedToken,
-  }
-  async function testReqs() {
-    const { statusCode, statusMessage, data } = await post('/reqs', null, reqsHeaders);
-    const reqs = JSON.parse(new TextDecoder().decode(data));
-    if (statusCode !== 200 || reqs.length !== 1 || reqs[0] !== subPubKeyHex) {
-      throw new Error(`[${statusCode}] ${statusMessage}`);
-    }
-  }
-
   await fs.promises.rm(`public/users/${pubKeyHex}/inbox`, { recursive: true, force: true });
 
   const replyHex = "9AAB13B04EC37A8827F6517BA5E8ABD035C590D409543F94292E6CE29AE30BADFA382538AB3801EF3606458B9F736A87320393B5EB889B87365FBB1D955C5E170E082A5363BEE9E72DA574CF0DE03AC89972A9B20EB6FF358F8DCF7EAF3F2396B64CFF5BA51B984402C4A5826D1378C0A6B414CC06174CF79F5400E718EB4BFA7F59C5165BB4DA655FB8DCE14032C6D27BAABD3B896B0DA56F4D76711A23DC8F9346BBA199C08E3729158334785A940548D54D04FFE3768FEEDAE8F50744652D1DBAEDF833831CE2140EFDB2FF6337869D548F9389E6502A8A48CD7631F01462FDC50D51D5BDE5854EB730CFE7C011CB2FCC55AF85A74890CF5233D8DE258898";
@@ -201,8 +171,6 @@ async function test() {
   await testChal();
   await testPut();
   await testGet();
-  await testSub();
-  await testReqs();
   await testInboxPost();
   await testInboxGet();
 }
