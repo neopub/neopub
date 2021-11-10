@@ -3,11 +3,11 @@ import { dumpState } from "lib/storage";
 import { useLocation, useHistory } from "react-router-dom";
 import { usePublicKeyHex } from "lib/auth";
 import CredFields from "components/credFields";
+import KnowMore from "components/knowMore";
 
-function CredDumper({ nextURL }: { nextURL: string | undefined }) {
+function More() {
   const [reveal, setReveal] = useState(false);
   const [credState, setCredState] = useState<string>();
-  const history = useHistory();
 
   useEffect(() => {
     const creds = dumpState();
@@ -19,16 +19,9 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
 
   const placeholder = credState?.replace(/\w/g, "*");
 
-  function handleSubmit(username?: string, creds?: string) {
-    if (!username || !nextURL) {
-      return;
-    }
-
-    history.push(nextURL);
-  }
-
   return (
     <div className="flex flex-col my-4">
+      <p className="">These are your credentials (an ECDSA keypair, etc...). Store them in your password manager.</p>
       <textarea
         className="w-full h-48 rounded font-mono text-xs"
         value={reveal ? credState : placeholder}
@@ -39,8 +32,33 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
           {reveal ? "Conceal" : "Reveal"}
         </button>
       </div>
+    </div>
+  );
+}
 
-      <p className="mb-2">Enter an ID and hit Save Creds. That triggers your browser's password manager.</p>
+function CredDumper({ nextURL }: { nextURL: string | undefined }) {
+  const [credState, setCredState] = useState<string>();
+  const history = useHistory();
+
+  useEffect(() => {
+    const creds = dumpState();
+    if (!creds) {
+      return;
+    }
+    setCredState(creds);
+  }, []);
+
+  function handleSubmit(username?: string, creds?: string) {
+    if (!username || !nextURL) {
+      return;
+    }
+
+    history.push(nextURL);
+  }
+
+  return (
+    <div className="flex flex-col my-4">
+      <p className="mb-2">Enter an ID (not published) and hit Save Creds. That will trigger your browser's password manager.</p>
 
       <CredFields fixedCreds={credState} onSubmit={handleSubmit} ctaText="Save Creds" />
     </div>
@@ -56,8 +74,8 @@ export default function DumpCreds() {
   return (
     <div className="max-w-lg flex flex-col">
       <h1 className="mb-4">credentials</h1>
-      <p className="">These are your credentials (an ECDSA keypair, etc...). Store them in your password manager.</p>
       <CredDumper nextURL={next ? next : `/users/${pubKeyHex}`} />
+      <KnowMore more={<More />} />
     </div>
   );
 }

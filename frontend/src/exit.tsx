@@ -3,6 +3,7 @@ import { dumpState } from "lib/storage";
 import { useHistory } from "react-router-dom";
 import CredFields from "components/credFields";
 import { wipeDB } from "lib/db";
+import KnowMore from "components/knowMore";
 
 export default function Exit() {
   const [credState, setCredState] = useState<string>();
@@ -58,20 +59,24 @@ export default function Exit() {
 
       <CredFields onSubmit={handleExit} ctaText="Exit" submitEnabledManualOverride={manualOverride} />
 
-      <p className="mt-2">
-        If you exit without having stored your creds, there is absolutely no way
-        to regain access to your account. Game over, man.
-      </p>
+      <KnowMore more={
+        <>
+          <p className="mt-2">
+            If you exit without having stored your creds, there is absolutely no way
+            to regain access to your account. Game over, man.
+          </p>
 
-      <label className="block">
-        <input
-          type="checkbox"
-          checked={manualOverride}
-          onChange={() => handleCheck(!manualOverride)}
-          className="mr-1"
-        />
-        I know what I'm doing.
-      </label>
+          <label className="block">
+            <input
+              type="checkbox"
+              checked={manualOverride}
+              onChange={() => handleCheck(!manualOverride)}
+              className="mr-1"
+            />
+            I know what I'm doing.
+          </label>
+        </>
+      } />
     </div>
   );
 }

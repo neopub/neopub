@@ -6,6 +6,7 @@ import { useJSON } from "lib/useJSON";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import DB from "lib/db";
+import KnowMore from "components/knowMore";
 
 export default function Post() {
   const { hex: pubKeyHex } = usePublicKeyHex();
@@ -56,7 +57,6 @@ export default function Post() {
   return (
     <div className="flex flex-col max-w-lg">
       <h1 className="mb-4">post</h1>
-      <p>In neopub, all posts are encrypted. For public posts, the encryption key is published. For private posts, the encryption key is separately encrypted for each subscriber, then those are published. See <Link to="/arch/post">/arch/post</Link> to learn more about post security architecture.</p>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -66,6 +66,10 @@ export default function Post() {
         <button className="flex-1" onClick={() => handlePostClicked("world")}>Post (Public)</button>
         <button className="flex-1" onClick={() => handlePostClicked("subs")}>Post (Subscribers)</button>
       </div>
+
+      <KnowMore more={
+        <p>In neopub, all posts are encrypted. For public posts, the encryption key is published. For private posts, the encryption key is separately encrypted for each subscriber, then those are published. See <Link to="/arch/post">/arch/post</Link> to learn more about post security architecture.</p>
+      } />
     </div>
   );
 }
