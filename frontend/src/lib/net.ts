@@ -152,10 +152,10 @@ export async function fetchInbox(pubKey: string, token: string): Promise<any> {
   }
 }
 
-export async function putReply(
+export async function putMessage(
   pubPubKeyHex: string,
   ephemDHPubBuf: ArrayBuffer,
-  encReqBuf: ArrayBuffer,
+  encMsgBuf: ArrayBuffer,
   host?: string,
 ): Promise<void> {
   const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
@@ -169,7 +169,7 @@ export async function putReply(
       [pubKeyHeader]: pubPubKeyHex,
       [subDhKey]: ephemDHPubHex,
     },
-    body: encReqBuf,
+    body: encMsgBuf,
   });
 }
 

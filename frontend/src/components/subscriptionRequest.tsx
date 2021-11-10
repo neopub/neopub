@@ -1,45 +1,11 @@
-import { usePrivateKey } from "lib/auth";
-import { useEffect, useState } from "react";
 import HexString from "components/hexString";
-import { IReq } from "core/types";
-import { unwrapReq } from "lib/api";
-import { addSubscriberPubKey, useSubscribers } from "lib/storage";
+import { ISubReq } from "core/types";
+import { addSubscriberPubKey } from "lib/storage";
 import Hexatar from "./hexatar";
 
-export default function SubReq({
-  pubKeyHex,
-  reqName,
-}: {
-  pubKeyHex: string;
-  reqName: string;
-}) {
-  const privKey = usePrivateKey("ECDH");
-
-  const [req, setReq] = useState<IReq>();
-  useEffect(() => {
-    if (!privKey) {
-      return;
-    }
-    unwrapReq(reqName, pubKeyHex, privKey).then((req) => setReq(req));
-  }, [reqName, privKey, pubKeyHex]);
-
-  const [subs, refetchSubs] = useSubscribers();
-
+export default function Req({ req }: { req: ISubReq}) {
   function handleAccept() {
-    if (!req?.pubKey) {
-      console.error("no req pubkey");
-      return;
-    }
     addSubscriberPubKey(req.pubKey);
-    refetchSubs();
-  }
-
-  if (subs && req && subs[req.pubKey]) {
-    return null;
-  }
-
-  if (!req) {
-    return <div>Loading...</div>
   }
 
   return (
@@ -49,5 +15,5 @@ export default function SubReq({
       <div>{req.msg}</div>
       <button onClick={handleAccept}>Accept</button>
     </div>
-  );
+  )
 }

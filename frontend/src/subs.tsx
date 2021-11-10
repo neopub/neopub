@@ -1,7 +1,6 @@
 import SubscriberList from "components/subscriberList";
 import SubscribeView from "components/subscribeView";
 import SubscriptionList from "components/subscriptionList";
-import SubReqs from "components/subscriptionRequests";
 import { usePublicKeyHex } from "lib/auth";
 import { useToken } from "lib/storage";
 
@@ -17,8 +16,6 @@ export default function Subs() {
     <>
       <h1 className="mb-4">subscribers</h1>
       <SubscriberList />
-      <h1 className="mb-4 mt-8">requests</h1>
-      <SubReqs pubKeyHex={pubKeyHex} token={token} />
       <h1 className="mb-4 mt-8">subscribees</h1>
       <SubscriptionList />
       <SubscribeView pubKeyHex={pubKeyHex} />

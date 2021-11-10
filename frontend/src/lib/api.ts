@@ -22,6 +22,7 @@ import {
   ISubReq,
   IProfile,
   IReply,
+  IMessage,
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
@@ -277,7 +278,23 @@ export async function sendReply(
   msg: string,
   host?: string,
 ): Promise<void> {
-  const userPubKey = await hex2ECDSAKey(pubPubKeyHex);
+  const message: IReply = {
+    type: "reply",
+    pubKey: senderPubKeyHex,
+    msg,
+    postId,
+    createdAt: new Date().toISOString(),
+  };
+
+  return sendMessage(pubPubKeyHex, message, host);
+}
+
+export async function sendMessage(
+  destPubKeyHex: string,
+  message: IMessage,
+  host?: string,
+): Promise<void> {
+  const userPubKey = await hex2ECDSAKey(destPubKeyHex);
   if (!userPubKey) {
     return;
   }
@@ -288,21 +305,12 @@ export async function sendReply(
   const ephemKeys = await genECDHKeys();
   const ephemDH = await deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
 
-  // Form request.
-  const req: IReply = {
-    type: "reply",
-    pubKey: senderPubKeyHex,
-    msg,
-    postId,
-    createdAt: new Date().toISOString(),
-  };
-
   // Encrypt request.
-  const reqJson = JSON.stringify(req);
+  const reqJson = JSON.stringify(message);
   const encReqBuf = await encryptString(reqJson, ephemDH);
 
   const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return Net.putReply(pubPubKeyHex, ephemDHPubBuf, encReqBuf, host);
+  return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, host);
 }
 
 export async function sendSubRequest(
@@ -311,30 +319,13 @@ export async function sendSubRequest(
   msg: string,
   host?: string,
 ): Promise<void> {
-  const userPubKey = await hex2ECDSAKey(pubPubKeyHex);
-  if (!userPubKey) {
-    return;
-  }
-
-  const pubECDH = await pubECDSA2ECDH(userPubKey);
-
-  // Gen ephem keypair for outer DH.
-  const ephemKeys = await genECDHKeys();
-  const ephemDH = await deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
-
-  // Form request.
-  const req: ISubReq = {
+  const message: ISubReq = {
     type: "subscribe",
     pubKey: subPubKeyHex,
     msg,
   };
 
-  // Encrypt request.
-  const reqJson = JSON.stringify(req);
-  const encReqBuf = await encryptString(reqJson, ephemDH);
-
-  const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return Net.putSubReq(pubPubKeyHex, ephemDHPubBuf, encReqBuf, host);
+  return sendMessage(pubPubKeyHex, message, host);
 }
 
 export async function publishPost(
