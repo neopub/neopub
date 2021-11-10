@@ -290,9 +290,11 @@ export async function sendReply(
 
   // Form request.
   const req: IReply = {
-    senderPubKey: senderPubKeyHex,
+    type: "reply",
+    pubKey: senderPubKeyHex,
     msg,
     postId,
+    createdAt: new Date().toISOString(),
   };
 
   // Encrypt request.
@@ -322,6 +324,7 @@ export async function sendSubRequest(
 
   // Form request.
   const req: ISubReq = {
+    type: "subscribe",
     pubKey: subPubKeyHex,
     msg,
   };

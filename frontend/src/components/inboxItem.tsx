@@ -24,12 +24,12 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
         DB.posts.put({
           hash: hashHex,
           replyToHash: item.postId,
-          publisherPubKey: item.senderPubKey,
+          publisherPubKey: item.pubKey,
           post: {
             content: {
               text: item.msg,
             },
-            createdAt: new Date(), // TODO: extract from item.,
+            createdAt: new Date(item.createdAt),
             type: "text",
           },
         });
@@ -47,8 +47,8 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
     content: {
       text: item.msg,
     },
-    createdAt: new Date(), // TODO: extract from item.,
+    createdAt: new Date(item.createdAt),
     type: "text",
   };
-  return <Post id={item.postId} post={post as any} pubKey={item.senderPubKey} />
+  return <Post id={item.postId} post={post as any} pubKey={item.pubKey} />
 }

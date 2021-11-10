@@ -50,15 +50,19 @@ export interface IPostKey {
   key: string; // hex-encoded ciphertext
 }
 
-export interface ISubReq {
-  pubKey: string;
+// An IMessage is a message sent directly from one user to another.
+export interface IMessage {
+  pubKey: string; // Sender's identity.
+  type: "subscribe" | "reply";
+}
+export interface ISubReq extends IMessage {
   msg: string;
 }
 
-export interface IReply {
-  senderPubKey: string;
+export interface IReply extends IMessage {
   msg: string;
   postId: string;
+  createdAt: string;
 }
 
 export type NotFound = "notfound";
