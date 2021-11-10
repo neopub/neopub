@@ -1,3 +1,4 @@
+import Empty from "components/empty";
 import Post from "components/post";
 import { IEncPost, TPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost } from "lib/api";
@@ -85,6 +86,7 @@ export default function Feed() {
       {posts.map(post => {
         return <Post key={post.hash} id={post.hash} post={post.post as TPost} pubKey={pubKeyHex} />;
       })}
+      {posts.length < 1 && <Empty text="No feed items. Follow some people to get content here." />}
     </div>
   );
 }

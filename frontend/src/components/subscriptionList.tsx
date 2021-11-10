@@ -2,6 +2,7 @@ import DB from "lib/db";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Empty from "./empty";
 import Hexatar from "./hexatar";
 import HexString from "./hexString";
 
@@ -25,7 +26,7 @@ export default function SubscriptionList() {
   }
 
   if (subs.length < 1) {
-    return <div>No subscriptions.</div>
+    return <Empty text="Not following anyone." />
   }
 
   return (

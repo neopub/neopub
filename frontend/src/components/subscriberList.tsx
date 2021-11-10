@@ -1,5 +1,6 @@
 import { useSubscribers } from "lib/storage";
 import { Link } from "react-router-dom";
+import Empty from "./empty";
 import Hexatar from "./hexatar";
 import HexString from "./hexString";
 
@@ -21,7 +22,7 @@ export default function SubscriberList() {
   }
 
   if (Object.values(subs).length < 1) {
-    return <div>No subscribers.</div>
+    return <Empty text="No followers." />
   }
 
   return (

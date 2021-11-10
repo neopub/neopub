@@ -13,6 +13,7 @@ import SubscriberList from "./subscriberList";
 import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
 import Tabs, { ITab } from "./tabs";
+import Empty from "./empty";
 
 interface IProps {
   id: string;
@@ -81,7 +82,7 @@ export default function Profile({ id }: IProps) {
       el: (
         <>
           {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-            {index === "notfound" || !index ? <div>No posts</div> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
+            {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
         </>
       ),
     },

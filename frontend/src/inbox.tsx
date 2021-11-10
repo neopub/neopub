@@ -1,3 +1,4 @@
+import Empty from "components/empty";
 import { usePublicKeyHex } from "lib/auth";
 import { fetchInbox } from "lib/net";
 import { useToken } from "lib/storage";
@@ -24,6 +25,9 @@ export default function Inbox() {
       <h1 className="mb-8">inbox</h1>
       {
         pubKeyHex && inbox.map(id => <InboxItem key={id} id={id} pubKeyHex={pubKeyHex} />)
+      }
+      {
+        inbox.length < 1 && <Empty text="No inbox items. Follow requests, and replies to your posts, will appear here." />
       }
     </main>
   )
