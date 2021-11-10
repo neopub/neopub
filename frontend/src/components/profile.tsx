@@ -1,125 +1,16 @@
- import type { IProfile, IIndex, IEncPost, IReply } from "core/types";
+ import type { IProfile, IIndex } from "core/types";
 import { useJSON } from "lib/useJSON";
-import { usePrivateKey, usePublicKeyHex } from "lib/auth";
+import { usePublicKeyHex } from "lib/auth";
 import Hexatar from "./hexatar";
 import { Link, useHistory } from "react-router-dom";
-import EncryptedPost from "./encryptedPost";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
-import { fetchInbox, fileLoc, getFileJSON, hostPrefix } from "lib/net";
+import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
-import { sendReply, unwrapInboxItem } from "lib/api";
 import { useToken } from "lib/storage";
-import { sha } from "core/crypto";
-import { buf2hex } from "core/bytes";
-import Post from "components/post";
+import Inbox from "./inbox";
+import PostList from "./postList";
 
-// TODO: extract.
-function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
-  const privKey = usePrivateKey("ECDH");
-
-  // TODO: do all this unwrapping in a data layer. Not UI.
-  const [item, setItem] = useState<any>();
-  useEffect(() => {
-    if (!privKey) {
-      return;
-    }
-    unwrapInboxItem(id, pubKeyHex, privKey)
-      .then(async (item: IReply) => {
-        const buf = new TextEncoder().encode(item.msg);
-        const hash = await sha(buf);
-        const hashHex = await buf2hex(hash);
-        DB.posts.put({
-          hash: hashHex,
-          replyToHash: item.postId,
-          publisherPubKey: item.senderPubKey,
-          post: {
-            content: {
-              text: item.msg,
-            },
-            createdAt: new Date(), // TODO: extract from item.,
-            type: "text",
-          },
-        });
-
-        setItem(item);
-      })
-      .catch(err => { console.log(err) });
-  }, [id, privKey, pubKeyHex]);
-
-  if (!item) {
-    return null;
-  }
-
-  const post = {
-    content: {
-      text: item.msg,
-    },
-    createdAt: new Date(), // TODO: extract from item.,
-    type: "text",
-  };
-  return <Post id={item.postId} post={post as any} pubKey={item.senderPubKey} />
-}
-
-function Inbox({ pubKeyHex, token }: { pubKeyHex: string, token: string }) {
-  const [inbox, setInbox] = useState<string[]>([]);
-  useEffect(() => {
-    fetchInbox(pubKeyHex, token).then((inb: string[]) => {
-      setInbox(inb);
-    });
-  }, [pubKeyHex, token]);
-
-  return (
-    <div>
-      <h2 className="mb-3">Inbox</h2>
-      {
-        inbox.map(id => <InboxItem key={id} id={id} pubKeyHex={pubKeyHex} />)
-      }
-    </div>
-  )
-}
-
-function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
-  if (index.posts?.length === 0) {
-    return <div className="mt-2">No posts.</div>;
-  }
-
-  function handleReply(postId: string, pubKey: string) {
-    if (!pubKeyHex) {
-      return;
-    }
-
-    const reply = prompt("Reply");
-    if (!reply) {
-      return;
-    }
-
-    sendReply(postId, id, pubKeyHex, reply, host);
-  }
-
-  const showReply = id !== pubKeyHex;
-
-  return (
-    <>
-      {
-        index.posts?.map(
-          (p, i) =>
-            id && (
-              <div key={i} className="flex flex-row items-start space-x-8">
-                <EncryptedPost
-                  key={i}
-                  enc={p as IEncPost}
-                  pubKey={id}
-                  worldKeyHex={worldKeyHex}
-                />
-                {showReply && <button onClick={() => handleReply((p as IEncPost).id, id)}>Reply</button>}
-              </div>
-            ),
-        )
-      }
-    </>
-  );
-}
 interface IProps {
   id: string;
 }
