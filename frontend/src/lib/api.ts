@@ -27,6 +27,7 @@ import {
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
 import DB from "./db";
+import solvePoWChallenge from "core/challenge";
 
 // TODO: just switch sub reqs to using this.
 export async function unwrapInboxItem(
@@ -309,8 +310,16 @@ export async function sendMessage(
   const reqJson = JSON.stringify(message);
   const encReqBuf = await encryptString(reqJson, ephemDH);
 
+  // Get PoW challenge and solve it.
+  const { chal, diff } =  await getMessageAuthChallenge(encReqBuf, host);
+  const solution = await solvePoWChallenge(chal, diff);
+  if (!solution) {
+    // TODO: signal failure.
+    return;
+  }
+
   const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, host);
+  return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, solution, host);
 }
 
 export async function sendSubRequest(
@@ -411,11 +420,31 @@ async function putFile(
   Net.putFile(location, pubKeyHex, token, data, sig, contentType)
 }
 
-export async function getAuthChallenge(
+export async function getUserAuthChallenge(
   publicKey: CryptoKey,
 ): Promise<IAuthChallenge> {
   const rawPubKey = await key2buf(publicKey);
-  return Net.fetchAuthChallenge(rawPubKey);
+  const pubKeyHex = buf2hex(rawPubKey);
+  const capDesc = {
+    type: "user",
+    pubKey: pubKeyHex,
+  } as const;
+  return Net.fetchAuthChallenge(capDesc);
+}
+
+export async function getMessageAuthChallenge(
+  message: ArrayBuffer,
+  host?: string,
+): Promise<IAuthChallenge> {
+  const hash = await sha(message);
+  const hashHex = buf2hex(hash);
+
+  const capDesc = {
+    type: "message",
+    hash: hashHex,
+    numBytes: message.byteLength,
+  } as const;
+  return Net.fetchAuthChallenge(capDesc, host);
 }
 
 export async function getSessionToken(

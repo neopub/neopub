@@ -1,6 +1,6 @@
-import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey } from "core/consts";
+import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader } from "core/consts";
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
-import { IAuthChallenge, IIndex, IProfile, NotFound } from "core/types";
+import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "core/types";
 
 export const hostPrefix = process.env.REACT_APP_HOST_PREFIX ?? "NOHOST";
 
@@ -156,10 +156,13 @@ export async function putMessage(
   pubPubKeyHex: string,
   ephemDHPubBuf: ArrayBuffer,
   encMsgBuf: ArrayBuffer,
+  powSolution: Uint8Array,
   host?: string,
 ): Promise<void> {
   const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
   const ephemDHPubHex = bytes2hex(ephemDHPubBytes);
+
+  const powHex = bytes2hex(powSolution);
 
   await fetch(`${host ?? hostPrefix}/inbox`, {
     method: "POST",
@@ -168,6 +171,7 @@ export async function putMessage(
       "Content-Type": "application/json",
       [pubKeyHeader]: pubPubKeyHex,
       [subDhKey]: ephemDHPubHex,
+      [powHeader]: powHex,
     },
     body: encMsgBuf,
   });
@@ -195,17 +199,16 @@ export async function putSubReq(
 }
 
 export async function fetchAuthChallenge(
-  pubKeyBuf: ArrayBuffer,
+  capDesc: CapabilityDescription,
+  host?: string,
 ): Promise<IAuthChallenge> {
-  const pubKeyHex = buf2hex(pubKeyBuf);
-
-  const resp = await fetch(`${hostPrefix}/auth`, {
+  const resp = await fetch(`${host ?? hostPrefix}/auth`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      [pubKeyHeader]: pubKeyHex,
     },
+    body: JSON.stringify(capDesc),
   });
   const bytes = hex2bytes(await resp.text());
   if (!bytes) {
