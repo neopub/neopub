@@ -1,20 +1,9 @@
 import { buf2hex, concatArrayBuffers, hex2bytes } from "./core/bytes";
 import { ecdsaParams, POW_DIFF } from "./core/consts";
 import PoW, { numHashBits } from "./core/pow";
+import { CapabilityDescription } from "./core/types";
 
 const supportedCapabilities = new Set(["user", "message"]);
-interface IUserCapability {
-  type: "user";
-  pubKey: string;
-}
-interface IMessageCapability {
-  type: "message";
-  hash: string;
-  numBytes: number;
-}
-
-type CapabilityDescription = IUserCapability | IMessageCapability;
-
 export default class Lib {
   crypto: any;
   pow: PoW;

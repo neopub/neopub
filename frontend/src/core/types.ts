@@ -66,3 +66,15 @@ export interface IReply extends IMessage {
 }
 
 export type NotFound = "notfound";
+
+interface IUserCapability {
+  type: "user";
+  pubKey: string;
+}
+interface IMessageCapability {
+  type: "message";
+  hash: string;
+  numBytes: number;
+}
+
+export type CapabilityDescription = IUserCapability | IMessageCapability;

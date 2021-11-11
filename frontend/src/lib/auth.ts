@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { bytes2hex } from "core/bytes";
 import { getPrivateKeyJWK, getPublicKeyJWK, setIDKeys, setToken, setWorldKey } from "lib/storage";
 import solvePoWChallenge from "core/challenge";
-import { getAuthChallenge, getSessionToken } from "./api";
+import { getUserAuthChallenge, getSessionToken } from "./api";
 
 export function isAuthenticated(): boolean {
   return getPublicKeyJWK() != null;
@@ -10,7 +10,7 @@ export function isAuthenticated(): boolean {
 
 export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus: (status: string) => void) {
   setStatus("Initiating challenge...");
-  const { chal, diff } = await getAuthChallenge(pubKey);
+  const { chal, diff } = await getUserAuthChallenge(pubKey);
 
   setStatus("Searching for solution...");
   const solution = await solvePoWChallenge(chal, diff);

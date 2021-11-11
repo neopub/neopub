@@ -1,6 +1,6 @@
 import { buf2hex, hex2bytes } from "./core/bytes";
 import { ECDSA_PUBKEY_BYTES } from "./core/consts";
-import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader } from "./core/consts";
+import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader, powHeader } from "./core/consts";
 import Lib from "./lib";
 
 export const corsHeaders = {
@@ -207,11 +207,33 @@ export default class API {
       return failure(400, "Missing/invalid pubKey");
     }
 
-    // TODO: preflight to get token. Check token.
+    // Parse solution.
+    const solutionHex = header(powHeader);
+    const solution = hex2bytes(solutionHex)
+    if (!solution) {
+      return failure(400, "Missing/malformed solution");
+    }
 
     const reqData = await body();
     if (reqData.byteLength < 1) {
       return failure(400, "Missing payload");
+    }
+
+    // Check proof-of-work.
+    // TODO: address DoS possibility here with large file sizes.
+    // Server has to hash the file before it can check PoW.
+    // Malicious client could just send a bunch of large files to waste compute.
+    // Solution: hash and PoW every N bytes?
+    const hashBuf = await this.lib.sha(reqData);
+    const hashHex = buf2hex(hashBuf);
+    const capDesc = {
+      type: "message",
+      hash: hashHex,
+      numBytes: reqData.byteLength,
+    } as const;
+    const valid = await this.lib.checkPoW(capDesc, solution)
+    if (!valid) {
+      return failure(400, "Invalid solution");
     }
 
     // NOTE: can't check signature, or server would know identity of sender.
