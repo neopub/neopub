@@ -24,7 +24,7 @@ function ButtonLink({ label, to }: { label: string, to: string }) {
   return <button onClick={() => history.push(to)}>{`${label} »`}</button>
 }
 
-function Handle({ handle, setHandle}: { handle?: string, setHandle: (newHandle: string) => void}) {
+function Handle({ handle, setHandle, editable }: { handle?: string, setHandle: (newHandle: string) => void, editable: boolean}) {
   function handleEdit() {
     const newHandle = prompt("New handle");
     if (!newHandle) {
@@ -37,12 +37,12 @@ function Handle({ handle, setHandle}: { handle?: string, setHandle: (newHandle: 
   return (
     <div className="flex flex-row space-x-2 mb-2 flex-grow-0">
       <h2 className={!handle ? "italic" : undefined}>{!handle ? "handle" : handle}</h2>
-      <BracketButton label="edit" onClick={handleEdit} />
+      {editable && <BracketButton label="edit" onClick={handleEdit} />}
     </div>
   );
 }
 
-function Bio({ bio, setBio }: { bio?: string, setBio: (newBio: string) => void}) {
+function Bio({ bio, setBio, editable }: { bio?: string, setBio: (newBio: string) => void, editable: boolean }) {
   function handleEdit() {
     const newBio = prompt("New bio");
     if (!newBio) {
@@ -55,12 +55,12 @@ function Bio({ bio, setBio }: { bio?: string, setBio: (newBio: string) => void})
   return (
     <div className="flex-1 mb-2 space-x-2">
       <span className={!bio ? "italic" : ""}>{!bio ? "Write a bio, if you like." : bio}</span>
-      <BracketButton label="edit" onClick={handleEdit} />
+      {editable && <BracketButton label="edit" onClick={handleEdit} />}
     </div>
   )
 }
 
-function IDCard({ profile, setProfile, id, host }: { profile?: IProfile, setProfile: (newProfile: IProfile) => void, id: string, host: string }) {
+function IDCard({ profile, setProfile, id, host, isAuthedUser }: { profile?: IProfile, setProfile: (newProfile: IProfile) => void, id: string, host: string, isAuthedUser: boolean }) {
   if (!profile) {
     return null;
   }
@@ -71,8 +71,8 @@ function IDCard({ profile, setProfile, id, host }: { profile?: IProfile, setProf
     <div className="flex flex-row mb-4 space-x-4">
       <a href={`/users/${id}?host=${host}`}><HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} /></a>
       <div className="flex flex-col">
-        <Handle handle={handle} setHandle={(newHandle) => setProfile({ ...profile, handle: newHandle })} />
-        <Bio bio={bio} setBio={(newBio) => setProfile({ ...profile, bio: newBio })} />
+        <Handle handle={handle} setHandle={(newHandle) => setProfile({ ...profile, handle: newHandle })} editable={isAuthedUser} />
+        <Bio bio={bio} setBio={(newBio) => setProfile({ ...profile, bio: newBio })} editable={isAuthedUser} />
         <Hexatar hex={id} />
       </div>
     </div>
@@ -177,6 +177,7 @@ export default function Profile({ id }: IProps) {
         setProfile={setProfile}
         id={id}
         host={host}
+        isAuthedUser={!!isAuthedUser}
       />
 
       <div className="flex flex-row space-x-1 mb-4">
