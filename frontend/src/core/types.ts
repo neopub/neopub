@@ -1,6 +1,7 @@
 export interface IProfile {
-  handle: string;
-  avatarURL: string;
+  handle?: string;
+  bio?: string;
+  avatarURL?: string;
   worldKey: string;
 }
 

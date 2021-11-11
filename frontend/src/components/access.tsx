@@ -26,7 +26,7 @@ export default function Access() {
     // Create profile.
     const worldKeyBuf = await key2buf(worldKey);
     const worldKeyHex = buf2hex(worldKeyBuf);
-    const profile = { handle: "", avatarURL: "", worldKey: worldKeyHex };
+    const profile = { worldKey: worldKeyHex };
     await uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile)
 
     history.push(`/creds/dump${next}`)
