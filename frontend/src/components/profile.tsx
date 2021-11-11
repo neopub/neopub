@@ -116,7 +116,7 @@ export default function Profile({ id }: IProps) {
       <div className="flex flex-row space-x-1 mb-4">
         <Hexatar hex={id} />
         {isAuthedUser && <Link to="/creds/dump">Creds</Link>}
-        {!isAuthedUser && (isSubscribed ? <Link to={`/subs`}>Subscribed</Link> : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
+        {!isAuthedUser && (isSubscribed ? "Subscribed" : <Link to={`/users/${id}/sub`}>Subscribe</Link>)}
       </div>
 
       <Tabs tabs={tabs} initialActiveTab="Posts" />
