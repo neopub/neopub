@@ -38,6 +38,10 @@ export async function setWorldKey(key: CryptoKey) {
   localStorage[worldKeyKey] = hex;
 }
 
+export function getToken(): string | undefined {
+  return localStorage[tokenKey];
+}
+
 export function getPrivateKeyJWK(): string | undefined {
   return localStorage[privKeyKey];
 }

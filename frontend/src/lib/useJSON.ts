@@ -1,6 +1,9 @@
 import { fileLoc, getFileJSON } from "lib/net";
-import { NotFound } from "core/types";
+import { IProfile, NotFound } from "core/types";
 import { useEffect, useState } from "react";
+import { getToken } from "./storage";
+import { getPrivateKey, getPublicKey } from "./auth";
+import { uploadProfile } from "./api";
 
 export function useJSON<T>(
   userId: string | undefined,
@@ -22,4 +25,42 @@ export function useJSON<T>(
   }, [userId, filename]);
 
   return [data, setData];
+}
+
+export function useProfile(userId?: string): [IProfile | NotFound, (newProfile: IProfile) => void] {
+  const defaultProfile: IProfile = { handle: "", avatarURL: "", worldKey: "" };
+  const [profile, setProfile] = useState<IProfile | NotFound>(defaultProfile);
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    const location = fileLoc(userId, "profile.json");
+    getFileJSON<IProfile>(location)
+      .then((p) => {
+        if (p) {
+          setProfile(p);
+        }
+      });
+  }, [userId]);
+
+  async function updateProfile(newProfile: IProfile): Promise<void> {
+    if (!userId) {
+      return;
+    }
+
+    setProfile(newProfile);
+
+    const privKey = await getPrivateKey("ECDSA");
+    const pubKey = await getPublicKey();
+    const token = getToken();
+    if (!privKey || !pubKey || !token) {
+      return;
+    }
+
+    return uploadProfile(pubKey, privKey, token, newProfile);
+  }
+
+  return [profile, updateProfile];
 }
