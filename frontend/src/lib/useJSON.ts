@@ -28,7 +28,7 @@ export function useJSON<T>(
 }
 
 export function useProfile(userId?: string): [IProfile | NotFound, (newProfile: IProfile) => void] {
-  const defaultProfile: IProfile = { handle: "", avatarURL: "", worldKey: "" };
+  const defaultProfile: IProfile = { worldKey: "" };
   const [profile, setProfile] = useState<IProfile | NotFound>(defaultProfile);
 
   useEffect(() => {

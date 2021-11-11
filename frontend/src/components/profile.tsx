@@ -24,44 +24,55 @@ function ButtonLink({ label, to }: { label: string, to: string }) {
   return <button onClick={() => history.push(to)}>{`${label} »`}</button>
 }
 
+function Handle({ handle, setHandle}: { handle?: string, setHandle: (newHandle: string) => void}) {
+  function handleEdit() {
+    const newHandle = prompt("New handle");
+    if (!newHandle) {
+      return;
+    }
+
+    setHandle(newHandle);
+  }
+
+  return (
+    <div className="flex flex-row space-x-2 mb-2 flex-grow-0">
+      <h2 className={!handle ? "italic" : undefined}>{!handle ? "handle" : handle}</h2>
+      <BracketButton label="edit" onClick={handleEdit} />
+    </div>
+  );
+}
+
+function Bio({ bio, setBio }: { bio?: string, setBio: (newBio: string) => void}) {
+  function handleEdit() {
+    const newBio = prompt("New bio");
+    if (!newBio) {
+      return;
+    }
+
+    setBio(newBio);
+  }
+
+  return (
+    <div className="flex-1 mb-2 space-x-2">
+      <span className={!bio ? "italic" : ""}>{!bio ? "Write a bio, if you like." : bio}</span>
+      <BracketButton label="edit" onClick={handleEdit} />
+    </div>
+  )
+}
+
 function IDCard({ profile, setProfile, id, host }: { profile?: IProfile, setProfile: (newProfile: IProfile) => void, id: string, host: string }) {
   if (!profile) {
     return null;
   }
 
-  const { handle } = profile;
-
-  function editHandle() {
-    const newHandle = prompt("New handle");
-    if (!newHandle || !profile) {
-      return;
-    }
-
-    console.log(newHandle);
-    setProfile({ ...profile, handle: newHandle });
-  }
-
-  function editBio() {
-    const newHandle = prompt("New bio");
-    if (!newHandle) {
-      return;
-    }
-
-    console.log(newHandle);
-  }
+  const { handle, bio } = profile;
 
   return (
     <div className="flex flex-row mb-4 space-x-4">
       <a href={`/users/${id}?host=${host}`}><HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} /></a>
       <div className="flex flex-col">
-        <div className="flex flex-row space-x-2 mb-2 flex-grow-0">
-          <h2>{handle}</h2>
-          <BracketButton label="edit" onClick={editHandle} />
-        </div>
-        <div className="flex-1 mb-2 space-x-2">
-          <span>Bio</span>
-          <BracketButton label="edit" onClick={editBio} />
-        </div>
+        <Handle handle={handle} setHandle={(newHandle) => setProfile({ ...profile, handle: newHandle })} />
+        <Bio bio={bio} setBio={(newBio) => setProfile({ ...profile, bio: newBio })} />
         <Hexatar hex={id} />
       </div>
     </div>
