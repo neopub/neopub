@@ -15,7 +15,7 @@ export default function Tabs({ tabs, initialActiveTab }: { tabs: ITab[], initial
         {
           tabs.map((tab) => {
             const isActive = tab.name === activeTab;
-            return <h2 className={`mb-3 cursor-pointer hover:text-green-200 hover:underline ${isActive ? "underline" : undefined}`} onClick={() => setActiveTab(tab.name)}>{tab.name}</h2>
+            return <h2 key={tab.name} className={`mb-3 cursor-pointer hover:text-green-200 hover:underline ${isActive ? "underline" : undefined}`} onClick={() => setActiveTab(tab.name)}>{tab.name}</h2>
           })
         }
       </div>
