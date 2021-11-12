@@ -1,16 +1,14 @@
 import { IIndex, IEncPost } from "core/types";
 import { sendReply } from "lib/api";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import EncryptedPost from "./encryptedPost";
 
-export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
+function ReplyButton({ post, pubKeyHex, id, host }: { post: IEncPost, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
   const history = useHistory();
-  
-  if (index.posts?.length === 0) {
-    return <div className="mt-2">No posts.</div>;
-  }
+  const [replyState, setReplyState] = useState<"sending" | "sent">();
 
-  function handleReply(postId: string, pubKey: string) {
+  async function handleReply(postId: string, pubKey: string) {
     if (!pubKeyHex) {
       alert('You need an identity first.')
       history.push(`/?next=${encodeURIComponent(history.location.pathname)}`);
@@ -22,7 +20,29 @@ export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { 
       return;
     }
 
-    sendReply(postId, id, pubKeyHex, reply, host);
+    try {
+      setReplyState("sending");
+      await sendReply(postId, id, pubKeyHex, reply, host);
+      setReplyState("sent");
+    } catch (err) {
+      alert("Failed to send reply.");
+      setReplyState(undefined);
+    }
+  }
+
+  let text = "Reply";
+  if (replyState === "sending") {
+    text = "Sending...";
+  } else if (replyState === "sent") {
+    text = "Reply sent."
+  }
+
+  return <button className={replyState !== undefined ? "border-0" : undefined} onClick={() => handleReply(post.id, id)} disabled={replyState !== undefined}>{text}</button>;
+}
+
+export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
+  if (index.posts?.length === 0) {
+    return <div className="mt-2">No posts.</div>;
   }
 
   const showReply = id !== pubKeyHex;
@@ -40,7 +60,8 @@ export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { 
                   pubKey={id}
                   worldKeyHex={worldKeyHex}
                 />
-                {showReply && <button onClick={() => handleReply((p as IEncPost).id, id)}>Reply</button>}
+                {showReply && <ReplyButton post={p as IEncPost} pubKeyHex={pubKeyHex} id={id} host={host} />}
+                
               </div>
             ),
         )
