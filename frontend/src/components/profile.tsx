@@ -34,9 +34,12 @@ function Handle({ handle, setHandle, editable }: { handle?: string, setHandle: (
     setHandle(newHandle);
   }
 
+  const emptyText = editable ? "handle" : "No handle";
+  const text = !handle ? emptyText : handle;
+
   return (
     <div className="flex flex-row space-x-2 mb-2 flex-grow-0">
-      <h2 className={!handle ? "italic" : undefined}>{!handle ? "handle" : handle}</h2>
+      <h2 className={!handle ? "italic" : undefined}>{text}</h2>
       {editable && <BracketButton label="edit" onClick={handleEdit} />}
     </div>
   );
@@ -52,9 +55,12 @@ function Bio({ bio, setBio, editable }: { bio?: string, setBio: (newBio: string)
     setBio(newBio);
   }
 
+  const emptyText = editable ? "Write a bio, if you like." : "No bio";
+  const text = !bio ? emptyText : bio;
+
   return (
     <div className="flex-1 mb-2 space-x-2">
-      <span className={!bio ? "italic" : ""}>{!bio ? "Write a bio, if you like." : bio}</span>
+      <span className={!bio ? "italic" : ""}>{text}</span>
       {editable && <BracketButton label="edit" onClick={handleEdit} />}
     </div>
   )
