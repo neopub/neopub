@@ -3,9 +3,11 @@ import HexString from "components/hexString";
 import KnowMore from "components/knowMore";
 import { sendSubRequest } from "lib/api";
 import { usePublicKeyHex } from "lib/auth";
+import DB from "lib/db";
 import { hostPrefix } from "lib/net";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useProfile } from "lib/useJSON";
+import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 
@@ -15,6 +17,14 @@ export default function Sub() {
   const [sentReq, setSentReq] = useState(false);
 
   const { id: pubId } = useParams<{ id: string }>();
+
+  const [following, setFollowing] = useState(false);
+  useEffect(() => {
+    DB.subscriptions.get(pubId)
+      .then((sub: any) => {
+        setFollowing(sub !== undefined);
+      });
+  }, [pubId]);
   
   const host = hostPrefix;
   const [profile] = useProfile(pubId, host);
@@ -69,7 +79,7 @@ export default function Sub() {
           {profile.handle}
         </Link>
         {
-          sentReq ? <div>Sent follow request.</div> : <button className="w-64 py-2 px-6" onClick={handleSubscribe}>Follow</button>
+          sentReq ? <div>Sent follow request.</div> : <button className="w-64 py-2 px-6" onClick={handleSubscribe} disabled={following}>{following ? "Following" : "Follow"}</button>
         }
       </div>
 
