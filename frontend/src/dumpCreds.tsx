@@ -21,9 +21,9 @@ function More() {
 
   return (
     <div className="flex flex-col my-4">
-      <p className="">These are your credentials (an ECDSA keypair, etc...). Store them in your password manager.</p>
+      <p className="">These are your credentials (an ECDSA keypair, etc...). They are pre-populated into the password field, so you can easily store them in your password manager.</p>
       <textarea
-        className="w-full h-48 rounded font-mono text-xs"
+        className="w-full h-48 rounded font-mono text-xs mt-2"
         value={reveal ? credState : placeholder}
         readOnly
       />
@@ -57,8 +57,10 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
   }
 
   return (
-    <div className="flex flex-col my-4">
-      <p className="mb-2">Enter an ID (not published) and hit Save Creds. That will trigger your browser's password manager.</p>
+    <div className="flex flex-col my-4 space-y-3">
+      <p>Enter an ID, hit Save Creds.</p>
+      <p>This ID is <b>private</b>. It's <i>only</i> used to identify this account in your password manager.</p>
+      <p>Save in your password manager, when it asks.</p>
 
       <CredFields fixedCreds={credState} onSubmit={handleSubmit} ctaText="Save Creds" />
     </div>
