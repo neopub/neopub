@@ -27,7 +27,7 @@ export function useJSON<T>(
   return [data, setData];
 }
 
-export function useProfile(userId?: string): [IProfile | NotFound, (newProfile: IProfile) => void] {
+export function useProfile(userId?: string, host?: string): [IProfile | NotFound, (newProfile: IProfile) => void] {
   const defaultProfile: IProfile = { worldKey: "" };
   const [profile, setProfile] = useState<IProfile | NotFound>(defaultProfile);
 
@@ -37,13 +37,13 @@ export function useProfile(userId?: string): [IProfile | NotFound, (newProfile: 
     }
 
     const location = fileLoc(userId, "profile.json");
-    getFileJSON<IProfile>(location)
+    getFileJSON<IProfile>(location, host)
       .then((p) => {
         if (p) {
           setProfile(p);
         }
       });
-  }, [userId]);
+  }, [userId, host]);
 
   async function updateProfile(newProfile: IProfile): Promise<void> {
     if (!userId) {
