@@ -16,7 +16,7 @@ import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
-  return <span>[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
+  return <span className="whitespace-nowrap">[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
 }
 
 function ButtonLink({ label, to }: { label: string, to: string }) {
