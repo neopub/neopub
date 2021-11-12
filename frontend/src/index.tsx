@@ -46,9 +46,11 @@ function Menu() {
 
   const items: MenuItems = isAuthenticated() ? authedMenu : unauthedMenu;
 
+  const kbLink = isAuthenticated() ? "/post" : "/";
+
   return (
     <div className="flex flex-row mb-2 space-x-4 font-mono">
-      <Link to="/"><img src="/keyboard.png" alt="Pixelated keyboard icon" style={{ width: 48 }} /></Link>
+      <Link to={kbLink} className="flex space-x-2"><img src="/keyboard.png" alt="Pixelated keyboard icon" style={{ width: 48 }} />{isAuthenticated() ? <span>post</span> : null}</Link>
       {
         items.map(({ path, text }) => {
           const highlight = loc.pathname === path;
