@@ -21,7 +21,7 @@ function BracketButton({ label, onClick }: { label: string, onClick: () => void 
 
 function ButtonLink({ label, to }: { label: string, to: string }) {
   const history = useHistory();
-  return <button onClick={() => history.push(to)}>{`${label} »`}</button>
+  return <button onClick={() => history.push(to)} className="border-0">{`${label} »`}</button>
 }
 
 function Handle({ handle, setHandle, editable }: { handle?: string, setHandle: (newHandle: string) => void, editable: boolean}) {
@@ -68,7 +68,7 @@ function IDCard({ profile, setProfile, id, host, isAuthedUser }: { profile?: IPr
   const { handle, bio } = profile;
 
   return (
-    <div className="flex flex-row mb-4 space-x-4">
+    <div className="flex flex-row mb-2 space-x-4">
       <a href={`/users/${id}?host=${host}`}><HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} /></a>
       <div className="flex flex-col">
         <Handle handle={handle} setHandle={(newHandle) => setProfile({ ...profile, handle: newHandle })} editable={isAuthedUser} />
