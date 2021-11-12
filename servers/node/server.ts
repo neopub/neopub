@@ -34,20 +34,33 @@ function failure(status: number, msg: string, res: http.ServerResponse) {
   res.end();
 }
 
-const data: IDataLayer = {
+const dataRoot = "public";
+class DataLayer {
+  dataDir: string;
+  constructor(dataDir?: string) {
+    this.dataDir = dataRoot;
+    if (dataDir) {
+      this.dataDir += "/" + dataDir;
+    }
+  }
+
+  private prefixPath(path: string) {
+    return `${this.dataDir}${path}`;
+  }
+
   async writeFile(loc: string, data: any): Promise<void> {
-    const fullLoc = `public${loc}`;
+    const fullLoc = this.prefixPath(loc);
     await fs.promises.mkdir(path.dirname(fullLoc), { recursive: true });
     return fs.promises.writeFile(fullLoc, data);
-  },
+  }
   
   async readFile(loc: string): Promise<any> {
-    const fullLoc = `public${loc}`;
+    const fullLoc = this.prefixPath(loc);
     return fs.promises.readFile(fullLoc);
-  },
+  }
   
   async listFiles(prefix: string): Promise<string[]> {
-    const fullLoc = `public${prefix}`;
+    const fullLoc = this.prefixPath(prefix);
     const dirExists = fs.existsSync(fullLoc);
     if (!dirExists) {
       return [];
@@ -56,16 +69,18 @@ const data: IDataLayer = {
     const keys = await fs.promises.readdir(fullLoc);
     return keys;
   }
-};
+}
 
 export default class Server {
   host: string;
   port: number;
   api: API;
   server: http.Server;
-  constructor(host: string, port: number, lib: Lib) {
+  constructor(host: string, port: number, lib: Lib, dataDir?: string) {
     this.host = host;
     this.port = port;
+
+    const data = new DataLayer(dataDir);
     this.api = new API(lib, data);
     this.server = http.createServer(this.handle);
   }
