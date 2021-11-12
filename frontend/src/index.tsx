@@ -50,7 +50,7 @@ function Menu() {
 
   return (
     <div className="flex flex-row mb-2 space-x-4 font-mono">
-      <Link to={kbLink} className="flex space-x-2"><img src="/keyboard.png" alt="Pixelated keyboard icon" style={{ width: 48 }} />{isAuthenticated() ? <span>post</span> : null}</Link>
+      <Link to={kbLink} className="flex space-x-2"><img src="/keyboard.png" alt="Pixelated keyboard icon" style={{ width: 48 }} /></Link>
       {
         items.map(({ path, text }) => {
           const highlight = loc.pathname === path;
