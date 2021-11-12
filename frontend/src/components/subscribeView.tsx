@@ -46,9 +46,12 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
   }
 
   return (
-    <form onSubmit={handleSubscribe}>
-      <input type="text" value={url} onChange={(e) => setURL(e.target.value)} />
-      <button type="submit" disabled={!match}>Subscribe</button>
-    </form>
+    <div className="mt-4">
+      To follow someone from a different host, copy the QR code link from their profile and paste it here.
+      <form onSubmit={handleSubscribe} className="space-x-1">
+        <input type="text" value={url} onChange={(e) => setURL(e.target.value)} className="py-1 px-3 rounded" placeholder="Paste profile link here" />
+        <button type="submit" disabled={!match}>Follow</button>
+      </form>
+    </div>
   )
 }
