@@ -19,6 +19,11 @@ export default function Post() {
   const history = useHistory();
 
   const [text, setText] = useState("");
+
+  const [viz, setViz] = useState<PostVisibility>("subs");
+  function handleWorldCheckboxClicked(evt: any) {
+    setViz(viz === "world" ? "subs" : "world");
+  }
   
   if (!(pubKeyHex && worldKeyHex && privKey && privDH && token && setIndex)) {
     return <div>Can't post.</div>
@@ -57,15 +62,18 @@ export default function Post() {
   return (
     <div className="flex flex-col max-w-lg">
       <h1 className="mb-4">post</h1>
+      <div className="text-right mt-2 mb-1">
+        <label htmlFor="worldcheck">
+          <input type="checkbox" id="worldcheck" checked={viz === "world"} onClick={handleWorldCheckboxClicked} className="mr-1" />
+          Make public
+        </label>
+      </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        className="h-48 rounded p-2 mt-4"
+        className="h-48 rounded p-2"
       />
-      <div className="flex space-x-2">
-        <button className="flex-1" onClick={() => handlePostClicked("world")}>Post (Public)</button>
-        <button className="flex-1" onClick={() => handlePostClicked("subs")}>Post (Subscribers)</button>
-      </div>
+      <button className="flex-1" onClick={() => handlePostClicked(viz)}>Post ({viz === "world" ? "World" : "Subscribers"})</button>
 
       <KnowMore more={
         <p>In neopub, all posts are encrypted. For public posts, the encryption key is published. For private posts, the encryption key is separately encrypted for each subscriber, then those are published. See <Link to="/arch/post">/arch/post</Link> to learn more about post security architecture.</p>
