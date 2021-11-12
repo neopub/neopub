@@ -6,17 +6,18 @@ import Empty from "./empty";
 import Hexatar from "./hexatar";
 import HexString from "./hexString";
 
-function SubscriptionItem({ pubKeyHex }: { pubKeyHex: string }) {
+function SubscriptionItem({ pubKeyHex, handle }: { pubKeyHex: string, handle?: string }) {
   return (
     <Link className="flex flex-row items-center space-x-2 no-underline" to={`/users/${pubKeyHex}`}>
       <Hexatar hex={pubKeyHex} />
       <HexString hex={pubKeyHex} />
+      {handle}
     </Link>
   )
 }
 
 export default function SubscriptionList() {
-  const [subs, setSubs] = useState<{ pubKey: string}[]>([]);
+  const [subs, setSubs] = useState<{ pubKey: string, handle?: string}[]>([]);
   useEffect(() => {
     DB.subscriptions.toArray().then((rows: any) => setSubs(rows));
   }, [])
@@ -30,8 +31,8 @@ export default function SubscriptionList() {
   }
 
   return (
-    <div>
-      {subs.map(({ pubKey }) => <SubscriptionItem key={pubKey} pubKeyHex={pubKey} />)}
+    <div className="space-y-2">
+      {subs.map(({ pubKey, handle }) => <SubscriptionItem key={pubKey} pubKeyHex={pubKey} handle={handle} />)}
     </div>
   )
 }

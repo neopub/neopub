@@ -80,8 +80,8 @@ export function getSubscriberPubKeyList(): Record<string, boolean> {
   return subs;
 }
 
-export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string) {
-  DB.subscriptions.add({ pubKey, host, worldKeyHex })
+export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string, handle?: string) {
+  DB.subscriptions.add({ pubKey, host, worldKeyHex, handle })
     .catch(() => {});
 }
 

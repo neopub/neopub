@@ -42,7 +42,7 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
     const worldKeyHex = profile.worldKey;
     
     await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, host);
-    addSubscriptionPubKey(pubPubKeyHex, host, worldKeyHex);
+    addSubscriptionPubKey(pubPubKeyHex, host, worldKeyHex, profile.handle);
   }
 
   return (
