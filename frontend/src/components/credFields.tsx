@@ -52,7 +52,7 @@ export default function CredFields({
         onChange={handleIDChange}
         className="block px-2 py-1 my-2 w-full"
       />
-      <label htmlFor="secrets">Creds</label>
+      <label htmlFor="creds">Creds</label>
       <input
         ref={credFieldRef}
         name="creds"
