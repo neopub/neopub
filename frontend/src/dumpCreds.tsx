@@ -17,11 +17,20 @@ function More() {
     setCredState(creds);
   }, []);
 
+  function handleCopy() {
+    if (!credState) {
+      return;
+    }
+    navigator.clipboard.writeText(credState);
+    alert("Copied creds to clipboard. Save these somewhere secure.")
+  }
+
   const placeholder = credState?.replace(/\w/g, "*");
 
   return (
-    <div className="flex flex-col my-4">
+    <div className="flex flex-col my-4 space-y-2">
       <p className="">These are your credentials (an ECDSA keypair, etc...). They are pre-populated into the password field, so you can easily store them in your password manager.</p>
+      <p>To manually save your credentials, use the copy button, below.</p>
       <textarea
         className="w-full h-48 rounded font-mono text-xs mt-2"
         value={reveal ? credState : placeholder}
@@ -31,6 +40,7 @@ function More() {
         <button onClick={() => setReveal(!reveal)} className="flex-1">
           {reveal ? "Conceal" : "Reveal"}
         </button>
+        <button onClick={handleCopy}>Copy</button>
       </div>
     </div>
   );
