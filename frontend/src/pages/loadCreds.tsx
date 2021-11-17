@@ -1,5 +1,6 @@
 import CredFields from "components/credFields";
-import { getPrivateKey, getPublicKey, getToken } from "lib/auth";
+import { getPrivateKey, getPublicKey } from "lib/auth";
+import { getToken } from "models/host";
 import { fetchState } from "lib/state";
 import { loadState, setToken } from "lib/storage";
 import { useState } from "react";
@@ -13,11 +14,8 @@ export default function LoadCreds() {
 
   async function fetchToken() {
     const pubKey = await getPublicKey();
-    if (!pubKey) {
-      return;
-    }
     const privKey = await getPrivateKey("ECDSA");
-    if (!privKey) {
+    if (!pubKey || !privKey) {
       return;
     }
     const token = await getToken(pubKey, privKey, setStatus);

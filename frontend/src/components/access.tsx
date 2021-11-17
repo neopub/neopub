@@ -1,4 +1,5 @@
-import { storeCredentials, getToken } from "lib/auth";
+import { storeCredentials } from "lib/auth";
+import { getToken } from "models/host";
 import { useState } from "react";
 import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
 import { Link, useHistory } from "react-router-dom";

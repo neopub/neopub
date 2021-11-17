@@ -1,33 +1,9 @@
 import { useEffect, useState } from "react";
 import { bytes2hex } from "core/bytes";
 import { getPrivateKeyJWK, getPublicKeyJWK, setIDKeys, setStateKey, setToken, setWorldKey } from "lib/storage";
-import solvePoWChallenge from "core/challenge";
-import { getUserAuthChallenge, getSessionToken } from "./api";
 
 export function isAuthenticated(): boolean {
   return getPublicKeyJWK() != null;
-}
-
-export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus: (status: string) => void) {
-  setStatus("Initiating challenge...");
-  const { chal, diff } = await getUserAuthChallenge(pubKey);
-
-  setStatus("Searching for solution...");
-  const solution = await solvePoWChallenge(chal, diff);
-  if (!solution) {
-    setStatus("No solution found.");
-    return;
-  }
-  setStatus("Found solution.");
-
-  const token = await getSessionToken(
-    privKey,
-    pubKey,
-    solution,
-  );
-  setStatus(`Got access token.`);
-
-  return token;
 }
 
 async function json2hex(json: string): Promise<string | undefined> {
