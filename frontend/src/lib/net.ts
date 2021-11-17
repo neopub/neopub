@@ -50,7 +50,7 @@ export async function fetchPost(
   return getFile(location);
 }
 
-async function getFile(location: string): Promise<ArrayBuffer | undefined> {
+export async function getFile(location: string): Promise<ArrayBuffer | undefined> {
   try {
     const resp = await fetch(`${hostPrefix}/get`, {
       method: "GET",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { bytes2hex } from "core/bytes";
-import { getPrivateKeyJWK, getPublicKeyJWK, setIDKeys, setToken, setWorldKey } from "lib/storage";
+import { getPrivateKeyJWK, getPublicKeyJWK, setIDKeys, setStateKey, setToken, setWorldKey } from "lib/storage";
 import solvePoWChallenge from "core/challenge";
 import { getUserAuthChallenge, getSessionToken } from "./api";
 
@@ -30,34 +30,44 @@ export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus:
   return token;
 }
 
-export async function storeCredentials(idKeys: CryptoKeyPair, token: string, worldKey: CryptoKey) {
+async function json2hex(json: string): Promise<string | undefined> {
+  const key = await json2key(json, "ECDSA", []);
+  if (!key) {
+    return;
+  }
+
+  try {
+    const raw = await crypto.subtle.exportKey("raw", key);
+    const bytes = new Uint8Array(raw);
+    return bytes2hex(bytes);
+  } catch (e) {
+    return undefined;
+  }
+}
+
+export async function getPublicKeyHex(): Promise<string | undefined> {
+  const json = getPublicKeyJWK();
+  if (!json) {
+    return;
+  }
+
+  return json2hex(json);
+}
+
+export async function storeCredentials(idKeys: CryptoKeyPair, token: string, worldKey: CryptoKey, stateKey: CryptoKey) {
   setToken(token);
   await setIDKeys(idKeys);
   await setWorldKey(worldKey);
+  await setStateKey(stateKey);
 }
 
 export function usePublicKeyHex(): { hex?: string, loading: boolean } {
   const [state, setState] = useState<{ hex?: string, loading: boolean}>({ hex: undefined, loading: true })
 
   useEffect(() => {
-    async function json2bytes(json: string): Promise<string | undefined> {
-      const key = await json2key(json, "ECDSA", []);
-      if (!key) {
-        return;
-      }
-
-      try {
-        const raw = await crypto.subtle.exportKey("raw", key);
-        const bytes = new Uint8Array(raw);
-        return bytes2hex(bytes);
-      } catch (e) {
-        return undefined;
-      }
-    }
-
     const json = getPublicKeyJWK();
     if (json) {
-      json2bytes(json).then((hex) => setState({ hex, loading: false }));
+      json2hex(json).then((hex) => setState({ hex, loading: false }));
     } else {
       setState({ hex: undefined, loading: false })
     }

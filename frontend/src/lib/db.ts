@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 
-const DB = new Dexie("neopub");
+const DB: any = new Dexie("neopub");
 DB.version(6).stores({
   subscriptions: "pubKey, host, worldKeyHex, handle",
   followers: "pubKey, host",
@@ -13,4 +13,23 @@ export async function wipeDB() {
   return DB.open();
 }
 
-export default DB as any;
+export async function dumpState() {
+  const following = await DB.subscriptions.toArray();
+  const followers = await DB.followers.toArray();
+  return { followers, following };
+}
+
+export async function loadStateDangerously(state: any) {
+  const { followers, following } = state;
+  
+  DB.transaction("rw", [DB.subscriptions, DB.followers], async () => {
+    return Promise.all([
+      DB.subscriptions.clear(),
+      DB.subscriptions.bulkAdd(following),
+      DB.followers.clear(),
+      DB.followers.bulkAdd(followers),
+    ]);
+  });
+}
+
+export default DB;

@@ -1,5 +1,6 @@
 import CredFields from "components/credFields";
 import { getPrivateKey, getPublicKey, getToken } from "lib/auth";
+import { fetchState } from "lib/state";
 import { loadState, setToken } from "lib/storage";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -29,7 +30,7 @@ export default function LoadCreds() {
     history.push(next ? next : "/");
   }
 
-  function handleLoad(id?: string, creds?: string) {
+  async function handleLoad(id?: string, creds?: string) {
     if (!creds) {
       return;
     }
@@ -38,7 +39,8 @@ export default function LoadCreds() {
     loadState(creds);
     setStatus("Loaded creds.")
     
-    fetchToken();
+    await fetchState();
+    await fetchToken();
   }
 
   return (

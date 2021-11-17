@@ -8,6 +8,7 @@ const tokenKey = "token";
 const privKeyKey = "privKey";
 const pubKeyKey = "pubKey";
 const worldKeyKey = "worldKey";
+const stateKeyKey = "stateKey";
 
 export function setToken(token: string) {
   localStorage[tokenKey] = token;
@@ -38,6 +39,12 @@ export async function setWorldKey(key: CryptoKey) {
   localStorage[worldKeyKey] = hex;
 }
 
+export async function setStateKey(key: CryptoKey) {
+  const buf = await key2buf(key);
+  const hex = buf2hex(buf);
+  localStorage[stateKeyKey] = hex;
+}
+
 export function getToken(): string | undefined {
   return localStorage[tokenKey];
 }
@@ -52,6 +59,10 @@ export function getPublicKeyJWK(): string | undefined {
 
 export function getWorldKey(): string | undefined {
   return localStorage[worldKeyKey];
+}
+
+export function getStateKey(): string | undefined {
+  return localStorage[stateKeyKey];
 }
 
 function useLocalStorage(key: string): { val: string | null, loading: boolean } {
@@ -112,13 +123,14 @@ export function useSubscribers(): [string[] | undefined, () => void] {
 }
 
 export function dumpState(): string | undefined {
-  const { pubKey, privKey, worldKey } = localStorage;
+  const { pubKey, privKey, worldKey, stateKey } = localStorage;
   try {
     const json = JSON.stringify(
       {
         pubKey: JSON.parse(pubKey),
         privKey: JSON.parse(privKey),
         worldKey,
+        stateKey,
       }, null, 2
     );
     return json;
@@ -130,10 +142,11 @@ export function dumpState(): string | undefined {
 export function loadState(stateJSON: string) {
   try {
     const state = JSON.parse(stateJSON);
-    const { pubKey, privKey, worldKey } = state;
+    const { pubKey, privKey, worldKey, stateKey } = state;
     localStorage[pubKeyKey] = JSON.stringify(pubKey);
     localStorage[privKeyKey] = JSON.stringify(privKey);
-    localStorage[worldKeyKey] = worldKey
+    localStorage[worldKeyKey] = worldKey;
+    localStorage[stateKeyKey] = stateKey;
   } catch {
   }
 }

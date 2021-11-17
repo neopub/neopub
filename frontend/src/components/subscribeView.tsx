@@ -1,5 +1,6 @@
 import { sendSubRequest } from "lib/api";
 import { getProfile, hostPrefix } from "lib/net";
+import { fetchState, putState } from "lib/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
 
@@ -43,7 +44,11 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
     const srcHost = hostPrefix;
     
     await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, destHost, srcHost);
+
+    // NOTE: race condition.
+    await fetchState();
     addSubscriptionPubKey(pubPubKeyHex, destHost, worldKeyHex, profile.handle);
+    await putState();
   }
 
   return (

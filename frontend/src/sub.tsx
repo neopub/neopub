@@ -5,6 +5,7 @@ import { sendSubRequest } from "lib/api";
 import { usePublicKeyHex } from "lib/auth";
 import DB from "lib/db";
 import { hostPrefix } from "lib/net";
+import { fetchState, putState } from "lib/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useProfile } from "lib/useJSON";
 import { useEffect } from "react";
@@ -60,7 +61,12 @@ export default function Sub() {
     const worldKeyHex = profile.worldKey;
 
     await sendSubRequest(pubId, pubKeyHex, msg, host, host);
+
+    // NOTE: race condition.
+    await fetchState();
     addSubscriptionPubKey(pubId, host, worldKeyHex, profile.handle);
+    await putState();
+
     setSentReq(true);
   }
 

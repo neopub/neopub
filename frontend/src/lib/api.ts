@@ -382,7 +382,7 @@ export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token
   return putFile(pubKeyHex, "profile.json", privKey, token, payload, "application/json");
 }
 
-async function putFile(
+export async function putFile(
   pubKeyHex: string,
   path: string,
   signPrivKey: CryptoKey,

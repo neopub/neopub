@@ -13,6 +13,7 @@ export default function Access() {
 
   async function handleCreateIDClicked() {
     const idKeys = await genIDKeyPair();
+    const stateKey = await genSymmetricKey();
 
     const token = await getToken(idKeys.publicKey, idKeys.privateKey, setStatus);
     if (!token) {
@@ -21,7 +22,7 @@ export default function Access() {
 
     const worldKey = await genSymmetricKey();
 
-    await storeCredentials(idKeys, token, worldKey);
+    await storeCredentials(idKeys, token, worldKey, stateKey);
 
     // Create profile.
     const worldKeyBuf = await key2buf(worldKey);
