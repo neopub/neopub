@@ -1,78 +1,28 @@
 import Empty from "components/empty";
 import Post from "components/post";
-import { IEncPost, TPost } from "core/types";
-import { fetchAndDecryptWorldOrSubPost } from "lib/api";
+import { TPost } from "core/types";
 import { usePrivateKey, usePublicKeyHex } from "lib/auth";
-import DB from "lib/db";
-import { getIndex } from "lib/net";
+import { DBPost, fetchPosts, loadPosts } from "models/post";
 import { useEffect, useState } from "react"
 
 export default function Feed() {
   const privDH = usePrivateKey("ECDH");
   const { hex: pubKeyHex } = usePublicKeyHex();
   
-  const [posts, setPosts] = useState<any[]>([])
+  const [posts, setPosts] = useState<DBPost[]>([])
   const [loading, setLoading] = useState(true);
-  
-  async function loadPosts() {
-    const posts = await DB.posts.orderBy("createdAt").reverse().toArray();
-    setPosts(posts);
-  }
 
   useEffect(() => {
-    async function fetchAndCachePost(pubKey: string, postHashHex: string, worldKeyHex: string) {
-      const res = await fetchAndDecryptWorldOrSubPost(
-        postHashHex,
-        pubKey,
-        privDH,
-        worldKeyHex,
-      );
-      if (!res) {
-        return;
-      } 
-      const { post } = res;
-  
-      return DB.posts.put({
-        post,
-        hash: postHashHex,
-        publisherPubKey: pubKey,
-        createdAt: post?.createdAt,
-      });
+    loadPosts().then(setPosts);
+
+    if (privDH) {
+      fetchPosts(privDH)
+        .then(async () => {
+          const posts = await loadPosts();
+          setPosts(posts);
+          setLoading(false);
+        });
     }
-
-    if (!privDH) {
-      return;
-    }
-
-    loadPosts();
-
-    async function fetchPosts() {
-      const subs: { pubKey: string, host: string, worldKeyHex: string }[] = await DB.subscriptions.orderBy("pubKey").toArray();
-
-      await Promise.all(subs.map(async (sub) => {
-        const { pubKey, host, worldKeyHex } = sub;
-        const index = await getIndex(pubKey, host);
-        if (index === "notfound" || !index) {
-          return;
-        }
-
-        return Promise.all(index.posts.map(async (post) => {
-          const postHash = (post as IEncPost).id;
-          
-          const local = await DB.posts.get(postHash);
-          if (local) {
-            return;
-          }
-
-          return fetchAndCachePost(pubKey, postHash, worldKeyHex);
-        }));
-      }));
-
-      await loadPosts();
-      setLoading(false);
-    };
-
-    fetchPosts();
   }, [privDH]);
 
   if (!pubKeyHex) {
