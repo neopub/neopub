@@ -1,7 +1,7 @@
-import Access from "./components/access";
-import { useToken } from "./lib/storage";
-import { usePublicKeyHex } from "./lib/auth";
-import Profile from "./components/profile";
+import Access from "../components/access";
+import { useToken } from "../lib/storage";
+import { usePublicKeyHex } from "../lib/auth";
+import Profile from "../components/profile";
 
 function App() {
   const { token, loading: loadingToken } = useToken();

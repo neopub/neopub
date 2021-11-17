@@ -3,7 +3,7 @@ import { usePublicKeyHex } from "lib/auth";
 import { fetchInbox } from "lib/net";
 import { useToken } from "lib/storage";
 import { useState, useEffect } from "react";
-import InboxItem from "./components/inboxItem";
+import InboxItem from "../components/inboxItem";
 
 export default function Inbox() {
   const { hex: pubKeyHex } = usePublicKeyHex();

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './pages/App';
 import reportWebVitals from './reportWebVitals';
 
 import {
@@ -11,21 +11,21 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import LoadCreds from 'loadCreds';
-import DumpCreds from 'dumpCreds';
-import UserProfile from 'userProfile';
-import Post from 'post';
-import Exit from './exit';
+import LoadCreds from 'pages/loadCreds';
+import DumpCreds from 'pages/dumpCreds';
+import UserProfile from 'pages/userProfile';
+import Post from 'pages/post';
+import Exit from './pages/exit';
 import { isAuthenticated } from 'lib/auth';
-import Sub from 'sub';
-import SubArch from 'subArch';
-import PostArch from 'postArch';
-import Arch from 'arch';
-import Host from 'host';
-import Feed from 'feed';
-import PostDetails from 'postDetails';
-import DataArch from 'dataArch';
-import Inbox from 'inbox';
+import Sub from 'pages/sub';
+import SubArch from 'pages/subArch';
+import PostArch from 'pages/postArch';
+import Arch from 'pages/arch';
+import Host from 'pages/host';
+import Feed from 'pages/feed';
+import PostDetails from 'pages/postDetails';
+import DataArch from 'pages/dataArch';
+import Inbox from 'pages/inbox';
 
 type MenuItems = Array<{ path: string, text: string }>;
 const authedMenu: MenuItems = [
