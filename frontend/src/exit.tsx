@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import CredFields from "components/credFields";
 import { wipeDB } from "lib/db";
 import KnowMore from "components/knowMore";
@@ -59,8 +59,11 @@ export default function Exit() {
 
       <CredFields onSubmit={handleExit} ctaText="Exit" submitEnabledManualOverride={manualOverride} />
 
-      <KnowMore more={
+      <KnowMore label="No creds?" more={
         <>
+          <p className="mt-2">
+            You should really go to <Link to="/creds/dump">creds</Link> to save your credentials.
+          </p>
           <p className="mt-2">
             If you exit without having stored your creds, there is absolutely no way
             to regain access to your account. Game over, man.

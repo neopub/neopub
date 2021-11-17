@@ -17,12 +17,18 @@ function More() {
     setCredState(creds);
   }, []);
 
-  function handleCopy() {
+  async function handleCopy() {
     if (!credState) {
       return;
     }
-    navigator.clipboard.writeText(credState);
-    alert("Copied creds to clipboard. Save these somewhere secure.")
+
+    try {
+      await navigator.clipboard.writeText(credState);
+    } catch (err) {
+      console.error(err);
+    }
+
+    alert("Copied creds to clipboard. Save these somewhere secure.");
   }
 
   const placeholder = credState?.replace(/\w/g, "*");
@@ -87,7 +93,7 @@ export default function DumpCreds() {
     <div className="max-w-lg flex flex-col">
       <h1 className="mb-4">credentials</h1>
       <CredDumper nextURL={next ? next : `/users/${pubKeyHex}`} />
-      <KnowMore more={<More />} />
+      <KnowMore label="Other options" more={<More />} />
     </div>
   );
 }
