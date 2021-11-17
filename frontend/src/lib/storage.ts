@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
 import { key2buf } from "core/crypto";
 import DB from "lib/db";
+import { IReq } from "core/types";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
 const pubKeyKey = "pubKey";
-const subListKey = "subs";
 const worldKeyKey = "worldKey";
 
 export function setToken(token: string) {
@@ -75,9 +75,8 @@ export function useWorldKey() {
   return { worldKeyHex, loading };
 }
 
-export function getSubscriberPubKeyList(): Record<string, boolean> {
-  const subs = JSON.parse(localStorage[subListKey] ?? "{}") as Record<string, boolean>;
-  return subs;
+export async function getSubscriberPubKeyList(): Promise<{ pubKey: string }[]> {
+  return DB.followers.toArray();
 }
 
 export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string, handle?: string) {
@@ -85,21 +84,23 @@ export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex:
     .catch(() => {});
 }
 
-function setSubscriberPubKeyList(subs: Record<string, boolean>) {
-  localStorage[subListKey] = JSON.stringify(subs);
+export async function addSubscriber(req: IReq) {
+  DB.followers.put({
+    pubKey: req.pubKey,
+  });
 }
 
-export function addSubscriberPubKey(subPubKey: string) {
-  const subs = getSubscriberPubKeyList();
-  subs[subPubKey] = true;
-  setSubscriberPubKeyList(subs);
-}
-
-export function useSubscribers(): [Record<string, boolean> | undefined, () => void] {
-  const [subs, setSubs] = useState<Record<string, boolean>>();
+export function useSubscribers(): [string[] | undefined, () => void] {
+  const [subs, setSubs] = useState<string[]>();
 
   function fetchSubs() {
-    setSubs(getSubscriberPubKeyList());
+    getSubscriberPubKeyList()
+      .then((subs) => {
+        setSubs(subs.map(s => s.pubKey));
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
 
   useEffect(() => {

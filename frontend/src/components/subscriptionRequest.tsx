@@ -1,11 +1,11 @@
 import HexString from "components/hexString";
 import { ISubReq } from "core/types";
-import { addSubscriberPubKey } from "lib/storage";
+import { addSubscriber } from "lib/storage";
 import Hexatar from "./hexatar";
 
 export default function Req({ req }: { req: ISubReq}) {
   function handleAccept() {
-    addSubscriberPubKey(req.pubKey);
+    addSubscriber(req);
   }
 
   return (

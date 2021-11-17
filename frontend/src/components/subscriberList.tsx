@@ -15,7 +15,6 @@ function SubscriberItem({ pubKeyHex }: { pubKeyHex: string }) {
 
 export default function SubscriberList() {
   const [subs] = useSubscribers();
-  const pubKeys = Object.keys(subs ?? {})
 
   if (subs === undefined) {
     return null;
@@ -27,7 +26,7 @@ export default function SubscriberList() {
 
   return (
     <div>
-      {pubKeys.map(subPubKeyHex => <SubscriberItem key={subPubKeyHex} pubKeyHex={subPubKeyHex} />)}
+      {subs.map(subPubKeyHex => <SubscriberItem key={subPubKeyHex} pubKeyHex={subPubKeyHex} />)}
     </div>
   )
 }
