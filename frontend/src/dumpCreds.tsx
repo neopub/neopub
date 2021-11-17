@@ -68,9 +68,9 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
 
   return (
     <div className="flex flex-col my-4 space-y-3">
-      <p>Enter an ID, hit Save Creds.</p>
+      <p>Enter an ID, then hit Save Creds.</p>
       <p>This ID is <b>private</b>. It's <i>only</i> used to identify this account in your password manager.</p>
-      <p>Save in your password manager, when it asks.</p>
+      <p>Save in your password manager, when it asks (supports Chrome and Safari; for 1Password, <i>right-click ID field &gt; 1Password &gt; Save Login</i>).</p>
 
       <CredFields fixedCreds={credState} onSubmit={handleSubmit} ctaText="Save Creds" />
     </div>
