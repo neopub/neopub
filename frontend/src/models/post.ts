@@ -1,5 +1,5 @@
-import { IEncPost } from "core/types";
-import { fetchAndDecryptWorldOrSubPost } from "lib/api";
+import { IEncPost, IIndex, ITextPost, PostVisibility } from "core/types";
+import { fetchAndDecryptWorldOrSubPost, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
 import { getIndex } from "lib/net";
 
@@ -51,3 +51,28 @@ export async function fetchPosts(privDH: CryptoKey) {
     }));
   }));
 };
+
+export async function publishTextPost(text: string, worldKeyHex: string, privDH: CryptoKey, pubKeyHex: string, token: string, privKey: CryptoKey, visibility: PostVisibility): Promise<IIndex> {
+  const now = new Date();
+  const post: ITextPost = {
+    createdAt: now.toISOString(),
+    type: "text",
+    content: {
+      text,
+    },
+  };
+  
+  const newIndex = await publishPostAndKeys(
+    post,
+    worldKeyHex,
+    privDH,
+    pubKeyHex,
+    privKey,
+    token,
+    visibility,
+  );
+
+  await DB.indexes.put({ pubKey: pubKeyHex, index: newIndex });
+
+  return newIndex;
+}

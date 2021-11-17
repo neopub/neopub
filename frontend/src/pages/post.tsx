@@ -1,12 +1,11 @@
-import { IIndex, ITextPost, PostVisibility } from "core/types";
-import { publishPostAndKeys } from "lib/api";
+import { IIndex, PostVisibility } from "core/types";
 import { usePrivateKey, usePublicKeyHex } from "lib/auth";
 import { useToken, useWorldKey } from "lib/storage";
 import { useJSON } from "lib/useJSON";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import DB from "lib/db";
 import KnowMore from "components/knowMore";
+import { publishTextPost } from "models/post";
 
 export default function Post() {
   const { hex: pubKeyHex } = usePublicKeyHex();
@@ -34,27 +33,9 @@ export default function Post() {
       return;
     }
 
-    const now = new Date();
-    const post: ITextPost = {
-      createdAt: now.toISOString(),
-      type: "text",
-      content: {
-        text,
-      },
-    };
-    
-    const newIndex = await publishPostAndKeys(
-      post,
-      worldKeyHex,
-      privDH,
-      pubKeyHex,
-      privKey,
-      token,
-      visibility,
-    );
-    setIndex(newIndex);
+    const newIndex = await publishTextPost(text, worldKeyHex, privDH, pubKeyHex, token, privKey, visibility);
 
-    DB.indexes.put({ pubKey: pubKeyHex, index: newIndex })
+    setIndex(newIndex);
 
     history.push(`/users/${pubKeyHex}`);
   }
