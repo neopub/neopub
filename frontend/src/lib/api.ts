@@ -17,7 +17,6 @@ import {
   TPost,
   IIndex,
   PostVisibility,
-  IReq,
   IAuthChallenge,
   ISubReq,
   IProfile,
@@ -29,12 +28,11 @@ import * as Net from "lib/net";
 import DB from "./db";
 import solvePoWChallenge from "core/challenge";
 
-// TODO: just switch sub reqs to using this.
 export async function unwrapInboxItem(
   id: string,
   pubKeyHex: string,
   privKey: CryptoKey,
-): Promise<any | undefined> {
+): Promise<IMessage | undefined> {
   const ephemDHPub = await hex2ECDHKey(id);
   if (!ephemDHPub) {
     return;
@@ -47,29 +45,7 @@ export async function unwrapInboxItem(
     return;
   }
   const decJson = await decryptString(enc, ephemDH);
-  const req = JSON.parse(decJson) as IReq;
-
-  return req;
-}
-
-export async function unwrapReq(
-  reqName: string,
-  pubKeyHex: string,
-  privKey: CryptoKey,
-): Promise<IReq | undefined> {
-  const ephemDHPub = await hex2ECDHKey(reqName);
-  if (!ephemDHPub) {
-    return;
-  }
-
-  const ephemDH = await deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
-
-  const enc = await Net.fetchSubReq(pubKeyHex, reqName);
-  if (!enc) {
-    return;
-  }
-  const decJson = await decryptString(enc, ephemDH);
-  const req = JSON.parse(decJson) as IReq;
+  const req = JSON.parse(decJson) as IMessage;
 
   return req;
 }
@@ -326,15 +302,17 @@ export async function sendSubRequest(
   pubPubKeyHex: string,
   subPubKeyHex: string,
   msg: string,
-  host?: string,
+  destHost: string,
+  srcHost: string,
 ): Promise<void> {
   const message: ISubReq = {
     type: "subscribe",
     pubKey: subPubKeyHex,
     msg,
+    host: srcHost,
   };
 
-  return sendMessage(pubPubKeyHex, message, host);
+  return sendMessage(pubPubKeyHex, message, destHost);
 }
 
 export async function publishPost(

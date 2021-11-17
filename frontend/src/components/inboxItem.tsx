@@ -36,10 +36,14 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
       return;
     }
     unwrapInboxItem(id, pubKeyHex, privKey)
-      .then(async (item: IReply) => {
+      .then(async (item: IMessage | undefined) => {
+        if (!item) {
+          return;
+        }
+        
         switch (item.type) {
           case "reply":
-            await recordReplyInDB(item);
+            await recordReplyInDB(item as IReply);
             break;
           case "subscribe":
             break;

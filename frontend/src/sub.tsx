@@ -59,7 +59,7 @@ export default function Sub() {
 
     const worldKeyHex = profile.worldKey;
 
-    await sendSubRequest(pubId, pubKeyHex, msg, host);
+    await sendSubRequest(pubId, pubKeyHex, msg, host, host);
     addSubscriptionPubKey(pubId, host, worldKeyHex, profile.handle);
     setSentReq(true);
   }

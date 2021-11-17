@@ -36,11 +36,6 @@ export interface IIndex {
 
 export type PostVisibility = "world" | "subs";
 
-export interface IReq {
-  pubKey: string;
-  msg: string;
-}
-
 export interface IAuthChallenge {
   chal: Uint8Array;
   diff: number;
@@ -58,6 +53,7 @@ export interface IMessage {
 }
 export interface ISubReq extends IMessage {
   msg: string;
+  host: string;
 }
 
 export interface IReply extends IMessage {

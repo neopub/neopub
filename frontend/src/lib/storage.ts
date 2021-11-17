@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
 import { key2buf } from "core/crypto";
 import DB from "lib/db";
-import { IReq } from "core/types";
+import { ISubReq } from "core/types";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -84,9 +84,10 @@ export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex:
     .catch(() => {});
 }
 
-export async function addSubscriber(req: IReq) {
+export async function addSubscriber(req: ISubReq) {
   DB.followers.put({
     pubKey: req.pubKey,
+    host: req.host,
   });
 }
 

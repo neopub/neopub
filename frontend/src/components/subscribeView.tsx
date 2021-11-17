@@ -1,5 +1,5 @@
 import { sendSubRequest } from "lib/api";
-import { getProfile } from "lib/net";
+import { getProfile, hostPrefix } from "lib/net";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
 
@@ -23,8 +23,8 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
       return;
     }
 
-    const host = unescape(match[5]);
-    if (!host) {
+    const destHost = unescape(match[5]);
+    if (!destHost) {
       alert("Host not specified.");
       return;
     }
@@ -34,15 +34,16 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
       return;
     }
 
-    const profile = await getProfile(pubPubKeyHex, host);
+    const profile = await getProfile(pubPubKeyHex, destHost);
     if (!profile || profile === "notfound") {
       return;
     }
 
     const worldKeyHex = profile.worldKey;
+    const srcHost = hostPrefix;
     
-    await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, host);
-    addSubscriptionPubKey(pubPubKeyHex, host, worldKeyHex, profile.handle);
+    await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, destHost, srcHost);
+    addSubscriptionPubKey(pubPubKeyHex, destHost, worldKeyHex, profile.handle);
   }
 
   return (
