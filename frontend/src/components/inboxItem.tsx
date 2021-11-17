@@ -1,30 +1,10 @@
-import { sha } from "core/crypto";
-import { buf2hex } from "core/bytes";
 import Post from "components/post";
 import { IMessage, IReply, ISubReq } from "core/types";
 import { unwrapInboxItem } from "lib/api";
 import { usePrivateKey } from "lib/auth";
-import DB from "lib/db";
+import { recordReplyInDB } from "lib/storage";
 import { useState, useEffect } from "react";
 import Req from "./subscriptionRequest";
-
-async function recordReplyInDB(reply: IReply) {
-  const buf = new TextEncoder().encode(reply.msg);
-  const hash = await sha(buf);
-  const hashHex = await buf2hex(hash);
-  return DB.posts.put({
-    hash: hashHex,
-    replyToHash: reply.postId,
-    publisherPubKey: reply.pubKey,
-    post: {
-      content: {
-        text: reply.msg,
-      },
-      createdAt: new Date(reply.createdAt),
-      type: "text",
-    },
-  });
-}
 
 export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
   const privKey = usePrivateKey("ECDH");
@@ -40,7 +20,7 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
         if (!item) {
           return;
         }
-        
+
         switch (item.type) {
           case "reply":
             await recordReplyInDB(item as IReply);

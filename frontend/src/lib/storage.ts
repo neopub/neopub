@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
-import { key2buf } from "core/crypto";
+import { key2buf, sha } from "core/crypto";
 import DB from "lib/db";
-import { ISubReq } from "core/types";
+import { IReply, ISubReq } from "core/types";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -136,4 +136,22 @@ export function loadState(stateJSON: string) {
     localStorage[worldKeyKey] = worldKey
   } catch {
   }
+}
+
+export async function recordReplyInDB(reply: IReply) {
+  const buf = new TextEncoder().encode(reply.msg);
+  const hash = await sha(buf);
+  const hashHex = await buf2hex(hash);
+  return DB.posts.put({
+    hash: hashHex,
+    replyToHash: reply.postId,
+    publisherPubKey: reply.pubKey,
+    post: {
+      content: {
+        text: reply.msg,
+      },
+      createdAt: new Date(reply.createdAt),
+      type: "text",
+    },
+  });
 }
