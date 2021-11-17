@@ -2,6 +2,7 @@ import { IEncPost, IIndex, ITextPost, PostVisibility } from "core/types";
 import { fetchAndDecryptWorldOrSubPost, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
 import { getIndex } from "lib/net";
+import { ID } from "./id";
 
 export type DBPost = any; // TODO.
 
@@ -52,7 +53,7 @@ export async function fetchPosts(privDH: CryptoKey) {
   }));
 };
 
-export async function publishTextPost(text: string, worldKeyHex: string, privDH: CryptoKey, pubKeyHex: string, token: string, privKey: CryptoKey, visibility: PostVisibility): Promise<IIndex> {
+export async function publishTextPost(id: ID, text: string, visibility: PostVisibility): Promise<IIndex> {
   const now = new Date();
   const post: ITextPost = {
     createdAt: now.toISOString(),
@@ -64,15 +65,15 @@ export async function publishTextPost(text: string, worldKeyHex: string, privDH:
   
   const newIndex = await publishPostAndKeys(
     post,
-    worldKeyHex,
-    privDH,
-    pubKeyHex,
-    privKey,
-    token,
+    id.worldKey.hex,
+    id.privKey.dhKey,
+    id.pubKey.hex,
+    id.privKey.key,
+    id.token,
     visibility,
   );
 
-  await DB.indexes.put({ pubKey: pubKeyHex, index: newIndex });
+  await DB.indexes.put({ pubKey: id.pubKey.hex, index: newIndex });
 
   return newIndex;
 }

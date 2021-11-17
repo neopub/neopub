@@ -1,20 +1,16 @@
 import { IIndex, PostVisibility } from "core/types";
-import { usePrivateKey, usePublicKeyHex } from "lib/auth";
-import { useToken, useWorldKey } from "lib/storage";
 import { useJSON } from "lib/useJSON";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import KnowMore from "components/knowMore";
 import { publishTextPost } from "models/post";
+import { useID } from "models/id";
 
 export default function Post() {
-  const { hex: pubKeyHex } = usePublicKeyHex();
-  const privKey = usePrivateKey("ECDSA");
-  const privDH = usePrivateKey("ECDH");
-  const { token } = useToken();
-  const { worldKeyHex } = useWorldKey();
+  const id = useID();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setIndex] = useJSON<IIndex>(pubKeyHex, "index.json", { posts: [], updatedAt: "" });
+  const [_, setIndex] = useJSON<IIndex>(id?.pubKey.hex, "index.json", { posts: [], updatedAt: "" });
   const history = useHistory();
 
   const [text, setText] = useState("");
@@ -24,20 +20,20 @@ export default function Post() {
     setViz(viz === "world" ? "subs" : "world");
   }
   
-  if (!(pubKeyHex && worldKeyHex && privKey && privDH && token && setIndex)) {
+  if (!id || !setIndex) {
     return <div>Can't post.</div>
   }
 
   async function handlePostClicked(visibility: PostVisibility) {
-    if (!(pubKeyHex && worldKeyHex && privKey && privDH && token && setIndex)) {
+    if (!id || !setIndex) {
       return;
     }
 
-    const newIndex = await publishTextPost(text, worldKeyHex, privDH, pubKeyHex, token, privKey, visibility);
+    const newIndex = await publishTextPost(id, text, visibility);
 
     setIndex(newIndex);
 
-    history.push(`/users/${pubKeyHex}`);
+    history.push(`/users/${id.pubKey.hex}`);
   }
 
   return (
