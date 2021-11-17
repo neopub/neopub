@@ -8,6 +8,24 @@ import DB from "lib/db";
 import { useState, useEffect } from "react";
 import Req from "./subscriptionRequest";
 
+async function recordReplyInDB(reply: IReply) {
+  const buf = new TextEncoder().encode(reply.msg);
+  const hash = await sha(buf);
+  const hashHex = await buf2hex(hash);
+  return DB.posts.put({
+    hash: hashHex,
+    replyToHash: reply.postId,
+    publisherPubKey: reply.pubKey,
+    post: {
+      content: {
+        text: reply.msg,
+      },
+      createdAt: new Date(reply.createdAt),
+      type: "text",
+    },
+  });
+}
+
 export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
   const privKey = usePrivateKey("ECDH");
 
@@ -19,21 +37,13 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
     }
     unwrapInboxItem(id, pubKeyHex, privKey)
       .then(async (item: IReply) => {
-        const buf = new TextEncoder().encode(item.msg);
-        const hash = await sha(buf);
-        const hashHex = await buf2hex(hash);
-        DB.posts.put({
-          hash: hashHex,
-          replyToHash: item.postId,
-          publisherPubKey: item.pubKey,
-          post: {
-            content: {
-              text: item.msg,
-            },
-            createdAt: new Date(item.createdAt),
-            type: "text",
-          },
-        });
+        switch (item.type) {
+          case "reply":
+            await recordReplyInDB(item);
+            break;
+          case "subscribe":
+            break;
+        }
 
         setItem(item);
       })
