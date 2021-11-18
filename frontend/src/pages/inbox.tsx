@@ -1,30 +1,28 @@
 import Empty from "components/empty";
-import { usePublicKeyHex } from "lib/auth";
 import { fetchInbox } from "lib/net";
-import { useToken } from "lib/storage";
+import { useID } from "models/id";
 import { useState, useEffect } from "react";
 import InboxItem from "../components/inboxItem";
 
 export default function Inbox() {
-  const { hex: pubKeyHex } = usePublicKeyHex();
-  const { token } = useToken();
+  const id = useID();
 
   const [inbox, setInbox] = useState<string[]>([]);
   useEffect(() => {
-    if (!pubKeyHex || !token) {
+    if (!id) {
       return;
     }
 
-    fetchInbox(pubKeyHex, token).then((inb: string[]) => {
+    fetchInbox(id.pubKey.hex, id.token).then((inb: string[]) => {
       setInbox(inb);
     });
-  }, [pubKeyHex, token]);
+  }, [id]);
 
   return (
     <main>
       <h1 className="mb-8">inbox</h1>
       {
-        pubKeyHex && inbox.map(id => <InboxItem key={id} id={id} pubKeyHex={pubKeyHex} />)
+        id && inbox.map(i => <InboxItem key={i} id={i} pubKeyHex={id.pubKey.hex} />)
       }
       {
         inbox.length < 1 && <Empty text="No inbox items. Follow requests, and replies to your posts, will appear here." />

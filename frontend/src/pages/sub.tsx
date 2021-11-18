@@ -2,19 +2,19 @@ import Hexatar from "components/hexatar";
 import HexString from "components/hexString";
 import KnowMore from "components/knowMore";
 import { sendSubRequest } from "lib/api";
-import { usePublicKeyHex } from "lib/auth";
 import DB from "lib/db";
 import { hostPrefix } from "lib/net";
 import { fetchState, putState } from "lib/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useProfile } from "lib/useJSON";
+import { useID } from "models/id";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 
 export default function Sub() {
   const history = useHistory();
-  const { hex: pubKeyHex } = usePublicKeyHex();
+  const id = useID();
   const [sentReq, setSentReq] = useState(false);
 
   const { id: pubId } = useParams<{ id: string }>();
@@ -42,13 +42,13 @@ export default function Sub() {
       return;
     }
 
-    if (!pubKeyHex) {
+    if (!id) {
       alert('You need an identity first.')
       history.push(`/?next=${encodeURIComponent(history.location.pathname)}`);
       return;
     }
 
-    if (pubKeyHex === pubId) {
+    if (id.pubKey.hex === pubId) {
       alert("You can't follow yourself.");
       return;
     }
@@ -60,7 +60,7 @@ export default function Sub() {
 
     const worldKeyHex = profile.worldKey;
 
-    await sendSubRequest(pubId, pubKeyHex, msg, host, host);
+    await sendSubRequest(pubId, id.pubKey.hex, msg, host, host);
 
     // NOTE: race condition.
     await fetchState();
