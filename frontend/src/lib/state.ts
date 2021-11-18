@@ -1,23 +1,21 @@
 import * as Net from "lib/net";
-import { buf2hex, hex2bytes } from "core/bytes";
-import { key2buf, importAESKey, encryptString, decryptString } from "core/crypto";
-import { getPrivateKey, getPublicKey, getPublicKeyHex } from "./auth";
+import { hex2bytes } from "core/bytes";
+import { importAESKey, encryptString, decryptString } from "core/crypto";
+import { getPublicKeyHex } from "./auth";
 import { dumpState, loadStateDangerously } from "./db";
 import { putFile } from "./api";
-import { getToken, getStateKey } from "./storage";
+import { getStateKey } from "./storage";
+import { loadID } from "models/id";
 
 export async function putState(): Promise<void> {
   const state = await dumpState();
 
-  const privKey = await getPrivateKey("ECDSA");
-  const pubKey = await getPublicKey();
-  const token = getToken();
-  if (!privKey || !pubKey || !token) {
+  const ident = await loadID();
+  if (!ident) {
     return;
   }
 
-  const pubKeyBuf = await key2buf(pubKey);
-  const pubKeyHex = buf2hex(pubKeyBuf);
+  const pubKeyHex = ident.pubKey.hex;
 
   const plaintext = JSON.stringify(state);
 
@@ -34,7 +32,7 @@ export async function putState(): Promise<void> {
   const ciphertext = await encryptString(plaintext, stateKey);
 
   // Obscure filename?
-  return putFile(pubKeyHex, "state.json", privKey, token, ciphertext, "application/json");
+  return putFile(pubKeyHex, "state.json", ident.privKey.key, ident.token, ciphertext, "application/json");
 }
 
 export async function fetchState(): Promise<void> {

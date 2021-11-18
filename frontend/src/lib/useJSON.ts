@@ -1,9 +1,8 @@
 import { fileLoc, getFileJSON } from "lib/net";
 import { IProfile, NotFound } from "core/types";
 import { useEffect, useState } from "react";
-import { getToken } from "./storage";
-import { getPrivateKey, getPublicKey } from "./auth";
 import { uploadProfile } from "./api";
+import { loadID } from "models/id";
 
 export function useJSON<T>(
   userId: string | undefined,
@@ -52,14 +51,12 @@ export function useProfile(userId?: string, host?: string): [IProfile | NotFound
 
     setProfile(newProfile);
 
-    const privKey = await getPrivateKey("ECDSA");
-    const pubKey = await getPublicKey();
-    const token = getToken();
-    if (!privKey || !pubKey || !token) {
+    const ident = await loadID();
+    if (!ident) {
       return;
     }
 
-    return uploadProfile(pubKey, privKey, token, newProfile);
+    return uploadProfile(ident.pubKey.key, ident.privKey.key, ident.token, newProfile);
   }
 
   return [profile, updateProfile];
