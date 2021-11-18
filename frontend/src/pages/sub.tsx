@@ -4,7 +4,7 @@ import KnowMore from "components/knowMore";
 import { sendSubRequest } from "lib/api";
 import DB from "lib/db";
 import { hostPrefix } from "lib/net";
-import { fetchState, putState } from "lib/state";
+import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useProfile } from "lib/useJSON";
 import { useID } from "models/id";
@@ -62,10 +62,9 @@ export default function Sub() {
 
     await sendSubRequest(pubId, id.pubKey.hex, msg, host, host);
 
-    // NOTE: race condition.
-    await fetchState();
-    addSubscriptionPubKey(pubId, host, worldKeyHex, profile.handle);
-    await putState();
+    await mutateState(async () => {
+      return addSubscriptionPubKey(pubId, host, worldKeyHex, profile.handle);
+    });
 
     setSentReq(true);
   }

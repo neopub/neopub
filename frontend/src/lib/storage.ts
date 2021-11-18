@@ -3,6 +3,7 @@ import { buf2hex } from "core/bytes";
 import { key2buf, sha } from "core/crypto";
 import DB from "lib/db";
 import { IReply, ISubReq } from "core/types";
+import { mutateState } from "models/state";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -69,15 +70,17 @@ export async function getSubscriberPubKeyList(): Promise<{ pubKey: string }[]> {
   return DB.followers.toArray();
 }
 
-export function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string, handle?: string) {
-  DB.subscriptions.add({ pubKey, host, worldKeyHex, handle })
+export async function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string, handle?: string) {
+  return DB.subscriptions.add({ pubKey, host, worldKeyHex, handle })
     .catch(() => {});
 }
 
 export async function addSubscriber(req: ISubReq) {
-  DB.followers.put({
-    pubKey: req.pubKey,
-    host: req.host,
+  return mutateState(() => {
+    return DB.followers.put({
+      pubKey: req.pubKey,
+      host: req.host,
+    });
   });
 }
 

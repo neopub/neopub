@@ -1,13 +1,13 @@
 import * as Net from "lib/net";
 import { hex2bytes } from "core/bytes";
 import { importAESKey, encryptString, decryptString } from "core/crypto";
-import { getPublicKeyHex } from "./auth";
-import { dumpState, loadStateDangerously } from "./db";
-import { putFile } from "./api";
-import { getStateKey } from "./storage";
+import { getPublicKeyHex } from "lib/auth";
+import { dumpState, loadStateDangerously } from "lib/db";
+import { putFile } from "lib/api";
+import { getStateKey } from "lib/storage";
 import { loadID } from "models/id";
 
-export async function putState(): Promise<void> {
+async function putState(): Promise<void> {
   const state = await dumpState();
 
   const ident = await loadID();
@@ -62,4 +62,13 @@ export async function fetchState(): Promise<void> {
   const state = JSON.parse(plaintext);
 
   return loadStateDangerously(state);
+}
+
+export async function mutateState(mutateFn: () => Promise<void>) {
+  // NOTE: race condition, here.
+  // Use CRDTs to eliminate that?
+
+  await fetchState();
+  await mutateFn();
+  await putState();
 }

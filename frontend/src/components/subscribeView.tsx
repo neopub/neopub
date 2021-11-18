@@ -1,6 +1,6 @@
 import { sendSubRequest } from "lib/api";
 import { getProfile, hostPrefix } from "lib/net";
-import { fetchState, putState } from "lib/state";
+import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
 
@@ -45,10 +45,9 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
     
     await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, destHost, srcHost);
 
-    // NOTE: race condition.
-    await fetchState();
-    addSubscriptionPubKey(pubPubKeyHex, destHost, worldKeyHex, profile.handle);
-    await putState();
+    await mutateState(async () => {
+      return addSubscriptionPubKey(pubPubKeyHex, destHost, worldKeyHex, profile.handle);
+    });
   }
 
   return (
