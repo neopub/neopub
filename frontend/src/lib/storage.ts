@@ -65,27 +65,6 @@ export function getStateKey(): string | undefined {
   return localStorage[stateKeyKey];
 }
 
-function useLocalStorage(key: string): { val: string | null, loading: boolean } {
-  const [state, setState] = useState<{ val: string | null, loading: boolean }>({ val: null, loading: true });
-
-  useEffect(() => {
-    const val = localStorage.getItem(key);
-    setState({ val, loading: false });
-  }, [key]);
-
-  return state;
-}
-
-export function useToken() {
-  const { val: token, loading } = useLocalStorage(tokenKey);
-  return { token, loading };
-}
-
-export function useWorldKey() {
-  const { val: worldKeyHex, loading } = useLocalStorage(worldKeyKey);
-  return { worldKeyHex, loading };
-}
-
 export async function getSubscriberPubKeyList(): Promise<{ pubKey: string }[]> {
   return DB.followers.toArray();
 }
