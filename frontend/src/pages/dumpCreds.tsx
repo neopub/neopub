@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
 import { useLocation, useHistory } from "react-router-dom";
-import { usePublicKeyHex } from "lib/auth";
 import CredFields from "components/credFields";
 import KnowMore from "components/knowMore";
+import { useID } from "models/id";
 
 function More() {
   const [reveal, setReveal] = useState(false);
@@ -84,7 +84,7 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
 }
 
 export default function DumpCreds() {
-  const { hex: pubKeyHex } = usePublicKeyHex();
+  const ident = useID();
   const location = useLocation();
 
   const next = new URLSearchParams(location.search).get("next");
@@ -92,7 +92,7 @@ export default function DumpCreds() {
   return (
     <div className="max-w-lg flex flex-col">
       <h1 className="mb-4">credentials</h1>
-      <CredDumper nextURL={next ? next : `/users/${pubKeyHex}`} />
+      <CredDumper nextURL={next ? next : `/users/${ident?.pubKey.hex}`} />
       <KnowMore label="Other options" more={<More />} />
     </div>
   );

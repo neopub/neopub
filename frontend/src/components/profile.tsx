@@ -1,19 +1,18 @@
  import type { IProfile, IIndex } from "core/types";
 import { useProfile } from "lib/useJSON";
-import { usePublicKeyHex } from "lib/auth";
 import Hexatar from "./hexatar";
 import { useHistory } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
 import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
-import { useToken } from "lib/storage";
 import PostList from "./postList";
 import SubscriberList from "./subscriberList";
 import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
 import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
+import { useID } from "models/id";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
   return <span className="whitespace-nowrap">[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
@@ -90,10 +89,8 @@ interface IProps {
 export default function Profile({ id }: IProps) {
   const history = useHistory();
   
-  const { hex: pubKeyHex } = usePublicKeyHex();
-  const isAuthedUser = pubKeyHex && id === pubKeyHex;
-
-  const { token } = useToken();
+  const ident = useID();
+  const isAuthedUser = ident && id === ident.pubKey.hex;
 
   const [profile, setProfile] = useProfile(id);
 
@@ -151,13 +148,13 @@ export default function Profile({ id }: IProps) {
       el: (
         <>
           {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-            {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={pubKeyHex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
+            {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
         </>
       ),
     },
   ];
 
-  if (isAuthedUser && pubKeyHex && token) {
+  if (isAuthedUser && ident) {
     tabs.push({
       name: "Followers",
       el: <SubscriberList />,
@@ -168,7 +165,7 @@ export default function Profile({ id }: IProps) {
       el: (
         <>
           <SubscriptionList />
-          <SubscribeView pubKeyHex={pubKeyHex} />
+          <SubscribeView pubKeyHex={ident.pubKey.hex} />
         </>
       ),
     });

@@ -45,11 +45,18 @@ export async function loadID(): Promise<ID | undefined> {
   };
 }
 
-export function useID(): ID | undefined {
-  const [id, setID] = useState<ID>();
+// undefined means loading; null means error
+export function useID(): ID | undefined | null {
+  const [id, setID] = useState<ID | null>();
 
   useEffect(() => {
-    loadID().then(setID);
+    loadID().then((id) => {
+      if (id) {
+        setID(id);
+      } else {
+        setID(null);
+      }
+    });
   }, []);
 
   return id;

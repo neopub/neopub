@@ -1,11 +1,11 @@
 import { TPost, IEncPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost } from "lib/api";
-import { usePrivateKey, usePublicKeyHex } from "lib/auth";
 import { useEffect, useState } from "react";
 import Post from "components/post";
 import DB from "lib/db";
 import { buf2hex } from "core/bytes";
 import HexString from "./hexString";
+import { useID } from "models/id";
 
 export default function EncryptedPost({
   enc,
@@ -18,8 +18,7 @@ export default function EncryptedPost({
   worldKeyHex?: string;
   showEncHex?: boolean;
 }) {
-  const privDH = usePrivateKey("ECDH");
-  const { hex: selfPubKeyHex } = usePublicKeyHex();
+  const ident = useID();
 
   const [post, setPost] = useState<TPost>();
   const [encBuf, setEncBuf] = useState<ArrayBuffer>();
@@ -36,7 +35,7 @@ export default function EncryptedPost({
       const res = await fetchAndDecryptWorldOrSubPost(
         postHashHex,
         pubKey,
-        privDH,
+        ident?.privKey.dhKey,
         worldKeyHex,
       );
       if (!res) {
@@ -55,7 +54,7 @@ export default function EncryptedPost({
       }
 
       try {
-        const isOwnPost = pubKey === selfPubKeyHex;
+        const isOwnPost = pubKey === ident?.pubKey.hex;
         if (isOwnPost) {
           await cachePost();
         } else {
@@ -73,7 +72,7 @@ export default function EncryptedPost({
     }
 
     fetchAndDec();
-  }, [selfPubKeyHex, enc, pubKey, worldKeyHex, privDH]);
+  }, [enc, pubKey, worldKeyHex, ident]);
 
   const encHex = encBuf ? buf2hex(encBuf) : "";
 

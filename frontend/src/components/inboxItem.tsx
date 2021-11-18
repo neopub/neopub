@@ -1,21 +1,21 @@
 import Post from "components/post";
 import { IMessage, IReply, ISubReq } from "core/types";
 import { unwrapInboxItem } from "lib/api";
-import { usePrivateKey } from "lib/auth";
 import { recordReplyInDB } from "lib/storage";
+import { useID } from "models/id";
 import { useState, useEffect } from "react";
 import Req from "./subscriptionRequest";
 
 export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
-  const privKey = usePrivateKey("ECDH");
+  const ident = useID();
 
   // TODO: do all this unwrapping in a data layer. Not UI.
   const [item, setItem] = useState<IMessage>();
   useEffect(() => {
-    if (!privKey) {
+    if (!ident) {
       return;
     }
-    unwrapInboxItem(id, pubKeyHex, privKey)
+    unwrapInboxItem(id, pubKeyHex, ident.privKey.dhKey)
       .then(async (item: IMessage | undefined) => {
         if (!item) {
           return;
@@ -32,7 +32,7 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
         setItem(item);
       })
       .catch(err => { console.log(err) });
-  }, [id, privKey, pubKeyHex]);
+  }, [id, ident, pubKeyHex]);
 
   if (!item) {
     return null;

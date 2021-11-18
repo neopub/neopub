@@ -1,21 +1,18 @@
 import Access from "../components/access";
-import { useToken } from "../lib/storage";
-import { usePublicKeyHex } from "../lib/auth";
 import Profile from "../components/profile";
+import { useID } from "models/id";
 
 function App() {
-  const { token, loading: loadingToken } = useToken();
-  const { hex: pubKeyHex, loading: loadingPubKey } = usePublicKeyHex();
+  const ident = useID();
 
-  const loading = loadingToken || loadingPubKey;
-  if (loading) {
+  if (ident === undefined) {
     return null;
   }
 
-  const hasAccess = token != null;
+  const hasAccess = ident?.token != null;
 
   return hasAccess ? (
-    pubKeyHex ? <Profile id={pubKeyHex} /> : null
+    ident ? <Profile id={ident.pubKey.hex} /> : null
   ) : (
     <Access />
   );
