@@ -116,24 +116,6 @@ export async function putFile(
   });
 }
 
-export async function fetchReqs(pubKey: string, token: string): Promise<any> {
-  const resp = await fetch(`${hostPrefix}/reqs`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      [pubKeyHeader]: pubKey,
-      [tokenHeader]: token,
-    },
-  });
-  try {
-    const reqs = await resp.json();
-    return reqs;
-  } catch {
-    return []
-  }
-}
-
 export async function fetchInbox(pubKey: string, token: string): Promise<any> {
   const resp = await fetch(`${hostPrefix}/inbox`, {
     method: "GET",
