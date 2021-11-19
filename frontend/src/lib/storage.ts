@@ -121,7 +121,7 @@ export function dumpState(): string | undefined {
   }
 }
 
-export function loadState(stateJSON: string) {
+export function loadCreds(stateJSON: string) {
   try {
     const state = JSON.parse(stateJSON);
     const { pubKey, privKey, worldKey, stateKey } = state;
