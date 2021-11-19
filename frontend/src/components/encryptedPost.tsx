@@ -8,12 +8,10 @@ export default function EncryptedPost({
   enc,
   pubKey,
   worldKeyHex,
-  showEncHex,
 }: {
   enc: IEncPost;
   pubKey: string;
   worldKeyHex?: string;
-  showEncHex?: boolean;
 }) {
   const ident = useID();
 

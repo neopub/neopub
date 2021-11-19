@@ -35,7 +35,6 @@ export default function PostDetails() {
         enc={{ id: postId }}
         pubKey={userId}
         worldKeyHex={worldKeyHex}
-        showEncHex
       />
       <div>
         <h2>Replies</h2>
