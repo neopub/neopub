@@ -19,7 +19,6 @@ import {
   PostVisibility,
   IAuthChallenge,
   ISubReq,
-  IProfile,
   IReply,
   IMessage,
 } from "core/types";
@@ -371,15 +370,6 @@ export async function publishPostKey(
   const ciphertext = await encryptString(postKeyHex, encKey);
 
   return putFile(pubKey, `keys/${locHex}`, privKey, token, ciphertext, "application/json");
-}
-
-export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token: string, profile: IProfile) {
-  const pubKeyBuf = await key2buf(pubKey);
-  const pubKeyHex = buf2hex(pubKeyBuf);
-
-  const payload = new TextEncoder().encode(JSON.stringify(profile));
-
-  return putFile(pubKeyHex, "profile.json", privKey, token, payload, "application/json");
 }
 
 export async function putFile(

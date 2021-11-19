@@ -1,10 +1,13 @@
+import { buf2hex } from "core/bytes";
+import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
 import { IProfile, NotFound } from "core/types";
-import { uploadProfile } from "lib/api";
-import { getPublicKeyHex } from "lib/auth";
+import { getPublicKeyHex, storeCredentials } from "lib/auth";
 import DB from "lib/db";
-import { fileLoc, getFileJSON } from "lib/net";
+import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
 import { useState, useEffect } from "react";
 import { loadID } from "./id";
+import { putFile } from "lib/api";
+import { getToken } from "models/host";
 
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
   const location = fileLoc(userId, "profile.json");
@@ -66,4 +69,42 @@ export async function fetchAndStoreOwnProfile() {
       storeProfile(pubKeyHex, profile);
     }
   }
+}
+
+export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token: string, profile: IProfile) {
+  const pubKeyBuf = await key2buf(pubKey);
+  const pubKeyHex = buf2hex(pubKeyBuf);
+
+  const payload = new TextEncoder().encode(JSON.stringify(profile));
+
+  return putFile(pubKeyHex, "profile.json", privKey, token, payload, "application/json");
+}
+
+export async function createProfile(setStatus: (status: string) => void) {
+  const idKeys = await genIDKeyPair();
+  const stateKey = await genSymmetricKey();
+
+  const token = await getToken(idKeys.publicKey, idKeys.privateKey, setStatus);
+  if (!token) {
+    return; // TODO: handle these intermediate errors.
+  }
+
+  const worldKey = await genSymmetricKey();
+
+  await storeCredentials(idKeys, token, worldKey, stateKey);
+
+  const pubKeyHex = await getPublicKeyHex();
+  if (!pubKeyHex) {
+    return;
+  }
+
+  // Create profile.
+  const worldKeyBuf = await key2buf(worldKey);
+  const worldKeyHex = buf2hex(worldKeyBuf);
+  const profile = { worldKey: worldKeyHex, host: hostPrefix };
+
+  return Promise.all([
+    storeProfile(pubKeyHex, profile),
+    uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile),
+  ]);
 }

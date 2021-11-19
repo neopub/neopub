@@ -1,11 +1,6 @@
-import { storeCredentials } from "lib/auth";
-import { getToken } from "models/host";
+import { createProfile } from "models/profile";
 import { useState } from "react";
-import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
 import { Link, useHistory } from "react-router-dom";
-import { buf2hex } from "core/bytes";
-import { uploadProfile } from "lib/api";
-import { hostPrefix } from "lib/net";
 
 export default function Access() {
   const [status, setStatus] = useState("");
@@ -14,24 +9,7 @@ export default function Access() {
   const next = history.location.search;
 
   async function handleCreateIDClicked() {
-    const idKeys = await genIDKeyPair();
-    const stateKey = await genSymmetricKey();
-
-    const token = await getToken(idKeys.publicKey, idKeys.privateKey, setStatus);
-    if (!token) {
-      return;
-    }
-
-    const worldKey = await genSymmetricKey();
-
-    await storeCredentials(idKeys, token, worldKey, stateKey);
-
-    // Create profile.
-    const worldKeyBuf = await key2buf(worldKey);
-    const worldKeyHex = buf2hex(worldKeyBuf);
-    const profile = { worldKey: worldKeyHex, host: hostPrefix };
-    await uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile);
-
+    await createProfile(setStatus);
     history.push(`/creds/dump${next}`)
   }
 
