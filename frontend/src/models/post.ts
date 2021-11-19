@@ -1,4 +1,4 @@
-import { IEncPost, IIndex, ITextPost, PostVisibility } from "core/types";
+import { IEncPost, IIndex, ITextPost, PostVisibility, TPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
 import { getIndex } from "lib/net";
@@ -76,4 +76,51 @@ export async function publishTextPost(id: ID, text: string, visibility: PostVisi
   await DB.indexes.put({ pubKey: id.pubKey.hex, index: newIndex });
 
   return newIndex;
+}
+
+export async function fetchAndDec(ident: ID, enc: IEncPost, pubKey: string, worldKeyHex?: string): Promise<TPost | undefined> {
+  const { id: postHashHex } = enc;
+
+  const postRow = await DB.posts.get(postHashHex);
+  if (postRow) {
+    return postRow.post;
+  }
+
+  const res = await fetchAndDecryptWorldOrSubPost(
+    postHashHex,
+    pubKey,
+    ident?.privKey.dhKey,
+    worldKeyHex,
+  );
+  if (!res) {
+    return;
+  } 
+  const { post } = res;
+  // setEncBuf(encBuf);
+
+  async function cachePost() {
+    return DB.posts.put({
+      post,
+      hash: postHashHex,
+      publisherPubKey: pubKey,
+      createdAt: post?.createdAt,
+    });
+  }
+
+  try {
+    const isOwnPost = pubKey === ident?.pubKey.hex;
+    if (isOwnPost) {
+      await cachePost();
+    } else {
+      // Cache post if subscribed to poster.
+      const sub = await DB.subscriptions.get(pubKey);
+      if (sub) {
+        await cachePost();
+      }
+    }
+  } catch (err) {
+    console.log(err, postHashHex)
+  }
+
+  return post;
 }
