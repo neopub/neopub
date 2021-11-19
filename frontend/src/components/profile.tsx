@@ -112,12 +112,12 @@ export default function Profile({ id }: IProps) {
     return <div>Not found.</div>
   }
 
-  const host = escape(hostPrefix);
+  const host = profile?.host ?? hostPrefix;
 
   const tabs: ITab[] = [
     {
       name: "Posts",
-      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={unescape(host)} />,
+      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={host} />,
     },
   ];
 
@@ -153,8 +153,8 @@ export default function Profile({ id }: IProps) {
         <KnowMore
           label="Show QR"
           more={
-            <a href={`/users/${id}?host=${host}`}>
-              <HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} />
+            <a href={`/users/${id}?host=${escape(host)}`}>
+              <HexQR hex={`https://${document.location.host}/users/${id}?host=${escape(host)}`} />
             </a>
           }
         />
