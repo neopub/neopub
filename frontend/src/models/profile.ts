@@ -154,3 +154,18 @@ export async function createProfile(setStatus: (status: string) => void) {
     uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile),
   ]);
 }
+
+export function useIsSubscribedTo(pubKeyHex: string): boolean {
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  useEffect(() => {
+    if (!pubKeyHex) {
+      return;
+    }
+
+    DB.subscriptions.get(pubKeyHex).then((sub: any) => {
+      setIsSubscribed(sub != null);
+    });
+  }, [pubKeyHex])
+
+  return isSubscribed;
+}

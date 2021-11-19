@@ -1,5 +1,5 @@
  import type { IProfile } from "core/types";
-import { useIndex, useProfile } from "models/profile";
+import { useIndex, useIsSubscribedTo, useProfile } from "models/profile";
 import Hexatar from "./hexatar";
 import { useHistory } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -106,19 +106,7 @@ export default function Profile({ id }: IProps) {
   const isAuthedUser = ident && id === ident.pubKey.hex;
 
   const [profile, setProfile] = useProfile(id);
-
-  // const [index] = useJSON<IIndex>(id, "index.json", { posts: [] });
-
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    DB.subscriptions.get(id).then((sub: any) => {
-      setIsSubscribed(sub != null);
-    });
-  }, [id])
+  const isSubscribed = useIsSubscribedTo(id);
 
   if (profile === "notfound") {
     return <div>Not found.</div>
