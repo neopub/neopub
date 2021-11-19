@@ -90,10 +90,15 @@ export default function Profile({ id }: IProps) {
   const ident = useID();
   const isAuthedUser = ident && id === ident.pubKey.hex;
 
-  const [profile, setProfile] = useProfile(id);
+  let host = new URLSearchParams(window.location.search).get("host") ?? undefined;
+
+  const [profile, setProfile] = useProfile(id, host);
   const isSubscribed = useIsSubscribedTo(id);
 
-  const host = (profile !== "notfound" ? profile?.host : null) ?? hostPrefix;
+  if (!host) {
+    host = (profile !== "notfound" ? profile?.host : null) ?? hostPrefix;
+  }
+
   const index = useIndex(id, host);
 
   if (profile === "notfound") {
