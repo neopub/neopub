@@ -47,10 +47,11 @@ export default function Post() {
       </div>
       <textarea
         value={text}
+        placeholder="Type here..."
         onChange={(e) => setText(e.target.value)}
         className="h-48 rounded p-2"
       />
-      <button className="flex-1" onClick={() => handlePostClicked(viz)}>Post ({viz === "world" ? "World" : "Subscribers"})</button>
+      <button className="flex-1 px-4 py-2" onClick={() => handlePostClicked(viz)} disabled={text.length < 1}>Post ({viz === "world" ? "World" : "Subscribers"})</button>
 
       <KnowMore more={
         <p>In neopub, all posts are encrypted. For public posts, the encryption key is published. For private posts, the encryption key is separately encrypted for each subscriber, then those are published. See <Link to="/arch/post">/arch/post</Link> to learn more about post security architecture.</p>
