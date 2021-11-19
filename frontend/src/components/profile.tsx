@@ -12,7 +12,8 @@ import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
 import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
-import { useID } from "models/id";
+import { ID, useID } from "models/id";
+import KnowMore from "./knowMore";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
   return <span className="whitespace-nowrap">[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
@@ -65,7 +66,7 @@ function Bio({ bio, setBio, editable }: { bio?: string, setBio: (newBio: string)
   )
 }
 
-function IDCard({ profile, setProfile, id, host, isAuthedUser }: { profile?: IProfile, setProfile: (newProfile: IProfile) => void, id: string, host: string, isAuthedUser: boolean }) {
+function IDCard({ profile, setProfile, id, isAuthedUser }: { profile?: IProfile, setProfile: (newProfile: IProfile) => void, id: string, isAuthedUser: boolean }) {
   if (!profile) {
     return null;
   }
@@ -74,26 +75,16 @@ function IDCard({ profile, setProfile, id, host, isAuthedUser }: { profile?: IPr
 
   return (
     <div className="flex flex-row mb-2 space-x-4">
-      <a href={`/users/${id}?host=${host}`}><HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} /></a>
+      <Hexatar hex={id} />
       <div className="flex flex-col">
         <Handle handle={handle} setHandle={(newHandle) => setProfile({ ...profile, handle: newHandle })} editable={isAuthedUser} />
         <Bio bio={bio} setBio={(newBio) => setProfile({ ...profile, bio: newBio })} editable={isAuthedUser} />
-        <Hexatar hex={id} />
       </div>
     </div>
   );
 }
-interface IProps {
-  id: string;
-}
-export default function Profile({ id }: IProps) {
-  const history = useHistory();
-  
-  const ident = useID();
-  const isAuthedUser = ident && id === ident.pubKey.hex;
 
-  const [profile, setProfile] = useProfile(id);
-
+function Posts({ id, isAuthedUser, history, ident, profile, host }: { id: string, isAuthedUser: boolean, history: any, ident: ID | null | undefined, profile: IProfile, host: string }) {
   const [index, setIndex] = useState<IIndex | "notfound">({ posts: [], updatedAt: "" });
   useEffect(() => {
     // TODO: manage potential local/remote index conflicts.
@@ -121,6 +112,26 @@ export default function Profile({ id }: IProps) {
     load();
   }, [id]);
 
+  const worldKeyHex = profile?.worldKey;
+
+  return (
+    <>
+      {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
+        {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
+    </>
+  );
+}
+
+interface IProps {
+  id: string;
+}
+export default function Profile({ id }: IProps) {
+  const history = useHistory();
+  const ident = useID();
+  const isAuthedUser = ident && id === ident.pubKey.hex;
+
+  const [profile, setProfile] = useProfile(id);
+
   // const [index] = useJSON<IIndex>(id, "index.json", { posts: [] });
 
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -138,19 +149,12 @@ export default function Profile({ id }: IProps) {
     return <div>Not found.</div>
   }
 
-  const worldKeyHex = profile?.worldKey;
-
   const host = escape(hostPrefix);
 
   const tabs: ITab[] = [
     {
       name: "Posts",
-      el: (
-        <>
-          {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-            {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
-        </>
-      ),
+      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={host} />,
     },
   ];
 
@@ -179,11 +183,18 @@ export default function Profile({ id }: IProps) {
         profile={profile}
         setProfile={setProfile}
         id={id}
-        host={host}
         isAuthedUser={!!isAuthedUser}
       />
 
-      <div className="flex flex-row space-x-1 mb-4">
+      <div className="flex flex-row space-x-1 mb-4 items-start">
+        <KnowMore
+          label="Show QR"
+          more={
+            <a href={`/users/${id}?host=${host}`}>
+              <HexQR hex={`https://${document.location.host}/users/${id}?host=${host}`} />
+            </a>
+          }
+        />
         {isAuthedUser && <ButtonLink to="/creds/dump" label="Creds" />}
         {!isAuthedUser && (isSubscribed ? "Following" : <button className="px-4 py-2" onClick={() => history.push(`/users/${id}/sub`)}>Follow</button>)}
       </div>

@@ -9,9 +9,14 @@ import { loadID } from "./id";
 import { putFile } from "lib/api";
 import { getToken } from "models/host";
 
+// TODO: standardize userId vs. pubKeyHex.
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
   const location = fileLoc(userId, "profile.json");
   return getFileJSON<IProfile>(location, host);
+}
+
+async function loadProfile(userId: string): Promise<IProfile | undefined> {
+  return DB.profiles.get(userId);
 }
 
 export function useProfile(userId?: string, host?: string): [IProfile | NotFound, (newProfile: IProfile) => void] {
@@ -23,7 +28,17 @@ export function useProfile(userId?: string, host?: string): [IProfile | NotFound
       return;
     }
 
-    fetchProfile(userId, host)
+    async function get(userId: string, host?: string): Promise<IProfile | undefined | "notfound"> {
+      const local = await loadProfile(userId);
+      if (local) {
+        return local;
+      }
+
+      const remote = await fetchProfile(userId, host);
+      return remote;
+    }
+
+    get(userId, host)
       .then((p) => {
         if (p) {
           setProfile(p);
