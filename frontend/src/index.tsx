@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './pages/App';
@@ -26,8 +26,7 @@ import Feed from 'pages/feed';
 import PostDetails from 'pages/postDetails';
 import DataArch from 'pages/dataArch';
 import Inbox from 'pages/inbox';
-import { useEffect } from 'react';
-import { inboxCount } from 'models/inbox';
+import { useInbox } from 'models/inbox';
 import { useID } from 'models/id';
 
 interface IMenuItemProps {
@@ -43,14 +42,8 @@ function MenuItem({ curPath, path, text }: IMenuItemProps) {
 function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
   const highlight = curPath === path;
   const ident = useID();
-  
-  const [count, setCount] = useState<number>();
-  useEffect(() => {
-    if (ident) {
-      inboxCount(ident)
-        .then(count => setCount(count));
-    }
-  }, [setCount, ident]);
+  const inbox = useInbox(ident);
+  const count = inbox?.length;
 
   return (
     <div key={text}>
