@@ -11,7 +11,11 @@ export default function Inbox() {
     <main>
       <h1 className="mb-8">inbox</h1>
       {
-        id && inbox && inbox.map(i => <InboxItem key={i} id={i} pubKeyHex={id.pubKey.hex} />)
+        id && inbox && (
+          <div className="space-y-3">
+            { inbox.map(i => <InboxItem key={i} id={i} pubKeyHex={id.pubKey.hex} />) }
+          </div>
+        )
       }
       {
         inbox && inbox.length < 1 && <Empty text="No inbox items. Follow requests, and replies to your posts, will appear here." />
