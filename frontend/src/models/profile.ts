@@ -1,6 +1,6 @@
 import { buf2hex } from "core/bytes";
 import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
-import { IProfile, NotFound } from "core/types";
+import { IIndex, IProfile, NotFound } from "core/types";
 import { getPublicKeyHex, storeCredentials } from "lib/auth";
 import DB from "lib/db";
 import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
@@ -13,6 +13,37 @@ import { getToken } from "models/host";
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
   const location = fileLoc(userId, "profile.json");
   return getFileJSON<IProfile>(location, host);
+}
+
+export function useIndex(id: string, host?: string): IIndex | "notfound" {
+  const [index, setIndex] = useState<IIndex | "notfound">({ posts: [], updatedAt: "" });
+  useEffect(() => {
+    // TODO: manage potential local/remote index conflicts.
+    async function load() {
+      let updatedAt = "";
+
+      // Must put an updatedAt timestamp on index, to know which should win.
+      const row = await DB.indexes.get(id);
+      if (row) {
+        setIndex(row.index);
+        updatedAt = row.updatedAt;
+      }
+
+      const location = fileLoc(id, "index.json");
+      const remoteIndex = await getFileJSON<IIndex>(location, host);
+      if (remoteIndex && remoteIndex !== "notfound" && remoteIndex.updatedAt > updatedAt) {
+        setIndex(remoteIndex);
+      }
+    }
+
+    if (!id) {
+      return;
+    }
+
+    load();
+  }, [id, host]);
+
+  return index;
 }
 
 async function loadProfile(userId: string): Promise<IProfile | undefined> {

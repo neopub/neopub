@@ -1,10 +1,10 @@
- import type { IProfile, IIndex } from "core/types";
-import { useProfile } from "models/profile";
+ import type { IProfile } from "core/types";
+import { useIndex, useProfile } from "models/profile";
 import Hexatar from "./hexatar";
 import { useHistory } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DB from "lib/db";
-import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
+import { hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import PostList from "./postList";
 import SubscriberList from "./subscriberList";
@@ -85,39 +85,14 @@ function IDCard({ profile, setProfile, id, isAuthedUser }: { profile?: IProfile,
 }
 
 function Posts({ id, isAuthedUser, history, ident, profile, host }: { id: string, isAuthedUser: boolean, history: any, ident: ID | null | undefined, profile: IProfile, host: string }) {
-  const [index, setIndex] = useState<IIndex | "notfound">({ posts: [], updatedAt: "" });
-  useEffect(() => {
-    // TODO: manage potential local/remote index conflicts.
-    async function load() {
-      let updatedAt = "";
-
-      // Must put an updatedAt timestamp on index, to know which should win.
-      const row = await DB.indexes.get(id);
-      if (row) {
-        setIndex(row.index);
-        updatedAt = row.updatedAt;
-      }
-
-      const location = fileLoc(id, "index.json");
-      const remoteIndex = await getFileJSON<IIndex>(location);
-      if (remoteIndex && remoteIndex !== "notfound" && remoteIndex.updatedAt > updatedAt) {
-        setIndex(remoteIndex);
-      }
-    }
-
-    if (!id) {
-      return;
-    }
-
-    load();
-  }, [id]);
+  const index = useIndex(id, host);
 
   const worldKeyHex = profile?.worldKey;
 
   return (
     <>
       {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-        {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={unescape(host)} />}
+      {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={host} />}
     </>
   );
 }
@@ -154,7 +129,7 @@ export default function Profile({ id }: IProps) {
   const tabs: ITab[] = [
     {
       name: "Posts",
-      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={host} />,
+      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={unescape(host)} />,
     },
   ];
 
