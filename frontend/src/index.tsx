@@ -26,11 +26,39 @@ import Feed from 'pages/feed';
 import PostDetails from 'pages/postDetails';
 import DataArch from 'pages/dataArch';
 import Inbox from 'pages/inbox';
+import { useInbox } from 'models/inbox';
+import { useID } from 'models/id';
 
-type MenuItems = Array<{ path: string, text: string }>;
+interface IMenuItemProps {
+  curPath: string;
+  path: string;
+  text: string;
+}
+function MenuItem({ curPath, path, text }: IMenuItemProps) {
+  const highlight = curPath === path;
+  return <Link key={text} to={path} className={highlight ? "text-green-200" : undefined}>{text}</Link>;
+}
+
+function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
+  const highlight = curPath === path;
+  const ident = useID();
+  const inbox = useInbox(ident);
+  const count = inbox?.length;
+
+  return (
+    <div key={text}>
+      <Link to={path} className={highlight ? "text-green-200" : undefined}>
+        <span>{text}</span>
+      </Link>
+      {count && <span className="ml-1 text-sm">({count})</span>}
+    </div>
+  );
+}
+
+type MenuItems = Array<{ path: string, text: string, el?: (props: IMenuItemProps) => React.ReactElement }>;
 const authedMenu: MenuItems = [
   { path: "/", text: "me" },
-  { path: "/inbox", text: "inbox" },
+  { path: "/inbox", text: "inbox", el: InboxMenuItem },
   { path: "/feed", text: "feed" },
   { path: "/arch", text: "arch" },
   { path: "/exit", text: "exit" },
@@ -39,7 +67,7 @@ const authedMenu: MenuItems = [
 const unauthedMenu: MenuItems = [
   { path: "/", text: "neopub" },
   { path: "/arch", text: "arch" },
-]
+];
 
 function Menu() {
   const loc = useLocation();
@@ -52,9 +80,12 @@ function Menu() {
     <div className="flex flex-row mb-2 space-x-4 font-mono">
       <Link to={kbLink}><img src="/keyboard.png" alt="Pixelated keyboard icon" style={{ width: 48 }} /></Link>
       {
-        items.map(({ path, text }) => {
-          const highlight = loc.pathname === path;
-          return <Link key={text} to={path} className={highlight ? "text-green-200" : undefined}>{text}</Link>;
+        items.map(({ path, text, el }) => {
+          const props = { key: text, path, text, curPath: loc.pathname };
+          if (el) {
+            return el(props);
+          }
+          return <MenuItem {...props} />;
         })
       }
     </div>

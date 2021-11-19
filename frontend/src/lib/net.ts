@@ -116,7 +116,7 @@ export async function putFile(
   });
 }
 
-export async function fetchInbox(pubKey: string, token: string): Promise<any> {
+export async function fetchInbox(pubKey: string, token: string): Promise<string[]> {
   const resp = await fetch(`${hostPrefix}/inbox`, {
     method: "GET",
     headers: {
