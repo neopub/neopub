@@ -44,13 +44,14 @@ function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
   const ident = useID();
   const inbox = useInbox(ident);
   const count = inbox?.length;
+  const showCount = count != null && count > 0;
 
   return (
     <div key={text}>
       <Link to={path} className={highlight ? "text-green-200" : undefined}>
         <span>{text}</span>
       </Link>
-      {count && <span className="ml-1 text-sm">({count})</span>}
+      {showCount && <span className="ml-1 text-sm">({count})</span>}
     </div>
   );
 }
