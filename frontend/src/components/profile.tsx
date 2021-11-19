@@ -2,8 +2,6 @@
 import { useIndex, useIsSubscribedTo, useProfile } from "models/profile";
 import Hexatar from "./hexatar";
 import { useHistory } from "react-router-dom";
-import { useEffect, useState } from "react";
-import DB from "lib/db";
 import { hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import PostList from "./postList";
@@ -12,7 +10,7 @@ import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
 import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
-import { ID, useID } from "models/id";
+import { useID } from "models/id";
 import KnowMore from "./knowMore";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
@@ -84,19 +82,6 @@ function IDCard({ profile, setProfile, id, isAuthedUser }: { profile?: IProfile,
   );
 }
 
-function Posts({ id, isAuthedUser, history, ident, profile, host }: { id: string, isAuthedUser: boolean, history: any, ident: ID | null | undefined, profile: IProfile, host: string }) {
-  const index = useIndex(id, host);
-
-  const worldKeyHex = profile?.worldKey;
-
-  return (
-    <>
-      {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-      {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={worldKeyHex} index={index} host={host} />}
-    </>
-  );
-}
-
 interface IProps {
   id: string;
 }
@@ -108,16 +93,22 @@ export default function Profile({ id }: IProps) {
   const [profile, setProfile] = useProfile(id);
   const isSubscribed = useIsSubscribedTo(id);
 
+  const host = (profile !== "notfound" ? profile?.host : null) ?? hostPrefix;
+  const index = useIndex(id, host);
+
   if (profile === "notfound") {
     return <div>Not found.</div>
   }
 
-  const host = profile?.host ?? hostPrefix;
-
   const tabs: ITab[] = [
     {
       name: "Posts",
-      el: <Posts id={id} isAuthedUser={!!isAuthedUser} profile={profile} history={history} ident={ident} host={host} />,
+      el: (
+        <>
+          {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
+          {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} />}
+        </>
+      ),
     },
   ];
 
