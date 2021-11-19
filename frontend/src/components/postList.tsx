@@ -37,7 +37,7 @@ function ReplyButton({ post, pubKeyHex, id, host }: { post: IEncPost, id: string
     text = "Reply sent."
   }
 
-  return <button className={replyState !== undefined ? "border-0" : undefined} onClick={() => handleReply(post.id, id)} disabled={replyState !== undefined}>{text}</button>;
+  return <button className="border-0 mt-2 mb-0" onClick={() => handleReply(post.id, id)} disabled={replyState !== undefined}>{text}</button>;
 }
 
 export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
@@ -48,12 +48,12 @@ export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { 
   const showReply = id !== pubKeyHex;
 
   return (
-    <>
+    <div className="divide-green-800 divide-y">
       {
         index.posts?.map(
           (p, i) =>
             id && (
-              <div key={i} className="flex flex-row items-start space-x-8">
+              <div key={i} className="flex flex-col pt-3 pb-2">
                 <EncryptedPost
                   key={i}
                   enc={p as IEncPost}
@@ -66,6 +66,6 @@ export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { 
             ),
         )
       }
-    </>
+    </div>
   );
 }

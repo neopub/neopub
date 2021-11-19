@@ -4,14 +4,14 @@ import PostContent from "components/postContent";
 import Hexatar from "./hexatar";
 import { Link } from "react-router-dom";
 
-function Contents({post, id, posterId}: {post?: TPost, id: string, posterId: string}) {
+function Contents({post}: {post?: TPost}) {
   if (!post) {
     return <div className="text-green-600 italic font-mono">encrypted</div>;
   }
 
   return (
     <div>
-      <Link to={`/posts/${posterId}/${id}`} className="no-underline"><Timestamp ts={post.createdAt} /></Link>
+      <Timestamp ts={post.createdAt} />
       <PostContent post={post} />
     </div>
   )
@@ -19,9 +19,9 @@ function Contents({post, id, posterId}: {post?: TPost, id: string, posterId: str
 
 export default function Post({ id, post, pubKey }: { id: string, post?: TPost, pubKey: string }) {
   return (
-    <div className="flex space-x-3 mb-5">
+    <Link to={`/posts/${pubKey}/${id}`} className="flex space-x-3 no-underline">
       <Hexatar hex={pubKey} />
-      <Contents post={post} id={id} posterId={pubKey} />
-    </div>
+      <Contents post={post} />
+    </Link>
   );
 }
