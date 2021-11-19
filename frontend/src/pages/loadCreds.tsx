@@ -5,6 +5,7 @@ import { fetchState } from "models/state";
 import { loadCreds, setToken } from "lib/storage";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { fetchAndStoreOwnProfile } from "models/profile";
 
 export default function LoadCreds() {
   const history = useHistory();
@@ -39,6 +40,7 @@ export default function LoadCreds() {
     
     await fetchState();
     await fetchToken();
+    await fetchAndStoreOwnProfile();
   }
 
   return (

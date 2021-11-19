@@ -1,5 +1,5 @@
  import type { IProfile, IIndex } from "core/types";
-import { useProfile } from "lib/useJSON";
+import { useProfile } from "models/profile";
 import Hexatar from "./hexatar";
 import { useHistory } from "react-router-dom";
 import { useEffect, useState } from "react";

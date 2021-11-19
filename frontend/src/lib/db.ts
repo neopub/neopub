@@ -1,11 +1,12 @@
 import Dexie from "dexie";
 
 const DB: any = new Dexie("neopub");
-DB.version(6).stores({
+DB.version(7).stores({
   subscriptions: "pubKey, host, worldKeyHex, handle",
   followers: "pubKey, host",
   posts: "hash, publisherPubKey, createdAt, post, replyToHash",
   indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
+  profiles: "pubKey, host, worldKeyHex, handle, bio, following, followsMe"
 });
 
 export async function wipeDB() {

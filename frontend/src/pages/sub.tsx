@@ -6,7 +6,7 @@ import DB from "lib/db";
 import { hostPrefix } from "lib/net";
 import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
-import { useProfile } from "lib/useJSON";
+import { useProfile } from "models/profile";
 import { useID } from "models/id";
 import { useEffect } from "react";
 import { useState } from "react";
