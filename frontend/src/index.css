@@ -43,6 +43,7 @@ a {
 @layer base {
   a {
     text-decoration: underline;
+    text-underline-offset: 2px;
   }
   
   a:hover {
