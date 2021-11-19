@@ -5,6 +5,7 @@ import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
 import { Link, useHistory } from "react-router-dom";
 import { buf2hex } from "core/bytes";
 import { uploadProfile } from "lib/api";
+import { hostPrefix } from "lib/net";
 
 export default function Access() {
   const [status, setStatus] = useState("");
@@ -28,8 +29,8 @@ export default function Access() {
     // Create profile.
     const worldKeyBuf = await key2buf(worldKey);
     const worldKeyHex = buf2hex(worldKeyBuf);
-    const profile = { worldKey: worldKeyHex };
-    await uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile)
+    const profile = { worldKey: worldKeyHex, host: hostPrefix };
+    await uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile);
 
     history.push(`/creds/dump${next}`)
   }

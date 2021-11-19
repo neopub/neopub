@@ -3,6 +3,7 @@ export interface IProfile {
   bio?: string;
   avatarURL?: string;
   worldKey: string;
+  host?: string;
 }
 
 interface IPostMetadata {
