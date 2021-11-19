@@ -43,7 +43,7 @@ export default function PostDetails() {
         worldKeyHex={worldKeyHex}
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
-      <div>
+      <div className="space-y-3">
         <h2>Replies</h2>
         {
           replies.map(reply => {
