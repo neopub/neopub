@@ -47,12 +47,10 @@ function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
   const showCount = count != null && count > 0;
 
   return (
-    <div key={text}>
-      <Link to={path} className={highlight ? "text-green-200" : undefined}>
-        <span>{text}</span>
-      </Link>
-      {showCount && <span className="ml-1 text-sm">({count})</span>}
-    </div>
+    <Link key={text} to={path} className={`flex flex-row items-start ${highlight ? "text-green-200" : undefined}`}>
+      {text}
+      {showCount && <div className="ml-1 text-xs bg-green-300 text-gray-800 rounded-sm px-1 no-underline">{count}</div>}
+    </Link>
   );
 }
 
