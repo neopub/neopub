@@ -18,7 +18,7 @@ export default function Inbox() {
         )
       }
       {
-        inbox && inbox.length < 1 && <Empty text="No inbox items. Follow requests, and replies to your posts, will appear here." />
+        inbox && inbox.length < 1 && <Empty text="No inbox items." subtext="Follow requests, and replies to your posts, will appear here." />
       }
     </main>
   )

@@ -37,7 +37,7 @@ export default function SubscriptionList() {
   }
 
   if (subs.length < 1) {
-    return <Empty text="Not following anyone." />
+    return <Empty text="Not following anyone." subtext="Go to someone's profile and hit Follow. Then they'll appear here." />
   }
 
   return (

@@ -111,7 +111,11 @@ export default function Profile({ id }: IProps) {
       el: (
         <>
           {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
-          {index === "notfound" || !index ? <Empty text="No posts" /> : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} />}
+          {
+            index === "notfound" || !index
+              ? <Empty text="No posts" subtext="Write a post and it will show up here." />
+              : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} />
+          }
         </>
       ),
     },

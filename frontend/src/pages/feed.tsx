@@ -37,7 +37,7 @@ export default function Feed() {
           return <Post key={post.hash} id={post.hash} post={post.post as TPost} pubKey={id.pubKey.hex} />;
         })}
       </div>
-      {posts.length < 1 && <Empty text="No feed items. Follow some people to get content here." />}
+      {posts.length < 1 && <Empty text="No feed items." subtext="Follow some people to get content here." />}
     </div>
   );
 }
