@@ -1,4 +1,5 @@
 import DB from "lib/db";
+import { hostPrefix } from "lib/net";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -6,20 +7,29 @@ import Empty from "./empty";
 import Hexatar from "./hexatar";
 import HexString from "./hexString";
 
-function SubscriptionItem({ pubKeyHex, handle }: { pubKeyHex: string, handle?: string }) {
+function SubscriptionItem({ profile }: { profile: any }) {
+  const { pubKey, handle, host } = profile;
+
+  let link = `/users/${pubKey}`;
+  if (host !== hostPrefix) {
+    link += `?host=${escape(host)}`;
+  }
+
   return (
-    <Link className="flex flex-row items-center space-x-2 no-underline" to={`/users/${pubKeyHex}`}>
-      <Hexatar hex={pubKeyHex} />
-      <HexString hex={pubKeyHex} />
+    <Link className="flex flex-row items-center space-x-2 no-underline" to={link}>
+      <Hexatar hex={pubKey} />
+      <HexString hex={pubKey} />
       {handle}
     </Link>
   )
 }
 
 export default function SubscriptionList() {
-  const [subs, setSubs] = useState<{ pubKey: string, handle?: string}[]>([]);
+  const [subs, setSubs] = useState<{ pubKey: string, handle?: string, host: string}[]>([]);
   useEffect(() => {
-    DB.subscriptions.toArray().then((rows: any) => setSubs(rows));
+    // NOTE: must use filter because IndexedDB doesn't support indexing boolean fields.
+    DB.profiles.filter((p: any) => p.following).toArray()
+      .then((profiles: any[]) => setSubs(profiles));
   }, [])
 
   if (subs === undefined) {
@@ -32,7 +42,7 @@ export default function SubscriptionList() {
 
   return (
     <div className="space-y-2">
-      {subs.map(({ pubKey, handle }) => <SubscriptionItem key={pubKey} pubKeyHex={pubKey} handle={handle} />)}
+      {subs.map((profile: any) => <SubscriptionItem key={profile.pubKey} profile={profile} />)}
     </div>
   )
 }
