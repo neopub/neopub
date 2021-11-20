@@ -3,6 +3,7 @@ import { getProfile, hostPrefix } from "lib/net";
 import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
+import { follow } from "models/profile";
 
 export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
   const [url, setURL] = useState("");
@@ -46,6 +47,7 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
     await sendSubRequest(pubPubKeyHex, pubKeyHex, msg, destHost, srcHost);
 
     await mutateState(async () => {
+      await follow(pubPubKeyHex, profile);
       return addSubscriptionPubKey(pubPubKeyHex, destHost, worldKeyHex, profile.handle);
     });
   }

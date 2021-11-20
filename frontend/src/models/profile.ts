@@ -169,3 +169,15 @@ export function useIsSubscribedTo(pubKeyHex: string): boolean {
 
   return isSubscribed;
 }
+
+export async function follow(pubKeyHex: string, profile: IProfile) {
+  return DB.profiles.put({
+    pubKey: pubKeyHex,
+    host: profile.host,
+    worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
+    handle: profile.handle,
+    bio: profile.handle,
+    following: true,
+    followsMe: false,
+  });
+}

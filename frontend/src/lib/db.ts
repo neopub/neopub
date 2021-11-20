@@ -14,21 +14,31 @@ export async function wipeDB() {
   return DB.open();
 }
 
-export async function dumpState() {
-  const following = await DB.subscriptions.toArray();
-  const followers = await DB.followers.toArray();
-  return { followers, following };
+// TODO: stronger types.
+interface ILocalState {
+  following: any[];
+  followers: any[];
+  profiles: any[];
 }
 
-export async function loadStateDangerously(state: any) {
-  const { followers, following } = state;
+export async function dumpState(): Promise<ILocalState> {
+  const following = await DB.subscriptions.toArray();
+  const followers = await DB.followers.toArray();
+  const profiles = await DB.profiles.toArray();
+  return { followers, following, profiles };
+}
+
+export async function loadStateDangerously(state: ILocalState) {
+  const { followers, following, profiles } = state;
   
-  DB.transaction("rw", [DB.subscriptions, DB.followers], async () => {
+  DB.transaction("rw", [DB.subscriptions, DB.followers, DB.profiles], async () => {
     return Promise.all([
       DB.subscriptions.clear(),
       DB.subscriptions.bulkAdd(following),
       DB.followers.clear(),
       DB.followers.bulkAdd(followers),
+      DB.profiles.clear(),
+      DB.profiles.bulkAdd(profiles),
     ]);
   });
 }

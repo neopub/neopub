@@ -6,7 +6,7 @@ import DB from "lib/db";
 import { hostPrefix } from "lib/net";
 import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
-import { useProfile } from "models/profile";
+import { follow, useProfile } from "models/profile";
 import { useID } from "models/id";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -63,6 +63,7 @@ export default function Sub() {
     await sendSubRequest(pubId, id.pubKey.hex, msg, host, host);
 
     await mutateState(async () => {
+      await follow(pubId, profile);
       return addSubscriptionPubKey(pubId, host, worldKeyHex, profile.handle);
     });
 
