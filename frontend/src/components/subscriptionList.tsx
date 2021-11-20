@@ -1,27 +1,12 @@
 import DB from "lib/db";
-import { hostPrefix } from "lib/net";
 import { useEffect } from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Empty from "./empty";
-import Hexatar from "./hexatar";
-import HexString from "./hexString";
+import HexIDCard from "./hexIdCard";
 
 function SubscriptionItem({ profile }: { profile: any }) {
   const { pubKey, handle, host } = profile;
-
-  let link = `/users/${pubKey}`;
-  if (host !== hostPrefix) {
-    link += `?host=${escape(host)}`;
-  }
-
-  return (
-    <Link className="flex flex-row items-center space-x-2 no-underline" to={link}>
-      <Hexatar hex={pubKey} />
-      <HexString hex={pubKey} />
-      {handle}
-    </Link>
-  )
+  return <HexIDCard {...{ pubKey, handle, host }} />;
 }
 
 export default function SubscriptionList() {

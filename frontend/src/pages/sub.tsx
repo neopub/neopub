@@ -1,5 +1,3 @@
-import Hexatar from "components/hexatar";
-import HexString from "components/hexString";
 import KnowMore from "components/knowMore";
 import { sendSubRequest } from "lib/api";
 import DB from "lib/db";
@@ -11,6 +9,7 @@ import { useID } from "models/id";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
+import HexIDCard from "components/hexIdCard";
 
 export default function Sub() {
   const history = useHistory();
@@ -79,11 +78,7 @@ export default function Sub() {
       </div>
 
       <div className="my-6">
-        <Link className="flex flex-row items-center space-x-2 no-underline mb-2" to={`/users/${pubId}`}>
-          <Hexatar hex={pubId} />
-          <HexString hex={pubId} />
-          {profile.handle}
-        </Link>
+        <HexIDCard pubKey={pubId} host={host} handle={profile.handle} />
         {
           sentReq ? <div>Sent follow request.</div> : <button className="w-64 py-2 px-6" onClick={handleSubscribe} disabled={following}>{following ? "Following" : "Follow"}</button>
         }
