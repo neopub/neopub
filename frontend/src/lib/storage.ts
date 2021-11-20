@@ -78,7 +78,7 @@ export async function addSubscriptionPubKey(pubKey: string, host: string, worldK
 
 export async function addSubscriber(req: ISubReq) {
   const profile = await fetchProfile(req.pubKey, req.host);
-  console.log(profile);
+
   if (!profile || profile === "notfound") {
     return; // TODO: handle error.
   }
