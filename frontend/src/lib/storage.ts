@@ -4,6 +4,7 @@ import { key2buf, sha } from "core/crypto";
 import DB from "lib/db";
 import { IReply, ISubReq } from "core/types";
 import { mutateState } from "models/state";
+import { acceptFollower, fetchProfile } from "models/profile";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -76,7 +77,14 @@ export async function addSubscriptionPubKey(pubKey: string, host: string, worldK
 }
 
 export async function addSubscriber(req: ISubReq) {
-  return mutateState(() => {
+  const profile = await fetchProfile(req.pubKey, req.host);
+  console.log(profile);
+  if (!profile || profile === "notfound") {
+    return; // TODO: handle error.
+  }
+
+  return mutateState(async () => {
+    await acceptFollower(req.pubKey, profile);
     return DB.followers.put({
       pubKey: req.pubKey,
       host: req.host,
@@ -84,15 +92,13 @@ export async function addSubscriber(req: ISubReq) {
   });
 }
 
-export function useSubscribers(): [string[] | undefined, () => void] {
-  const [subs, setSubs] = useState<string[]>();
+export function useSubscribers(): [any[] | undefined, () => void] {
+  const [subs, setSubs] = useState<any[]>();
 
   function fetchSubs() {
-    getSubscriberPubKeyList()
-      .then((subs) => {
-        setSubs(subs.map(s => s.pubKey));
-      })
-      .catch(err => {
+    DB.profiles.filter((p: any) => p.followsMe).toArray()
+      .then((subs: any[]) => { setSubs(subs) })
+      .catch((err: any) => {
         console.error(err);
       });
   }

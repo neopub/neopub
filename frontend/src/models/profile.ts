@@ -178,6 +178,18 @@ export async function follow(pubKeyHex: string, profile: IProfile) {
     handle: profile.handle,
     bio: profile.handle,
     following: true,
-    followsMe: false,
+    followsMe: false, // TODO: handle case of overwrite. Maybe using separate table to track follower/following.
+  });
+}
+
+export async function acceptFollower(pubKeyHex: string, profile: IProfile) {
+  return DB.profiles.put({
+    pubKey: pubKeyHex,
+    host: profile.host,
+    worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
+    handle: profile.handle,
+    bio: profile.handle,
+    following: false, // TODO: handle case of overwrite. Maybe using separate table to track follower/following.
+    followsMe: true,
   });
 }

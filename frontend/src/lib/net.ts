@@ -87,7 +87,6 @@ export async function getFileJSON<T>(location: string, host?: string): Promise<T
     const json = await resp.json();
     return json;
   } catch {
-    debugger;
     return;
   }
 }
