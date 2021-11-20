@@ -1,11 +1,7 @@
 import CredFields from "components/credFields";
-import { getPrivateKey, getPublicKey } from "lib/auth";
-import { getToken } from "models/host";
-import { fetchState } from "models/state";
-import { loadCreds, setToken } from "lib/storage";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { fetchAndStoreOwnProfile } from "models/profile";
+import { identify } from "models/id";
 
 export default function LoadCreds() {
   const history = useHistory();
@@ -13,34 +9,17 @@ export default function LoadCreds() {
 
   const next = new URLSearchParams(history.location.search).get('next');
 
-  async function fetchToken() {
-    const pubKey = await getPublicKey();
-    const privKey = await getPrivateKey("ECDSA");
-    if (!pubKey || !privKey) {
-      return;
-    }
-    const token = await getToken(pubKey, privKey, setStatus);
-
-    if (!token) {
-      setStatus("Failed to get token.");
-      return;
-    }
-    setToken(token);
-    history.push(next ? next : "/");
-  }
-
   async function handleLoad(id?: string, creds?: string) {
     if (!creds) {
       return;
     }
 
-    setStatus("Loading creds...")
-    loadCreds(creds);
-    setStatus("Loaded creds.")
-    
-    await fetchState();
-    await fetchToken();
-    await fetchAndStoreOwnProfile();
+    const failed = await identify(creds, setStatus);
+    if (failed) {
+      return;
+    }
+
+    history.push(next ? next : "/");
   }
 
   return (

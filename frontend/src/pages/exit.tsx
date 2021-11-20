@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
 import { Link, useHistory } from "react-router-dom";
 import CredFields from "components/credFields";
-import { wipeDB } from "lib/db";
 import KnowMore from "components/knowMore";
+import { deidentify } from "models/id";
 
 export default function Exit() {
   const [credState, setCredState] = useState<string>();
@@ -18,13 +18,12 @@ export default function Exit() {
     setManualOverride(checked);
   }
 
-  function handleExit(id?: string, creds?: string) {
-    async function exit() {
-      localStorage.clear();
-      await wipeDB();
-      history.push("/");
-    }
+  async function exit() {
+    await deidentify();
+    history.push("/");
+  }
 
+  function handleExit(id?: string, creds?: string) {
     if (manualOverride) {
       exit();
     }
