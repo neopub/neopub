@@ -19,7 +19,7 @@ export default function SubscriberList() {
   }
 
   return (
-    <div>
+    <div className="space-y-2">
       {subs.map((sub) => <SubscriberItem key={sub.pubKey} profile={sub} />)}
     </div>
   )
