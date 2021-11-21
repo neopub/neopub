@@ -13,11 +13,15 @@ export default function Req({ id, req }: { id: string, req: ISubReq}) {
   }
 
   return (
-    <div className="flex flex-row items-center space-x-2">
-      <HexIDCard {...req} />
-      <div>{req.msg}</div>
-      <button onClick={handleAccept}>Accept</button>
-      <button onClick={handleDelete}>Delete</button>
+    <div>
+      <div className="flex flex-row items-center space-x-2">
+        <HexIDCard {...req} />
+        <div>{req.msg}</div>
+      </div>
+      <div className="flex flex-row space-x-2 w-72 mt-2 mb-8 ml-12">
+        <button onClick={handleAccept} className="flex-1">Accept</button>
+        <button onClick={handleDelete} className="flex-1 border-none">Delete</button>
+      </div>
     </div>
   )
 }
