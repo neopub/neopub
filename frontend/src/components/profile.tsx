@@ -105,6 +105,9 @@ export default function Profile({ id }: IProps) {
     return <div>Not found.</div>
   }
 
+  console.log(isAuthedUser)
+  const emptyPostList = <Empty text="No posts" subtext={isAuthedUser ? "Write a post and it will show up here." : `When ${profile.handle ?? id.slice(0, 8)} posts, it will show up here.`} />;
+
   const tabs: ITab[] = [
     {
       name: "Posts",
@@ -113,8 +116,8 @@ export default function Profile({ id }: IProps) {
           {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
           {
             index === "notfound" || !index
-              ? <Empty text="No posts" subtext="Write a post and it will show up here." />
-              : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} />
+              ? emptyPostList
+              : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} empty={emptyPostList} />
           }
         </>
       ),

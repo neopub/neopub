@@ -1,11 +1,10 @@
 import { IIndex, IEncPost } from "core/types";
-import Empty from "./empty";
 import EncryptedPost from "./encryptedPost";
 import ReplyButton from "./replyButton";
 
-export default function PostList({ pubKeyHex, index, id, worldKeyHex, host }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string }) {
+export default function PostList({ pubKeyHex, index, id, worldKeyHex, host, empty }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string, empty: React.ReactElement }) {
   if (index.posts?.length === 0) {
-    return <Empty text="No posts" subtext="Write a post and it will show up here." />;
+    return empty;
   }
 
   const showReply = id !== pubKeyHex;
