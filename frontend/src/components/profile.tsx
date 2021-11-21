@@ -105,7 +105,6 @@ export default function Profile({ id }: IProps) {
     return <div>Not found.</div>
   }
 
-  console.log(isAuthedUser)
   const emptyPostList = <Empty text="No posts" subtext={isAuthedUser ? "Write a post and it will show up here." : `When ${profile.handle ?? id.slice(0, 8)} posts, it will show up here.`} />;
 
   const tabs: ITab[] = [
