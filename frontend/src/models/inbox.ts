@@ -1,3 +1,4 @@
+import EventBus from "lib/eventBus";
 import { deleteFile, fetchInbox, fileLoc } from "lib/net";
 import { useState, useEffect } from "react";
 import { ID, loadID } from "./id";
@@ -6,8 +7,10 @@ type Inbox = string[];
 
 let inbox: Inbox | undefined;
 
-async function loadInbox(ident: ID): Promise<Inbox | undefined> {
-  const shouldRefetch = !inbox;
+const inboxChange = new EventBus();
+
+async function loadInbox(ident: ID, force?: boolean): Promise<Inbox | undefined> {
+  const shouldRefetch = force || !inbox;
   if (shouldRefetch) {
     const newInbox = await fetchInbox(ident.pubKey.hex, ident.token);
     inbox = newInbox;
@@ -19,13 +22,26 @@ async function loadInbox(ident: ID): Promise<Inbox | undefined> {
 export function useInbox(ident?: ID | null): Inbox | undefined {
   const [inbox, setInbox] = useState<Inbox>();
   useEffect(() => {
-    if (!ident) {
-      return;
+    async function reloadInbox(force: boolean) {
+      if (!ident) {
+        return;
+      }
+
+      const inb = await loadInbox(ident, force);
+      setInbox(inb);
     }
 
-    loadInbox(ident).then((inb) => {
-      setInbox(inb);
-    });
+    // TODO: fix double reload caused by menu bar and inbox page reacting to same event (rearchitect state).
+    function forceReloadInbox() {
+      reloadInbox(true);
+    }
+    
+    reloadInbox(false);
+
+    inboxChange.on(forceReloadInbox);
+    return () => {
+      inboxChange.off(forceReloadInbox);
+    }
   }, [ident]);
 
   return inbox;
@@ -52,6 +68,7 @@ export async function deleteInboxItem(id: string) {
   const location = fileLoc(ident.pubKey.hex, `inbox/${id}`);
   try {
     deleteFile(ident.pubKey.hex, ident.token, location);
+    inboxChange.emit();
   } catch (err) {
     // TODO: handle in UI code.
     alert("Failed to delete.");
