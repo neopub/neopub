@@ -17,7 +17,11 @@ const data: IDataLayer = {
   async listFiles(prefix: string): Promise<string[]> {
     const list = await KV.list({ prefix });
     return list.keys.map(k => k.name.substr(prefix.length));
-  }
+  },
+
+  async deleteFile(loc: string): Promise<void> {
+    return KV.delete(loc);
+  },
 };
 
 declare let SESS_TOKEN_SEED: string;

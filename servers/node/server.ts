@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 import Lib from "./shared/lib";
 import fs from "fs";
 import path from "path";
-import API, { corsHeaders, IDataLayer, IHandlerContext } from "./shared/api";
+import API, { corsHeaders, IHandlerContext } from "./shared/api";
 
 async function body2buf(req: http.IncomingMessage): Promise<Buffer> {
   const bufs = [];
@@ -58,6 +58,11 @@ class DataLayer {
     const fullLoc = this.prefixPath(loc);
     return fs.promises.readFile(fullLoc);
   }
+
+  async deleteFile(loc: string): Promise<void> {
+    const fullLoc = this.prefixPath(loc);
+    return fs.promises.rm(fullLoc);
+  }
   
   async listFiles(prefix: string): Promise<string[]> {
     const fullLoc = this.prefixPath(prefix);
@@ -104,7 +109,7 @@ export default class Server {
 
       res.setHeader("Access-Control-Allow-Headers", req.headers["access-control-request-headers"] ?? "");
     } else {
-      res.setHeader("Allow", "GET, POST, OPTIONS");
+      res.setHeader("Allow", "GET, POST, DELETE, OPTIONS");
     }
 
     res.writeHead(200);

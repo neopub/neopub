@@ -69,6 +69,18 @@ export async function getFile(location: string): Promise<ArrayBuffer | undefined
   }
 }
 
+export async function deleteFile(pubKeyHex: string, token: string, location: string): Promise<Response> {
+  return fetch(`${hostPrefix}/rm`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/octet-stream",
+      [pubKeyHeader]: pubKeyHex,
+      [tokenHeader]: token,
+      [locationHeader]: location,
+    },
+  });
+}
+
 export async function getFileJSON<T>(location: string, host?: string): Promise<T | undefined | NotFound> {
   try {
     const resp = await fetch(`${host ?? hostPrefix}/get`, {

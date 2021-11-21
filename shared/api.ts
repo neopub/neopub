@@ -5,7 +5,7 @@ import Lib from "./lib";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,DELETE,HEAD,POST,OPTIONS",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -24,6 +24,7 @@ export interface IDataLayer {
   writeFile: (loc: string, data: any) => Promise<void>,
   readFile: (loc: string) => Promise<any>,
   listFiles: (loc: string) => Promise<string[]>,
+  deleteFile: (loc: string) => Promise<void>,
 }
 
 function parsePublicKey(header: HeaderFunc): { hex: string, bytes: Uint8Array } | undefined {
@@ -80,6 +81,7 @@ export default class API {
       "POST /put": this.put,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
+      "DELETE /rm": this.rm,
     };
 
     const key = `${method.toUpperCase()} ${url}`;
@@ -277,6 +279,28 @@ export default class API {
     } catch (e) {
       console.error(e);
       return failure(500, "Error listing inbox");
+    }
+  }
+
+  private async rm({ success, failure, header }: IHandlerContext) {
+    const pubKey = parsePublicKey(header);
+    if (!pubKey) {
+      return failure(400, "Missing/invalid pubKey");
+    }
+
+    const tokenValid = await this.checkToken(header, pubKey.bytes);
+    if (!tokenValid) {
+      return failure(400, "Invalid token");
+    }
+
+    const loc = header(locationHeader);
+    try {
+      await this.data.deleteFile(loc);
+
+      return success(null, { "Content-Type": "text/plain" });
+    } catch (e) {
+      console.error(e);
+      return failure(404, "Not found");
     }
   }
 }

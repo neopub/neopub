@@ -51,6 +51,6 @@ export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: st
       return <Post id={reply.postId} post={post as any} pubKey={reply.pubKey} />
     case "subscribe":
       const req = item as ISubReq;
-      return <Req req={req} />;
+      return <Req id={id} req={req} />;
   }
 }

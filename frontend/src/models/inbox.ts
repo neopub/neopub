@@ -1,6 +1,6 @@
-import { fetchInbox } from "lib/net";
+import { deleteFile, fetchInbox, fileLoc } from "lib/net";
 import { useState, useEffect } from "react";
-import { ID } from "./id";
+import { ID, loadID } from "./id";
 
 type Inbox = string[];
 
@@ -39,4 +39,21 @@ export async function inboxCount(ident: ID): Promise<number | undefined> {
   }
 
   return inbox.length;
+}
+
+export async function deleteInboxItem(id: string) {
+  const ident = await loadID();
+  if (!ident) {
+    // TODO: show error. Real TODO: rearchitect so ident must be present before calling this.
+    return;
+  }
+
+  // TODO: manage the prefixing with pubkeyhex all on the server side. Client doesn't need to care about that.
+  const location = fileLoc(ident.pubKey.hex, `inbox/${id}`);
+  try {
+    deleteFile(ident.pubKey.hex, ident.token, location);
+  } catch (err) {
+    // TODO: handle in UI code.
+    alert("Failed to delete.");
+  }
 }
