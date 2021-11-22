@@ -225,6 +225,14 @@ export async function publishPostWorldKey(
   }
   const worldKey = await importAESKey(worldKeyBytes, ["encrypt"]);
 
+  // TODO: cleanup.
+  const keyLoc = await postKeyLocation(worldKey, postHash);
+  await DB.postKeys.put({
+    postHash: buf2hex(postHash),
+    subPubKey: worldKeyHex,
+    keyLoc,
+  });
+
   await publishPostKey(postKey, postHash, worldKey, pubKeyHex, privKey, token);
 }
 

@@ -22,16 +22,23 @@ function AudienceListItem({ pubKey }: { pubKey: string }) {
   return profile && <HexIDCard key={pubKey} pubKey={pubKey} host={profile.host} handle={profile.handle} />;
 }
 
-function Audience({ postHash }: { postHash: string }) {
+function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: string }) {
   const pubKeys = useAudience(postHash);
 
-  // TODO: visualize when post is world-visible. Also, all past visibility states, since someone might have cached a key.
+  // TODO: visualize all past visibility states, since someone might have cached a key.
 
   return (
     <div className="space-y-3">
       <h2>Audience</h2>
       {
-        pubKeys.map((pubKey) => <AudienceListItem key={pubKey} pubKey={pubKey} />)
+        pubKeys.map((pubKey) => {
+          const isWorld = pubKey === worldKeyHex;
+          if (isWorld) {
+            return <div>PUBLIC</div>;
+          }
+
+          return <AudienceListItem key={pubKey} pubKey={pubKey} />;
+        })
       }
     </div>
   )
@@ -70,7 +77,7 @@ export default function PostDetails() {
         worldKeyHex={worldKeyHex}
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
-      <Audience postHash={postId} />
+      <Audience postHash={postId} worldKeyHex={worldKeyHex} />
       <div className="space-y-3">
         <h2>Replies</h2>
         {
