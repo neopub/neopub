@@ -5,7 +5,7 @@ DB.version(9).stores({
   subscriptions: "pubKey, host, worldKeyHex, handle",
   followers: "pubKey, host",
   posts: "hash, publisherPubKey, createdAt, post, replyToHash",
-  postKeys: "postHash, subPubKey, keyLoc", // TODO: record post key and derive location instead?
+  postKeys: "keyLoc, postHash, subPubKey", // TODO: record post key and derive location instead?
   indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
   profiles: "pubKey, host, worldKeyHex, handle, bio, following, followsMe",
 });

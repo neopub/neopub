@@ -1,9 +1,11 @@
+import { hex2bytes } from "core/bytes";
+import { hex2ECDHKey, deriveDHKey } from "core/crypto";
 import { IEncPost, IIndex, ITextPost, PostVisibility, TPost } from "core/types";
-import { fetchAndDecryptWorldOrSubPost, publishPostAndKeys } from "lib/api";
+import { fetchAndDecryptWorldOrSubPost, postKeyLocation, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
-import { getIndex } from "lib/net";
+import { deleteFile, fileLoc, getIndex } from "lib/net";
 import { useEffect, useState } from "react";
-import { ID } from "./id";
+import { ID, loadID } from "./id";
 
 export type DBPost = any; // TODO.
 
@@ -138,4 +140,48 @@ export function useAudience(postHash: string): string[] {
   }, [postHash]);
 
   return pubKeys;
+}
+
+export async function removeAccess(postHash: string, viewerPubKey: string) {
+  const ident = await loadID();
+  if (!ident) {
+    // TODO: show error. Real TODO: rearchitect so ident must be present before calling this.
+    return;
+  }
+
+  // TODO: manage the prefixing with pubkeyhex all on the server side. Client doesn't need to care about that.
+  // const location = fileLoc(ident.pubKey.hex, `inbox/${id}`);
+  // try {
+  //   deleteFile(ident.pubKey.hex, ident.token, location);
+  //   inboxChange.emit();
+  // } catch (err) {
+  //   // TODO: handle in UI code.
+  //   alert("Failed to delete.");
+  // }
+
+  console.log("deleting access");
+
+  const subDHPub = await hex2ECDHKey(viewerPubKey);
+  if (!subDHPub) {
+    return;
+  }
+
+  const hashBuf = hex2bytes(postHash);
+  if (!hashBuf) {
+    return; // TODO.
+  }
+
+  const encDH = await deriveDHKey(subDHPub, ident.privKey.dhKey, ["encrypt", "decrypt"]);
+
+  const keyLoc = await postKeyLocation(encDH, hashBuf);
+
+  const location = fileLoc(ident.pubKey.hex, `keys/${keyLoc}`);
+  try {
+    await deleteFile(ident.pubKey.hex, ident.token, location);
+  } catch (err) {
+    // TODO: handle in UI code.
+    alert("Failed to delete from host.");
+  }
+
+  await DB.postKeys.delete(keyLoc);
 }

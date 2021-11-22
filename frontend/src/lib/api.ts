@@ -361,7 +361,7 @@ export async function publishPost(
   return [index, hash];
 }
 
-async function postKeyLocation(
+export async function postKeyLocation(
   outerKey: CryptoKey,
   postHash: ArrayBuffer,
 ): Promise<string> {
