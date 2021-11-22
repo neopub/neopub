@@ -25,6 +25,8 @@ function AudienceListItem({ pubKey }: { pubKey: string }) {
 function Audience({ postHash }: { postHash: string }) {
   const pubKeys = useAudience(postHash);
 
+  // TODO: visualize when post is world-visible. Also, all past visibility states, since someone might have cached a key.
+
   return (
     <div className="space-y-3">
       <h2>Audience</h2>
