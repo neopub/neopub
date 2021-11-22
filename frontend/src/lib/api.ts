@@ -244,6 +244,14 @@ export async function publishPostSubKey(
 
   const encDH = await deriveDHKey(subDHPub, privDH, ["encrypt", "decrypt"]);
 
+  // TODO: cleanup.
+  const keyLoc = await postKeyLocation(encDH, postHash);
+  await DB.postKeys.put({
+    postHash: buf2hex(postHash),
+    subPubKey,
+    keyLoc,
+  });
+
   await publishPostKey(postKey, postHash, encDH, pubKey, privKey, token);
 }
 
@@ -350,7 +358,7 @@ async function postKeyLocation(
   postHash: ArrayBuffer,
 ): Promise<string> {
   const encKeyBytes = await key2buf(outerKey);
-  const locBytes = await sha(concatArrayBuffers(encKeyBytes, postHash));
+  const locBytes = await sha(concatArrayBuffers(encKeyBytes, postHash)); // TODO: don't stick post hash on end of this... that makes it trivial to analyze number of distinct posts and people with access to each.
   const locHex = buf2hex(locBytes);
   return locHex;
 }

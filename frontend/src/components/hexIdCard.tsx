@@ -6,9 +6,9 @@ function MissingHandle() {
   return <i>No handle</i>;
 }
 
-export default function HexIDCard({ pubKey, host, handle }: { pubKey: string, host: string, handle?: string }) {
+export default function HexIDCard({ pubKey, host, handle }: { pubKey: string, host?: string, handle?: string }) {
   let link = `/users/${pubKey}`;
-  if (host !== hostPrefix) {
+  if (host && host !== hostPrefix) {
     link += `?host=${escape(host)}`;
   }
 

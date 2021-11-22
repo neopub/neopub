@@ -2,6 +2,7 @@ import { IEncPost, IIndex, ITextPost, PostVisibility, TPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
 import { getIndex } from "lib/net";
+import { useEffect, useState } from "react";
 import { ID } from "./id";
 
 export type DBPost = any; // TODO.
@@ -123,4 +124,18 @@ export async function fetchAndDec(ident: ID, enc: IEncPost, pubKey: string, worl
   }
 
   return post;
+}
+
+export function useAudience(postHash: string): string[] {
+  const [pubKeys, setPubKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    DB.postKeys.where({ postHash }).toArray()
+      .then((postKeys: any[]) => {
+        const pubKeys = postKeys.map(({ subPubKey }) => subPubKey);
+        setPubKeys(pubKeys);
+      });
+  }, [postHash]);
+
+  return pubKeys;
 }

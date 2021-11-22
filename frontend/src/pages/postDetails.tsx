@@ -1,14 +1,39 @@
 import Empty from "components/empty";
 import EncryptedPost from "components/encryptedPost";
+import HexIDCard from "components/hexIdCard";
 import Post from "components/post";
 import ReplyButton from "components/replyButton";
 import { IProfile } from "core/types";
 import DB from "lib/db";
 import { useJSON } from "lib/useJSON";
 import { useID } from "models/id";
+import { useAudience } from "models/post";
+import { useProfile } from "models/profile";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+
+function AudienceListItem({ pubKey }: { pubKey: string }) {
+  const [profile, _] = useProfile(pubKey);
+  if (profile === "notfound" || !profile) {
+    return null;
+  }
+
+  return profile && <HexIDCard key={pubKey} pubKey={pubKey} host={profile.host} handle={profile.handle} />;
+}
+
+function Audience({ postHash }: { postHash: string }) {
+  const pubKeys = useAudience(postHash);
+
+  return (
+    <div className="space-y-3">
+      <h2>Audience</h2>
+      {
+        pubKeys.map((pubKey) => <AudienceListItem key={pubKey} pubKey={pubKey} />)
+      }
+    </div>
+  )
+}
 
 export default function PostDetails() {
   const { userId, postId } = useParams<{ userId: string, postId: string }>();
@@ -43,6 +68,7 @@ export default function PostDetails() {
         worldKeyHex={worldKeyHex}
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
+      <Audience postHash={postId} />
       <div className="space-y-3">
         <h2>Replies</h2>
         {
