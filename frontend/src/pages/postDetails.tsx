@@ -78,6 +78,8 @@ export default function PostDetails() {
 
   const postHost = profile?.host;
 
+  const isPoster = userId === ident?.pubKey.hex;
+
   return (
     <div className="space-y-4">
       <EncryptedPost
@@ -86,7 +88,7 @@ export default function PostDetails() {
         worldKeyHex={worldKeyHex}
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
-      <Audience postHash={postId} worldKeyHex={worldKeyHex} />
+      {isPoster && <Audience postHash={postId} worldKeyHex={worldKeyHex} />}
       <div className="space-y-3">
         <h2>Replies</h2>
         {
