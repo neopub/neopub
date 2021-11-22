@@ -188,8 +188,8 @@ export async function publishPostAndKeys(
       token,
     );
   } else if (visibility === "subs") {
-    const subs = getSubscriberPubKeyList();
-    const subPubKeys = Object.keys(subs);
+    const subs = await getSubscriberPubKeyList();
+    const subPubKeys = subs.map(sub => sub.pubKey);
 
     // Encrypt post for self, to allow refetching from host, without local post cache (e.g. after re-login).
     const targetPubKeys = subPubKeys.concat(pubKey);

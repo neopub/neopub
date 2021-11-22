@@ -34,7 +34,7 @@ export default function Feed() {
       {loading && (<div>Loading...</div>)}
       <div className="space-y-4">
         {posts.map(post => {
-          return <Post key={post.hash} id={post.hash} post={post.post as TPost} pubKey={id.pubKey.hex} />;
+          return <Post key={post.hash} id={post.hash} post={post.post as TPost} pubKey={post.publisherPubKey} />;
         })}
       </div>
       {posts.length < 1 && <Empty text="No feed items." subtext="Follow some people to get content here." />}
