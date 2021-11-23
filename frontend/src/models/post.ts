@@ -159,8 +159,6 @@ export async function removeAccess(postHash: string, viewerPubKey: string) {
   //   alert("Failed to delete.");
   // }
 
-  console.log("deleting access");
-
   const subDHPub = await hex2ECDHKey(viewerPubKey);
   if (!subDHPub) {
     return;
@@ -184,4 +182,26 @@ export async function removeAccess(postHash: string, viewerPubKey: string) {
   }
 
   await DB.postKeys.delete(keyLoc);
+}
+
+export async function deletePost(postHash: string) {
+  const ident = await loadID();
+  if (!ident) {
+    // TODO: show error. Real TODO: rearchitect so ident must be present before calling this.
+    return;
+  }
+
+  const location = fileLoc(ident.pubKey.hex, `posts/${postHash}`);
+  try {
+    await deleteFile(ident.pubKey.hex, ident.token, location);
+  } catch (err) {
+    // TODO: handle in UI code.
+    alert("Failed to delete from host.");
+  }
+
+  await DB.posts.delete(postHash);
+
+  // TODO: update index.
+
+  // TODO: delete post keys too.
 }

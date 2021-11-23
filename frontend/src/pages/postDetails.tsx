@@ -7,7 +7,7 @@ import { IProfile } from "core/types";
 import DB from "lib/db";
 import { useJSON } from "lib/useJSON";
 import { useID } from "models/id";
-import { removeAccess, useAudience } from "models/post";
+import { deletePost, removeAccess, useAudience } from "models/post";
 import { useProfile } from "models/profile";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -80,6 +80,10 @@ export default function PostDetails() {
 
   const isPoster = userId === ident?.pubKey.hex;
 
+  function handleDelete() {
+    deletePost(postId);
+  }
+
   return (
     <div className="space-y-4">
       <EncryptedPost
@@ -88,6 +92,7 @@ export default function PostDetails() {
         worldKeyHex={worldKeyHex}
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
+      {isPoster && <button onClick={handleDelete}>Delete Post</button>}
       {isPoster && <Audience postHash={postId} worldKeyHex={worldKeyHex} />}
       <div className="space-y-3">
         <h2>Replies</h2>
