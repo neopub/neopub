@@ -41,7 +41,7 @@ export default function Post() {
       <h1 className="mb-4">post</h1>
       <div className="text-right mt-2 mb-1">
         <label htmlFor="worldcheck">
-          <input type="checkbox" id="worldcheck" checked={viz === "world"} onClick={handleWorldCheckboxClicked} className="mr-1" />
+          <input type="checkbox" id="worldcheck" checked={viz === "world"} onChange={handleWorldCheckboxClicked} className="mr-1" />
           Make public
         </label>
       </div>
