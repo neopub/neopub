@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 function AudienceListItem({ pubKey, postHash }: { pubKey: string, postHash: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [profile, _] = useProfile(pubKey);
   if (profile === "notfound" || !profile) {
     return null;
