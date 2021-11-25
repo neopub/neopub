@@ -3,13 +3,10 @@ import {
   decryptString,
   deriveDHKey,
   encryptString,
-  genECDHKeys,
   genSymmetricKey,
   hex2ECDHKey,
-  hex2ECDSAKey,
   importAESKey,
   key2buf,
-  pubECDSA2ECDH,
   sha,
   sign,
 } from "core/crypto";
@@ -20,34 +17,11 @@ import {
   IAuthChallenge,
   ISubReq,
   IReply,
-  IMessage,
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
 import DB from "./db";
-import solvePoWChallenge from "core/challenge";
-
-export async function unwrapInboxItem(
-  id: string,
-  pubKeyHex: string,
-  privKey: CryptoKey,
-): Promise<IMessage | undefined> {
-  const ephemDHPub = await hex2ECDHKey(id);
-  if (!ephemDHPub) {
-    return;
-  }
-
-  const ephemDH = await deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
-
-  const enc = await Net.fetchInboxItem(pubKeyHex, id);
-  if (!enc) {
-    return;
-  }
-  const decJson = await decryptString(enc, ephemDH);
-  const req = JSON.parse(decJson) as IMessage;
-
-  return req;
-}
+import { sendMessage } from "models/message";
 
 async function fetchAndDecryptPostWithOuterKey(
   posterPubKeyHex: string,
@@ -279,38 +253,6 @@ export async function sendReply(
   };
 
   return sendMessage(pubPubKeyHex, message, host);
-}
-
-export async function sendMessage(
-  destPubKeyHex: string,
-  message: IMessage,
-  host?: string,
-): Promise<void> {
-  const userPubKey = await hex2ECDSAKey(destPubKeyHex);
-  if (!userPubKey) {
-    return;
-  }
-
-  const pubECDH = await pubECDSA2ECDH(userPubKey);
-
-  // Gen ephem keypair for outer DH.
-  const ephemKeys = await genECDHKeys();
-  const ephemDH = await deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
-
-  // Encrypt request.
-  const reqJson = JSON.stringify(message);
-  const encReqBuf = await encryptString(reqJson, ephemDH);
-
-  // Get PoW challenge and solve it.
-  const { chal, diff } =  await getMessageAuthChallenge(encReqBuf, host);
-  const solution = await solvePoWChallenge(chal, diff);
-  if (!solution) {
-    // TODO: signal failure.
-    return;
-  }
-
-  const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, solution, host);
 }
 
 export async function sendSubRequest(

@@ -129,11 +129,7 @@ async function genIV(
   return iv;
 }
 
-export async function encryptString(
-  data: string,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
-  const plaintext = new TextEncoder().encode(data);
+export async function encryptBuf(plaintext: ArrayBuffer, key: CryptoKey): Promise<ArrayBuffer> {
   const iv = await genIV(plaintext, key);
 
   const ciphertext = await window.crypto.subtle.encrypt(
@@ -149,10 +145,18 @@ export async function encryptString(
   return payload;
 }
 
-export async function decryptString(
+export async function encryptString(
+  data: string,
+  key: CryptoKey,
+): Promise<ArrayBuffer> {
+  const plaintext = new TextEncoder().encode(data);
+  return encryptBuf(plaintext, key);
+}
+
+export async function decryptBuf(
   payload: ArrayBuffer,
   key: CryptoKey,
-): Promise<string> {
+): Promise<ArrayBuffer> {
   const bytes = new Uint8Array(payload);
   const iv = bytes.slice(0, numIvBytes);
   const ciphertext = bytes.slice(numIvBytes);
@@ -166,7 +170,14 @@ export async function decryptString(
     ciphertext,
   );
 
-  const plaintext = new TextDecoder().decode(decrypted);
+  return decrypted;
+}
 
+export async function decryptString(
+  payload: ArrayBuffer,
+  key: CryptoKey,
+): Promise<string> {
+  const decrypted = await decryptBuf(payload, key);
+  const plaintext = new TextDecoder().decode(decrypted);
   return plaintext;
 }

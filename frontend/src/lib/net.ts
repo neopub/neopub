@@ -1,4 +1,4 @@
-import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams } from "core/consts";
+import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams, NUM_SIG_BYTES } from "core/consts";
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
 import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "core/types";
 import { hex2ECDSAKey } from "core/crypto";
@@ -120,7 +120,6 @@ export async function getFileSignedJSON<T>(signerPubKeyHex: string, location: st
       return;
     }
 
-    const NUM_SIG_BYTES = 64;
     const buf = await resp.arrayBuffer();
     const sig = buf.slice(0, NUM_SIG_BYTES);
 

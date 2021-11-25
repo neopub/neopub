@@ -1,5 +1,6 @@
 export const POW_DIFF = 14;
 
+export const NUM_SIG_BYTES = 64;
 export const ECDSA_PUBKEY_BYTES = 65;
 export const SOLUTION_BYTES = 32;
 export const SIGNATURE_BYTES = 64;

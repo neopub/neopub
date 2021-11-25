@@ -1,6 +1,6 @@
 import Post from "components/post";
 import { IMessage, IReply, ISubReq } from "core/types";
-import { unwrapInboxItem } from "lib/api";
+import { unwrapInboxItem } from "models/message";
 import { recordReplyInDB } from "lib/storage";
 import { useID } from "models/id";
 import { useState, useEffect } from "react";
