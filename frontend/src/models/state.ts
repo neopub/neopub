@@ -62,6 +62,8 @@ export async function fetchState(): Promise<void> {
 
   const plaintext = await decryptString(ciphertext, stateKey);
 
+  // TODO: test this blows up if it fails to decrypt.
+
   const state = JSON.parse(plaintext);
 
   return loadStateDangerously(state);

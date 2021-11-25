@@ -356,7 +356,11 @@ export async function publishPost(
   // Update index.
   index.posts.push({ id: hashHex });
   const indexEnc = new TextEncoder().encode(JSON.stringify(index));
-  await putFile(pubKey, `index.json`, privKey, token, indexEnc, "application/json");
+  const indexSig = await sign(privKey, indexEnc);
+  const signedIndex = concatArrayBuffers(indexSig, indexEnc);
+  // putFile already signs the file for the host to check. Redundant? Cleaner way?
+
+  await putFile(pubKey, `index.json`, privKey, token, signedIndex, "application/json");
 
   return [index, hash];
 }

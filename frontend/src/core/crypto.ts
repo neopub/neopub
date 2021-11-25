@@ -77,7 +77,7 @@ export async function hex2ECDSAKey(
     bytes,
     { name: "ECDSA", namedCurve: "P-256" },
     true,
-    [],
+    ["verify"],
   );
 }
 

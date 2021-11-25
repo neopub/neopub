@@ -3,7 +3,7 @@ import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
 import { IIndex, IProfile, NotFound } from "core/types";
 import { getPublicKeyHex, storeCredentials } from "lib/auth";
 import DB from "lib/db";
-import { fileLoc, getFileJSON, hostPrefix } from "lib/net";
+import { fileLoc, getFileJSON, getFileSignedJSON, hostPrefix } from "lib/net";
 import { useState, useEffect } from "react";
 import { loadID } from "./id";
 import { putFile } from "lib/api";
@@ -30,7 +30,7 @@ export function useIndex(id: string, host?: string): IIndex | "notfound" {
       }
 
       const location = fileLoc(id, "index.json");
-      const remoteIndex = await getFileJSON<IIndex>(location, host);
+      const remoteIndex = await getFileSignedJSON<IIndex>(id, location, host);
       if (remoteIndex && remoteIndex !== "notfound" && remoteIndex.updatedAt > updatedAt) {
         setIndex(remoteIndex);
       }

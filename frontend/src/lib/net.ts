@@ -1,6 +1,7 @@
-import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader } from "core/consts";
+import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams } from "core/consts";
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
 import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "core/types";
+import { hex2ECDSAKey } from "core/crypto";
 
 export const hostPrefix = process.env.REACT_APP_HOST_PREFIX ?? "NOHOST";
 
@@ -34,7 +35,7 @@ export async function fetchPostKey(
 
 export async function getIndex(pubKeyHex: string, host?: string): Promise<IIndex | undefined | NotFound> {
   const location = fileLoc(pubKeyHex, "index.json");
-  return getFileJSON<IIndex>(location, host);
+  return getFileSignedJSON<IIndex>(pubKeyHex, location, host);
 }
 
 export async function getProfile(pubKeyHex: string, host?: string): Promise<IProfile | undefined | NotFound> {
@@ -99,6 +100,54 @@ export async function getFileJSON<T>(location: string, host?: string): Promise<T
     const json = await resp.json();
     return json;
   } catch {
+    return;
+  }
+}
+
+export async function getFileSignedJSON<T>(signerPubKeyHex: string, location: string, host?: string): Promise<T | undefined | NotFound> {
+  try {
+    const resp = await fetch(`${host ?? hostPrefix}/get`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        [locationHeader]: location,
+      },
+    });
+    if (resp.status === 404) {
+      return "notfound";
+    }
+    if (!resp.ok) {
+      return;
+    }
+
+    const NUM_SIG_BYTES = 64;
+    const buf = await resp.arrayBuffer();
+    const sig = buf.slice(0, NUM_SIG_BYTES);
+
+    // TODO: check.
+    const signerPubKey = await hex2ECDSAKey(signerPubKeyHex);
+    if (!signerPubKey) {
+      return; // TODO: signal error.
+    }
+
+    const rest = buf.slice(NUM_SIG_BYTES);
+
+    const valid = await crypto.subtle.verify(
+      ecdsaParams,
+      signerPubKey,
+      sig,
+      rest,
+    );
+    if (!valid) {
+      return; // TODO blow up.
+    }
+
+    const json = new TextDecoder().decode(rest);
+    const index = JSON.parse(json);
+
+    return index;
+  } catch (err) {
+    console.error(err);
     return;
   }
 }
