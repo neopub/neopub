@@ -1,9 +1,9 @@
-import { buf2hex } from "core/bytes";
-import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
+import { buf2hex, concatArrayBuffers } from "core/bytes";
+import { genIDKeyPair, genSymmetricKey, key2buf, sign } from "core/crypto";
 import { IIndex, IProfile, NotFound } from "core/types";
 import { getPublicKeyHex, storeCredentials } from "lib/auth";
 import DB from "lib/db";
-import { fileLoc, getFileJSON, getFileSignedJSON, hostPrefix } from "lib/net";
+import { fileLoc, getFileSignedJSON, hostPrefix } from "lib/net";
 import { useState, useEffect } from "react";
 import { loadID } from "./id";
 import { putFile } from "lib/api";
@@ -12,7 +12,7 @@ import { getToken } from "models/host";
 // TODO: standardize userId vs. pubKeyHex.
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
   const location = fileLoc(userId, "profile.json");
-  return getFileJSON<IProfile>(location, host);
+  return getFileSignedJSON<IProfile>(userId, location, host);
 }
 
 export function useIndex(id: string, host?: string): IIndex | "notfound" {
@@ -84,6 +84,9 @@ export function useProfile(userId?: string, host?: string): [IProfile | NotFound
 
     setProfile(newProfile);
 
+    await storeProfile(userId, newProfile);
+    console.log(newProfile);
+
     const ident = await loadID();
     if (!ident) {
       return;
@@ -101,7 +104,7 @@ export async function storeProfile(pubKeyHex: string, profile: IProfile, followi
     host: profile.host,
     worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
     handle: profile.handle,
-    bio: profile.handle,
+    bio: profile.bio,
     following,
     followsMe,
   })
@@ -122,8 +125,10 @@ export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token
   const pubKeyHex = buf2hex(pubKeyBuf);
 
   const payload = new TextEncoder().encode(JSON.stringify(profile));
+  const sig = await sign(privKey, payload);
+  const signed = concatArrayBuffers(sig, payload);
 
-  return putFile(pubKeyHex, "profile.json", privKey, token, payload, "application/json");
+  return putFile(pubKeyHex, "profile.json", privKey, token, signed, "application/json");
 }
 
 export async function createProfile(setStatus: (status: string) => void) {

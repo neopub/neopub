@@ -40,7 +40,7 @@ export async function getIndex(pubKeyHex: string, host?: string): Promise<IIndex
 
 export async function getProfile(pubKeyHex: string, host?: string): Promise<IProfile | undefined | NotFound> {
   const location = fileLoc(pubKeyHex, "profile.json");
-  return getFileJSON<IProfile>(location, host);
+  return getFileSignedJSON<IProfile>(pubKeyHex, location, host);
 }
 
 export async function fetchPost(
