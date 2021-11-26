@@ -3,9 +3,7 @@ import EncryptedPost from "components/encryptedPost";
 import HexIDCard from "components/hexIdCard";
 import Post from "components/post";
 import ReplyButton from "components/replyButton";
-import { IProfile } from "core/types";
 import DB from "lib/db";
-import { useJSON } from "lib/useJSON";
 import { useID } from "models/id";
 import { deletePost, removeAccess, useAudience } from "models/post";
 import { useProfile } from "models/profile";
@@ -58,7 +56,7 @@ export default function PostDetails() {
   const { userId, postId } = useParams<{ userId: string, postId: string }>();
   const ident = useID();
 
-  const [profile] = useJSON<IProfile>(userId, "profile.json", { handle: "", avatarURL: "", worldKey: "" });
+  const [profile] = useProfile(userId);
 
   const [replies, setReplies] = useState<any[]>([]);
   useEffect(() => {
