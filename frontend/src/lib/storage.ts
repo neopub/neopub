@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
 import { key2buf, sha } from "core/crypto";
 import DB from "lib/db";
-import { IReply, ISubReq } from "core/types";
-import { mutateState } from "models/state";
-import { acceptFollower, fetchProfile } from "models/profile";
+import { IReply } from "core/types";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -74,22 +72,6 @@ export async function getSubscriberPubKeyList(): Promise<{ pubKey: string }[]> {
 export async function addSubscriptionPubKey(pubKey: string, host: string, worldKeyHex: string, handle?: string) {
   return DB.subscriptions.add({ pubKey, host, worldKeyHex, handle })
     .catch(() => {});
-}
-
-export async function addSubscriber(req: ISubReq) {
-  const profile = await fetchProfile(req.pubKey, req.host);
-
-  if (!profile || profile === "notfound") {
-    return; // TODO: handle error.
-  }
-
-  return mutateState(async () => {
-    await acceptFollower(req.pubKey, profile);
-    return DB.followers.put({
-      pubKey: req.pubKey,
-      host: req.host,
-    });
-  });
 }
 
 export function useSubscribers(): [any[] | undefined, () => void] {

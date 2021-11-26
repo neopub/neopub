@@ -1,7 +1,9 @@
+import { ISubReq } from "core/types";
 import EventBus from "lib/eventBus";
 import { deleteFile, fetchInbox, fileLoc } from "lib/net";
 import { useState, useEffect } from "react";
 import { ID, loadID } from "./id";
+import { addSubscriber } from "./profile";
 
 type Inbox = string[];
 
@@ -73,4 +75,9 @@ export async function deleteInboxItem(id: string) {
     // TODO: handle in UI code.
     alert("Failed to delete.");
   }
+}
+
+export async function acceptRequest(id: string, req: ISubReq) {
+  await addSubscriber(req);
+  return deleteInboxItem(id);
 }

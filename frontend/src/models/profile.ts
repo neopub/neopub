@@ -1,6 +1,6 @@
 import { buf2hex, concatArrayBuffers } from "core/bytes";
 import { genIDKeyPair, genSymmetricKey, key2buf, sign } from "core/crypto";
-import { IIndex, IProfile, NotFound } from "core/types";
+import { IIndex, IProfile, ISubReq, NotFound } from "core/types";
 import { getPublicKeyHex, storeCredentials } from "lib/auth";
 import DB from "lib/db";
 import { fileLoc, getFileSignedJSON, hostPrefix } from "lib/net";
@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { loadID } from "./id";
 import { putFile } from "lib/api";
 import { getToken } from "models/host";
+import { mutateState } from "./state";
 
 // TODO: standardize userId vs. pubKeyHex.
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
@@ -196,5 +197,21 @@ export async function acceptFollower(pubKeyHex: string, profile: IProfile) {
     bio: profile.handle,
     following: false, // TODO: handle case of overwrite. Maybe using separate table to track follower/following.
     followsMe: true,
+  });
+}
+
+export async function addSubscriber(req: ISubReq) {
+  const profile = await fetchProfile(req.pubKey, req.host);
+
+  if (!profile || profile === "notfound") {
+    return; // TODO: handle error.
+  }
+
+  return mutateState(async () => {
+    await acceptFollower(req.pubKey, profile);
+    return DB.followers.put({
+      pubKey: req.pubKey,
+      host: req.host,
+    });
   });
 }

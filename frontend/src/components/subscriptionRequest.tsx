@@ -1,11 +1,10 @@
 import { ISubReq } from "core/types";
-import { addSubscriber } from "lib/storage";
-import { deleteInboxItem } from "models/inbox";
+import { acceptRequest, deleteInboxItem } from "models/inbox";
 import HexIDCard from "./hexIdCard";
 
 export default function Req({ id, req }: { id: string, req: ISubReq}) {
-  function handleAccept() {
-    addSubscriber(req);
+  async function handleAccept() {
+    await acceptRequest(id, req);
   }
 
   function handleDelete() {
