@@ -3,6 +3,7 @@ import EncryptedPost from "components/encryptedPost";
 import HexIDCard from "components/hexIdCard";
 import Post from "components/post";
 import ReplyButton from "components/replyButton";
+import Tabs, { ITab } from "components/tabs";
 import DB from "lib/db";
 import { useID } from "models/id";
 import { deletePost, removeAccess, useAudience } from "models/post";
@@ -36,8 +37,7 @@ function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: s
   // TODO: visualize all past visibility states, since someone might have cached a key.
 
   return (
-    <div className="space-y-3">
-      <h2>Audience</h2>
+    <div>
       {
         pubKeys.map((pubKey) => {
           const isWorld = pubKey === worldKeyHex;
@@ -83,6 +83,31 @@ export default function PostDetails() {
     deletePost(postId);
   }
 
+  const tabs: ITab[] = [
+    {
+      name: "Replies",
+      el: (
+        <>
+          {
+            replies.map(reply => {
+              return <Post key={reply.hash} id={reply.hash} post={reply.post} pubKey={reply.publisherPubKey} />
+            })
+          }
+          {
+            replies.length < 1 && <Empty text="No replies." />
+          }
+        </>
+      ),
+    },
+  ];
+
+  if (isPoster) {
+    tabs.push({
+      name: "Audience",
+      el: <Audience postHash={postId} worldKeyHex={worldKeyHex} />,
+    });
+  }
+
   return (
     <div className="space-y-4">
       <EncryptedPost
@@ -92,18 +117,7 @@ export default function PostDetails() {
       />
       {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
       {isPoster && <button onClick={handleDelete}>Delete Post</button>}
-      {isPoster && <Audience postHash={postId} worldKeyHex={worldKeyHex} />}
-      <div className="space-y-3">
-        <h2>Replies</h2>
-        {
-          replies.map(reply => {
-            return <Post key={reply.hash} id={reply.hash} post={reply.post} pubKey={reply.publisherPubKey} />
-          })
-        }
-        {
-          replies.length < 1 && <Empty text="No replies." />
-        }
-      </div>
+      <Tabs tabs={tabs} initialActiveTab="Replies" />
     </div>
   )
 }
