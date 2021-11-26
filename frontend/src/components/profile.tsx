@@ -12,6 +12,7 @@ import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
 import { useID } from "models/id";
 import KnowMore from "./knowMore";
+import RepliesList from "./repliesList";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
   return <span className="whitespace-nowrap">[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
@@ -116,7 +117,7 @@ export default function Profile({ id }: IProps) {
           {
             index === "notfound" || !index
               ? emptyPostList
-              : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} index={index} host={host} empty={emptyPostList} />
+              : <PostList pubKeyHex={ident?.pubKey.hex} id={id} worldKeyHex={profile?.worldKey} posts={index.posts ?? []} host={host} empty={emptyPostList} />
           }
         </>
       ),
@@ -124,6 +125,11 @@ export default function Profile({ id }: IProps) {
   ];
 
   if (isAuthedUser && ident) {
+    tabs.push({
+      name: "Replies",
+      el: <RepliesList />,
+    });
+
     tabs.push({
       name: "Followers",
       el: <SubscriberList />,

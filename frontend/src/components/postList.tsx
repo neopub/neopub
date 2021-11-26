@@ -1,9 +1,9 @@
-import { IIndex, IEncPost } from "core/types";
+import { IEncPost, TPost } from "core/types";
 import EncryptedPost from "./encryptedPost";
 import ReplyButton from "./replyButton";
 
-export default function PostList({ pubKeyHex, index, id, worldKeyHex, host, empty }: { index: IIndex, id: string, worldKeyHex?: string, pubKeyHex?: string, host: string, empty: React.ReactElement }) {
-  if (index.posts?.length === 0) {
+export default function PostList({ pubKeyHex, posts, id, worldKeyHex, host, empty }: { posts: (TPost | IEncPost)[], id: string, worldKeyHex?: string, pubKeyHex?: string, host: string, empty: React.ReactElement }) {
+  if (posts.length === 0) {
     return empty;
   }
 
@@ -12,7 +12,7 @@ export default function PostList({ pubKeyHex, index, id, worldKeyHex, host, empt
   return (
     <div className="divide-green-800 divide-y">
       {
-        index.posts?.map(
+        posts.map(
           (p, i) =>
             id && (
               <div key={i} className="flex flex-col pt-3 pb-2">
