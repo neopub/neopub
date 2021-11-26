@@ -11,7 +11,7 @@ export default function Tabs({ tabs, initialActiveTab }: { tabs: ITab[], initial
   const activeEl = tabs.filter(tab => tab.name === activeTab)?.[0]?.el;
   return (
     <>
-      <div className="flex flex-row text-center">
+      <div className="flex flex-row text-center overflow-auto">
         {
           tabs.map((tab) => {
             const isActive = tab.name === activeTab;

@@ -94,7 +94,7 @@ function Menu() {
 ReactDOM.render(
   <React.StrictMode>
     <div className="flex justify-center">
-      <div className="flex-1 p-4 max-w-5xl">
+      <div className="flex-1 p-4 max-w-full md:max-w-5xl">
         <Router>
           <Menu />
           <Switch>
