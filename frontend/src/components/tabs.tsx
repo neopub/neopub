@@ -11,11 +11,11 @@ export default function Tabs({ tabs, initialActiveTab }: { tabs: ITab[], initial
   const activeEl = tabs.filter(tab => tab.name === activeTab)?.[0]?.el;
   return (
     <>
-      <div className="flex flex-row space-x-4">
+      <div className="flex flex-row text-center">
         {
           tabs.map((tab) => {
             const isActive = tab.name === activeTab;
-            return <h2 key={tab.name} className={`mb-3 cursor-pointer hover:text-green-200 hover:underline ${isActive ? "underline" : undefined}`} onClick={() => setActiveTab(tab.name)} style={{ textUnderlineOffset: 2 }}>{tab.name}</h2>
+            return <h2 key={tab.name} className={`mb-3 p-3 flex-1 cursor-pointer hover:bg-gray-800 hover:text-green-200 hover:underline ${isActive ? "underline" : undefined}`} onClick={() => setActiveTab(tab.name)} style={{ textUnderlineOffset: 2 }}>{tab.name}</h2>
           })
         }
       </div>
