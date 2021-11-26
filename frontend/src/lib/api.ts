@@ -16,7 +16,6 @@ import {
   PostVisibility,
   IAuthChallenge,
   ISubReq,
-  IReply,
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
 import * as Net from "lib/net";
@@ -235,24 +234,6 @@ export async function publishPostSubKey(
   });
 
   await publishPostKey(postKey, postHash, encDH, pubKey, privKey, token);
-}
-
-export async function sendReply(
-  postId: string,
-  pubPubKeyHex: string,
-  senderPubKeyHex: string,
-  msg: string,
-  host?: string,
-): Promise<void> {
-  const message: IReply = {
-    type: "reply",
-    pubKey: senderPubKeyHex,
-    msg,
-    postId,
-    createdAt: new Date().toISOString(),
-  };
-
-  return sendMessage(pubPubKeyHex, message, host);
 }
 
 export async function sendSubRequest(

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
-import { key2buf, sha } from "core/crypto";
+import { key2buf } from "core/crypto";
 import DB from "lib/db";
 import { IReply } from "core/types";
+import { replyId } from "models/reply";
 
 const tokenKey = "token";
 const privKeyKey = "privKey";
@@ -122,9 +123,7 @@ export function loadCreds(stateJSON: string) {
 }
 
 export async function recordReplyInDB(reply: IReply) {
-  const buf = new TextEncoder().encode(reply.msg);
-  const hash = await sha(buf);
-  const hashHex = await buf2hex(hash);
+  const hashHex = await replyId(reply);
   return DB.posts.put({
     hash: hashHex,
     replyToHash: reply.postId,
