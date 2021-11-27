@@ -5,6 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import KnowMore from "components/knowMore";
 import { publishTextPost } from "models/post";
 import { useID } from "models/id";
+import { TabBar } from "components/tabs";
 
 export default function Post() {
   const id = useID();
@@ -16,8 +17,15 @@ export default function Post() {
   const [text, setText] = useState("");
 
   const [viz, setViz] = useState<PostVisibility>("subs");
-  function handleWorldCheckboxClicked(evt: any) {
-    setViz(viz === "world" ? "subs" : "world");
+
+  const tabs = ["Followers", "Public"]
+  const activeTab = viz === "world" ? "Public" : "Followers";
+  function handleTabSelected(tab: string) {
+    if (tab === "Public") {
+      setViz("world");
+    } else if (tab === "Followers") {
+      setViz("subs");
+    }
   }
   
   if (!id || !setIndex) {
@@ -39,19 +47,14 @@ export default function Post() {
   return (
     <div className="flex flex-col max-w-lg">
       <h1 className="mb-4">post</h1>
-      <div className="text-right mt-2 mb-1">
-        <label htmlFor="worldcheck">
-          <input type="checkbox" id="worldcheck" checked={viz === "world"} onChange={handleWorldCheckboxClicked} className="mr-1" />
-          Make public
-        </label>
-      </div>
+      <TabBar tabs={tabs} activeTab={activeTab} onTabSelected={handleTabSelected} />
       <textarea
         value={text}
         placeholder="Type here..."
         onChange={(e) => setText(e.target.value)}
         className="h-48 rounded p-2"
       />
-      <button className="flex-1 px-4 py-2" onClick={() => handlePostClicked(viz)} disabled={text.length < 1}>Post ({viz === "world" ? "World" : "Subscribers"})</button>
+      <button className="flex-1 px-4 py-2" onClick={() => handlePostClicked(viz)} disabled={text.length < 1}>Post ({viz === "world" ? "World" : "Followers"})</button>
 
       <KnowMore more={
         <p>In neopub, all posts are encrypted. For public posts, the encryption key is published. For private posts, the encryption key is separately encrypted for each subscriber, then those are published. See <Link to="/arch/post">/arch/post</Link> to learn more about post security architecture.</p>
