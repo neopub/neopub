@@ -119,8 +119,12 @@ export default function PostDetails() {
         pubKey={userId}
         worldKeyHex={worldKeyHex}
       />
-      {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
-      {isPoster && <button onClick={handleDelete}>Delete Post</button>}
+
+      <div className="flex flex-row space-x-2">
+        {postHost != null && <ReplyButton post={post} pubKeyHex={ident?.pubKey.hex} id={userId} host={postHost} />}
+        {isPoster && <button onClick={handleDelete}>Delete Post</button>}
+      </div>
+
       <Tabs tabs={tabs} initialActiveTab="Replies" />
     </div>
   )
