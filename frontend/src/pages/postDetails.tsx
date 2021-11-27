@@ -113,6 +113,7 @@ export default function PostDetails() {
 
   return (
     <div className="space-y-4">
+      <h1 className="mb-8">post details</h1>
       <EncryptedPost
         enc={post}
         pubKey={userId}
