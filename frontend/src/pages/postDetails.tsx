@@ -39,6 +39,9 @@ function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: s
   return (
     <div>
       {
+        pubKeys.length < 1 && <Empty text="No one with view access" subtext="No keys to decrypt this post are published for anyone but you. If someone previously had access and you removed them, they could still decrypt the post if they downloaded the key before you removed their access." />
+      }
+      {
         pubKeys.map((pubKey) => {
           const isWorld = pubKey === worldKeyHex;
           if (isWorld) {
@@ -94,7 +97,7 @@ export default function PostDetails() {
             })
           }
           {
-            replies.length < 1 && <Empty text="No replies." />
+            replies.length < 1 && <Empty text="No replies" subtext="If someone replies to this post, you'll see their reply here." />
           }
         </>
       ),
