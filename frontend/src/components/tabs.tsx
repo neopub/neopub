@@ -7,7 +7,7 @@ export function TabBar({ tabs, activeTab, onTabSelected }: { tabs: string[], act
       {
         tabs.map((tab) => {
           const isActive = tab === activeTab;
-          return <h2 key={tab} className={`mb-3 p-3 flex-1 cursor-pointer hover:bg-gray-800 hover:text-green-200 hover:underline ${isActive ? "underline" : undefined}`} onClick={() => onTabSelected(tab)} style={{ textUnderlineOffset: 2 }}>{tab}</h2>
+          return <h2 key={tab} className={`mb-3 p-3 flex-1 cursor-pointer hover:bg-gray-800 hover:text-green-200 hover:underline ${isActive ? "underline bg-gray-800" : undefined}`} onClick={() => onTabSelected(tab)} style={{ textUnderlineOffset: 2 }}>{tab}</h2>
         })
       }
     </div>
