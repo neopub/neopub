@@ -1,12 +1,12 @@
 import Empty from "components/empty";
 import Post from "components/post";
 import { TPost } from "core/types";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { DBPost, fetchPosts, loadPosts } from "models/post";
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 
 export default function Feed() {
-  const id = useID();
+  const ident = useContext(IdentityContext);
   
   const [posts, setPosts] = useState<DBPost[]>([])
   const [loading, setLoading] = useState(true);
@@ -14,17 +14,17 @@ export default function Feed() {
   useEffect(() => {
     loadPosts().then(setPosts);
 
-    if (id) {
-      fetchPosts(id.privKey.dhKey)
+    if (ident) {
+      fetchPosts(ident.privKey.dhKey)
         .then(async () => {
           const posts = await loadPosts();
           setPosts(posts);
           setLoading(false);
         });
     }
-  }, [id]);
+  }, [ident]);
 
-  if (!id) {
+  if (!ident) {
     return null;
   }
 

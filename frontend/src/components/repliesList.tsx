@@ -1,11 +1,12 @@
 import { hostPrefix } from "lib/net";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { useReplies } from "models/reply";
+import { useContext } from "react";
 import Empty from "./empty";
 import PostList from "./postList";
 
 export default function RepliesList() {
-  const ident = useID();
+  const ident = useContext(IdentityContext);
   const replies = useReplies(ident);
 
   if (!ident || !replies) {

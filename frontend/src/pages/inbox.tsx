@@ -1,19 +1,20 @@
 import Empty from "components/empty";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { useInbox } from "models/inbox";
+import { useContext } from "react";
 import InboxItem from "../components/inboxItem";
 
 export default function Inbox() {
-  const id = useID();
-  const inbox = useInbox(id);
+  const ident = useContext(IdentityContext);
+  const inbox = useInbox(ident);
 
   return (
     <main>
       <h1 className="mb-8">inbox</h1>
       {
-        id && inbox && (
+        ident && inbox && (
           <div className="space-y-3">
-            { inbox.map(i => <InboxItem key={i} id={i} pubKeyHex={id.pubKey.hex} />) }
+            { inbox.map(i => <InboxItem key={i} id={i} pubKeyHex={ident.pubKey.hex} />) }
           </div>
         )
       }

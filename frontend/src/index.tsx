@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './pages/App';
@@ -27,7 +27,7 @@ import PostDetails from 'pages/postDetails';
 import DataArch from 'pages/dataArch';
 import Inbox from 'pages/inbox';
 import { useInbox } from 'models/inbox';
-import { useID } from 'models/id';
+import { IdentityContext, useID } from 'models/id';
 
 interface IMenuItemProps {
   curPath: string;
@@ -41,7 +41,7 @@ function MenuItem({ curPath, path, text }: IMenuItemProps) {
 
 function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
   const highlight = curPath === path;
-  const ident = useID();
+  const ident = useContext(IdentityContext);
   const inbox = useInbox(ident);
   const count = inbox?.length;
   const showCount = count != null && count > 0;
@@ -91,63 +91,73 @@ function Menu() {
   )
 }
 
+function Main() {
+  const ident = useID();
+
+  return (
+    <React.StrictMode>
+      <IdentityContext.Provider value={ident}>
+        <div className="flex justify-center">
+          <div className="flex-1 p-4 max-w-full md:max-w-5xl">
+            <Router>
+              <Menu />
+              <Switch>
+                <Route exact path="/">
+                  <App />
+                </Route>
+                <Route exact path="/feed">
+                  <Feed />
+                </Route>
+                <Route exact path="/post">
+                  <Post />
+                </Route>
+                <Route exact path="/posts/:userId/:postId">
+                  <PostDetails />
+                </Route>
+                <Route exact path="/inbox">
+                  <Inbox />
+                </Route>
+                <Route exact path="/exit">
+                  <Exit />
+                </Route>
+                <Route exact path="/creds/dump*">
+                  <DumpCreds />
+                </Route>
+                <Route exact path="/creds/load">
+                  <LoadCreds />
+                </Route>
+                <Route exact path="/users/:id">
+                  <UserProfile />
+                </Route>
+                <Route exact path="/users/:id/sub">
+                  <Sub />
+                </Route>
+                <Route exact path="/host">
+                  <Host />
+                </Route>
+                <Route exact path="/arch">
+                  <Arch />
+                </Route>
+                <Route exact path="/arch/sub">
+                  <SubArch />
+                </Route>
+                <Route exact path="/arch/post">
+                  <PostArch />
+                </Route>
+                <Route exact path="/arch/data">
+                  <DataArch />
+                </Route>
+              </Switch>
+            </Router>
+          </div>
+        </div>
+      </IdentityContext.Provider>
+    </React.StrictMode>
+  );
+}
+
 ReactDOM.render(
-  <React.StrictMode>
-    <div className="flex justify-center">
-      <div className="flex-1 p-4 max-w-full md:max-w-5xl">
-        <Router>
-          <Menu />
-          <Switch>
-            <Route exact path="/">
-              <App />
-            </Route>
-            <Route exact path="/feed">
-              <Feed />
-            </Route>
-            <Route exact path="/post">
-              <Post />
-            </Route>
-            <Route exact path="/posts/:userId/:postId">
-              <PostDetails />
-            </Route>
-            <Route exact path="/inbox">
-              <Inbox />
-            </Route>
-            <Route exact path="/exit">
-              <Exit />
-            </Route>
-            <Route exact path="/creds/dump*">
-              <DumpCreds />
-            </Route>
-            <Route exact path="/creds/load">
-              <LoadCreds />
-            </Route>
-            <Route exact path="/users/:id">
-              <UserProfile />
-            </Route>
-            <Route exact path="/users/:id/sub">
-              <Sub />
-            </Route>
-            <Route exact path="/host">
-              <Host />
-            </Route>
-            <Route exact path="/arch">
-              <Arch />
-            </Route>
-            <Route exact path="/arch/sub">
-              <SubArch />
-            </Route>
-            <Route exact path="/arch/post">
-              <PostArch />
-            </Route>
-            <Route exact path="/arch/data">
-              <DataArch />
-            </Route>
-          </Switch>
-        </Router>
-      </div>
-    </div>
-  </React.StrictMode>,
+  <Main />,
   document.getElementById('root')
 );
 

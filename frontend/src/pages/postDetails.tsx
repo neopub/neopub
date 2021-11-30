@@ -5,10 +5,10 @@ import Post from "components/post";
 import ReplyButton from "components/replyButton";
 import Tabs, { ITab } from "components/tabs";
 import DB from "lib/db";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { deletePost, removeAccess, useAudience } from "models/post";
 import { useProfile } from "models/profile";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -57,7 +57,7 @@ function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: s
 
 export default function PostDetails() {
   const { userId, postId } = useParams<{ userId: string, postId: string }>();
-  const ident = useID();
+  const ident = useContext(IdentityContext);
 
   const [profile] = useProfile(userId);
 

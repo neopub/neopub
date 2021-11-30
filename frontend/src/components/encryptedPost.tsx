@@ -1,7 +1,7 @@
 import { TPost, IEncPost } from "core/types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Post from "components/post";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { fetchAndDec } from "models/post";
 
 export default function EncryptedPost({
@@ -13,7 +13,7 @@ export default function EncryptedPost({
   pubKey: string;
   worldKeyHex?: string;
 }) {
-  const ident = useID();
+  const ident = useContext(IdentityContext);
 
   const [post, setPost] = useState<TPost>();
   useEffect(() => {

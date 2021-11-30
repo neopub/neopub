@@ -1,9 +1,10 @@
 import Access from "../components/access";
 import Profile from "../components/profile";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
+import { useContext } from "react";
 
 function App() {
-  const ident = useID();
+  const ident = useContext(IdentityContext);
 
   if (ident === undefined) {
     return null;

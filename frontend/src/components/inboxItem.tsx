@@ -2,12 +2,12 @@ import Post from "components/post";
 import { IMessage, IReply, ISubReq } from "core/types";
 import { unwrapInboxItem } from "models/message";
 import { recordReplyInDB } from "lib/storage";
-import { useID } from "models/id";
-import { useState, useEffect } from "react";
+import { IdentityContext } from "models/id";
+import { useState, useEffect, useContext } from "react";
 import Req from "./subscriptionRequest";
 
 export default function InboxItem({ id, pubKeyHex }: { id: string, pubKeyHex: string }) {
-  const ident = useID();
+  const ident = useContext(IdentityContext);
 
   // TODO: do all this unwrapping in a data layer. Not UI.
   const [item, setItem] = useState<IMessage>();

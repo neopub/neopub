@@ -5,15 +5,15 @@ import { hostPrefix } from "lib/net";
 import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { follow, useProfile } from "models/profile";
-import { useID } from "models/id";
-import { useEffect } from "react";
+import { IdentityContext } from "models/id";
+import { useContext, useEffect } from "react";
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import HexIDCard from "components/hexIdCard";
 
 export default function Sub() {
   const history = useHistory();
-  const id = useID();
+  const ident = useContext(IdentityContext);
   const [sentReq, setSentReq] = useState(false);
 
   const { id: pubId } = useParams<{ id: string }>();
@@ -41,13 +41,13 @@ export default function Sub() {
       return;
     }
 
-    if (!id) {
+    if (!ident) {
       alert('You need an identity first.')
       history.push(`/?next=${encodeURIComponent(history.location.pathname)}`);
       return;
     }
 
-    if (id.pubKey.hex === pubId) {
+    if (ident.pubKey.hex === pubId) {
       alert("You can't follow yourself.");
       return;
     }
@@ -59,7 +59,7 @@ export default function Sub() {
 
     const worldKeyHex = profile.worldKey;
 
-    await sendSubRequest(pubId, id.pubKey.hex, msg, host, host);
+    await sendSubRequest(pubId, ident.pubKey.hex, msg, host, host);
 
     await mutateState(async () => {
       await follow(pubId, profile);

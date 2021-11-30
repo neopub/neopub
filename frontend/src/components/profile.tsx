@@ -10,9 +10,10 @@ import SubscribeView from "./subscribeView";
 import SubscriptionList from "./subscriptionList";
 import Tabs, { ITab } from "./tabs";
 import Empty from "./empty";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import KnowMore from "./knowMore";
 import RepliesList from "./repliesList";
+import { useContext } from "react";
 
 function BracketButton({ label, onClick }: { label: string, onClick: () => void }) {
   return <span className="whitespace-nowrap">[<button className="border-0 m-0 p-0" onClick={onClick}>{label}</button>]</span>;
@@ -88,7 +89,7 @@ interface IProps {
 }
 export default function Profile({ id }: IProps) {
   const history = useHistory();
-  const ident = useID();
+  const ident = useContext(IdentityContext);
   const isAuthedUser = ident && id === ident.pubKey.hex;
 
   let host = new URLSearchParams(window.location.search).get("host") ?? undefined;

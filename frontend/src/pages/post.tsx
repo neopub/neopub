@@ -1,17 +1,17 @@
 import { IIndex, PostVisibility } from "core/types";
 import { useJSON } from "lib/useJSON";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import KnowMore from "components/knowMore";
 import { publishTextPost } from "models/post";
-import { useID } from "models/id";
+import { IdentityContext } from "models/id";
 import { TabBar } from "components/tabs";
 
 export default function Post() {
-  const id = useID();
+  const ident = useContext(IdentityContext);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setIndex] = useJSON<IIndex>(id?.pubKey.hex, "index.json", { posts: [], updatedAt: "" });
+  const [_, setIndex] = useJSON<IIndex>(ident?.pubKey.hex, "index.json", { posts: [], updatedAt: "" });
   const history = useHistory();
 
   const [text, setText] = useState("");
@@ -28,20 +28,20 @@ export default function Post() {
     }
   }
   
-  if (!id || !setIndex) {
+  if (!ident || !setIndex) {
     return <div>Can't post.</div>
   }
 
   async function handlePostClicked(visibility: PostVisibility) {
-    if (!id || !setIndex) {
+    if (!ident || !setIndex) {
       return;
     }
 
-    const newIndex = await publishTextPost(id, text, visibility);
+    const newIndex = await publishTextPost(ident, text, visibility);
 
     setIndex(newIndex);
 
-    history.push(`/users/${id.pubKey.hex}`);
+    history.push(`/users/${ident.pubKey.hex}`);
   }
 
   return (

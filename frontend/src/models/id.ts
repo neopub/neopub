@@ -3,7 +3,7 @@ import { wipeDB } from "lib/db";
 import EventBus from "lib/eventBus";
 import { getToken, getWorldKey, loadCreds, setToken } from "lib/storage";
 import * as Host from "models/host";
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext } from "react";
 import { fetchAndStoreOwnProfile } from "./profile";
 import { fetchState } from "./state";
 
@@ -21,6 +21,8 @@ export interface ID {
     hex: string,
   }
 }
+
+export const IdentityContext = createContext<ID | null | undefined>(undefined);
 
 export async function loadID(): Promise<ID | undefined> {
   const pubKey = await getPublicKey();
