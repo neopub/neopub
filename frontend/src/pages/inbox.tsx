@@ -1,12 +1,12 @@
 import Empty from "components/empty";
 import { IdentityContext } from "models/id";
-import { useInbox } from "models/inbox";
+import { InboxContext } from "models/inbox";
 import { useContext } from "react";
 import InboxItem from "../components/inboxItem";
 
 export default function Inbox() {
   const ident = useContext(IdentityContext);
-  const inbox = useInbox(ident);
+  const inbox = useContext(InboxContext);
 
   return (
     <main>

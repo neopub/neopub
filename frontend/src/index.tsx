@@ -26,7 +26,7 @@ import Feed from 'pages/feed';
 import PostDetails from 'pages/postDetails';
 import DataArch from 'pages/dataArch';
 import Inbox from 'pages/inbox';
-import { useInbox } from 'models/inbox';
+import { InboxContext, useInbox } from 'models/inbox';
 import { IdentityContext, useID } from 'models/id';
 
 interface IMenuItemProps {
@@ -41,8 +41,7 @@ function MenuItem({ curPath, path, text }: IMenuItemProps) {
 
 function InboxMenuItem({ curPath, path, text }: IMenuItemProps) {
   const highlight = curPath === path;
-  const ident = useContext(IdentityContext);
-  const inbox = useInbox(ident);
+  const inbox = useContext(InboxContext);
   const count = inbox?.length;
   const showCount = count != null && count > 0;
 
@@ -93,10 +92,12 @@ function Menu() {
 
 function Main() {
   const ident = useID();
+  const inbox = useInbox(ident);
 
   return (
     <React.StrictMode>
       <IdentityContext.Provider value={ident}>
+      <InboxContext.Provider value={inbox}>
         <div className="flex justify-center">
           <div className="flex-1 p-4 max-w-full md:max-w-5xl">
             <Router>
@@ -151,6 +152,7 @@ function Main() {
             </Router>
           </div>
         </div>
+      </InboxContext.Provider>
       </IdentityContext.Provider>
     </React.StrictMode>
   );

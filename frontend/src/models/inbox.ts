@@ -1,7 +1,7 @@
 import { ISubReq } from "core/types";
 import EventBus from "lib/eventBus";
 import { deleteFile, fetchInbox, fileLoc } from "lib/net";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext } from "react";
 import { ID, loadID } from "./id";
 import { addSubscriber } from "./profile";
 
@@ -20,6 +20,8 @@ async function loadInbox(ident: ID, force?: boolean): Promise<Inbox | undefined>
 
   return inbox;
 }
+
+export const InboxContext = createContext<Inbox | undefined>(undefined);
 
 export function useInbox(ident?: ID | null): Inbox | undefined {
   const [inbox, setInbox] = useState<Inbox>();
