@@ -1,5 +1,5 @@
 import { bytes2hex } from "core/bytes";
-import { getPrivateKeyJWK, getPublicKeyJWK, setIDKeys, setStateKey, setToken, setWorldKey } from "lib/storage";
+import { getPrivateKeyJWK, getPublicKeyJWK } from "lib/storage";
 
 export function isAuthenticated(): boolean {
   return getPublicKeyJWK() != null;
@@ -27,13 +27,6 @@ export async function getPublicKeyHex(): Promise<string | undefined> {
   }
 
   return json2hex(json);
-}
-
-export async function storeCredentials(idKeys: CryptoKeyPair, token: string, worldKey: CryptoKey, stateKey: CryptoKey) {
-  setToken(token);
-  await setIDKeys(idKeys);
-  await setWorldKey(worldKey);
-  await setStateKey(stateKey);
 }
 
 async function json2key(json: string, keyType: "ECDSA" | "ECDH", usages: KeyUsage[]): Promise<CryptoKey | undefined> {

@@ -1,11 +1,11 @@
 import { buf2hex, concatArrayBuffers } from "core/bytes";
 import { genIDKeyPair, genSymmetricKey, key2buf, sign } from "core/crypto";
 import { IIndex, IProfile, ISubReq, NotFound } from "core/types";
-import { getPublicKeyHex, storeCredentials } from "lib/auth";
+import { getPublicKeyHex } from "lib/auth";
 import DB from "lib/db";
 import { fileLoc, getFileSignedJSON, hostPrefix } from "lib/net";
 import { useState, useEffect } from "react";
-import { loadID } from "./id";
+import { loadID, storeCredentials } from "./id";
 import { putFile } from "lib/api";
 import { getToken } from "models/host";
 import { mutateState } from "./state";

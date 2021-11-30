@@ -26,25 +26,20 @@ export const InboxContext = createContext<Inbox | undefined>(undefined);
 export function useInbox(ident?: ID | null): Inbox | undefined {
   const [inbox, setInbox] = useState<Inbox>();
   useEffect(() => {
-    async function reloadInbox(force: boolean) {
+    async function reloadInbox() {
       if (!ident) {
         return;
       }
 
-      const inb = await loadInbox(ident, force);
+      const inb = await loadInbox(ident, true);
       setInbox(inb);
     }
-
-    // TODO: fix double reload caused by menu bar and inbox page reacting to same event (rearchitect state).
-    function forceReloadInbox() {
-      reloadInbox(true);
-    }
     
-    reloadInbox(false);
+    reloadInbox();
 
-    inboxChange.on(forceReloadInbox);
+    inboxChange.on(reloadInbox);
     return () => {
-      inboxChange.off(forceReloadInbox);
+      inboxChange.off(reloadInbox);
     }
   }, [ident]);
 

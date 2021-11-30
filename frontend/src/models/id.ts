@@ -1,7 +1,7 @@
 import { getPrivateKey, getPublicKey, getPublicKeyHex } from "lib/auth";
 import { wipeDB } from "lib/db";
 import EventBus from "lib/eventBus";
-import { getToken, getWorldKey, loadCreds, setToken } from "lib/storage";
+import { getToken, getWorldKey, loadCreds, setIDKeys, setStateKey, setToken, setWorldKey } from "lib/storage";
 import * as Host from "models/host";
 import { useEffect, useState, createContext } from "react";
 import { fetchAndStoreOwnProfile } from "./profile";
@@ -110,4 +110,12 @@ export async function deidentify() {
   localStorage.clear();
   idChange.emit();
   await wipeDB();
+}
+
+export async function storeCredentials(idKeys: CryptoKeyPair, token: string, worldKey: CryptoKey, stateKey: CryptoKey) {
+  setToken(token);
+  await setIDKeys(idKeys);
+  await setWorldKey(worldKey);
+  await setStateKey(stateKey);
+  idChange.emit();
 }
