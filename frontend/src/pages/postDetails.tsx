@@ -45,7 +45,7 @@ function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: s
         pubKeys.map((pubKey) => {
           const isWorld = pubKey === worldKeyHex;
           if (isWorld) {
-            return <div>PUBLIC</div>;
+            return <div key="public">PUBLIC</div>;
           }
 
           return <AudienceListItem key={pubKey} pubKey={pubKey} postHash={postHash} />;
@@ -75,7 +75,7 @@ export default function PostDetails() {
     return null;
   }
 
-  const worldKeyHex = profile?.worldKey;
+  const worldKeyHex = profile?.worldKey ?? (profile as any)?.worldKeyHex; // barf.
   const post = { id: postId };
 
   const postHost = profile?.host;
