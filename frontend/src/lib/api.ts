@@ -149,7 +149,7 @@ export async function publishPostAndKeys(
   );
 
   const postHashHex = buf2hex(postHash)
-  DB.posts.add({ post, hash: postHashHex }, [postHash]);
+  DB.posts.add({ post, hash: postHashHex, publisherPubKey: pubKey }, postHashHex);
 
   if (visibility === "world") {
     await publishPostWorldKey(

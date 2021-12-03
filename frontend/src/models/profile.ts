@@ -27,7 +27,7 @@ export function useIndex(id: string, host?: string): IIndex | "notfound" {
       const row = await DB.indexes.get(id);
       if (row) {
         setIndex(row.index);
-        updatedAt = row.updatedAt;
+        updatedAt = row.index.updatedAt;
       }
 
       const location = fileLoc(id, "index.json");
@@ -103,7 +103,7 @@ export async function storeProfile(pubKeyHex: string, profile: IProfile, followi
   return DB.profiles.put({
     pubKey: pubKeyHex,
     host: profile.host,
-    worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
+    worldKey: profile.worldKey, // TODO: standardize all these Hex suffixes.
     handle: profile.handle,
     bio: profile.bio,
     following,
@@ -180,7 +180,7 @@ export async function follow(pubKeyHex: string, profile: IProfile) {
   return DB.profiles.put({
     pubKey: pubKeyHex,
     host: profile.host,
-    worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
+    worldKey: profile.worldKey, // TODO: standardize all these Hex suffixes.
     handle: profile.handle,
     bio: profile.handle,
     following: true,
@@ -192,7 +192,7 @@ export async function acceptFollower(pubKeyHex: string, profile: IProfile) {
   return DB.profiles.put({
     pubKey: pubKeyHex,
     host: profile.host,
-    worldKeyHex: profile.worldKey, // TODO: standardize all these Hex suffixes.
+    worldKey: profile.worldKey, // TODO: standardize all these Hex suffixes.
     handle: profile.handle,
     bio: profile.handle,
     following: false, // TODO: handle case of overwrite. Maybe using separate table to track follower/following.

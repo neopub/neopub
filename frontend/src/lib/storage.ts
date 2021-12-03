@@ -132,7 +132,7 @@ export async function recordReplyInDB(reply: IReply) {
       content: {
         text: reply.msg,
       },
-      createdAt: new Date(reply.createdAt),
+      createdAt: reply.createdAt,
       type: "text",
     },
   });

@@ -29,7 +29,6 @@ async function fetchAndCachePost(pubKey: string, postHashHex: string, worldKeyHe
     post,
     hash: postHashHex,
     publisherPubKey: pubKey,
-    createdAt: post?.createdAt,
   });
 }
 
@@ -106,7 +105,6 @@ export async function fetchAndDec(ident: ID, enc: IEncPost, pubKey: string, worl
       post,
       hash: postHashHex,
       publisherPubKey: pubKey,
-      createdAt: post?.createdAt,
     });
   }
 

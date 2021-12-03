@@ -69,7 +69,7 @@ export async function fetchState(): Promise<void> {
   return loadStateDangerously(state);
 }
 
-export async function mutateState(mutateFn: () => Promise<void>) {
+export async function mutateState(mutateFn: () => Promise<unknown>) {
   // NOTE: race condition, here.
   // Use CRDTs to eliminate that?
 

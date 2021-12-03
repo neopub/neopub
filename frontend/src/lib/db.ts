@@ -1,14 +1,70 @@
+import { IIndex, TPost } from "core/types";
 import Dexie from "dexie";
 
-const DB: any = new Dexie("neopub");
-DB.version(9).stores({
-  subscriptions: "pubKey, host, worldKeyHex, handle",
-  followers: "pubKey, host",
-  posts: "hash, publisherPubKey, createdAt, post, replyToHash",
-  postKeys: "keyLoc, postHash, subPubKey", // TODO: record post key and derive location instead?
-  indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
-  profiles: "pubKey, host, worldKeyHex, handle, bio, following, followsMe",
-});
+interface IDBSubscription {
+  pubKey: string;
+  host: string;
+  worldKeyHex: string;
+  handle?: string;
+}
+
+interface IDBFollower {
+  pubKey: string;
+  host: string;
+}
+
+interface IDBPost {
+  hash: string;
+  publisherPubKey: string;
+  // createdAt: Date;
+  post: TPost;
+  replyToHash?: string;
+}
+
+interface IDBPostKey {
+  keyLoc: string;
+  postHash: string;
+  subPubKey: string;
+}
+
+interface IDBIndex {
+  pubKey: string;
+  index: IIndex;
+  // updatedAt: Date;
+}
+
+interface IDBProfile {
+  pubKey: string;
+  host?: string;
+  worldKey: string;
+  handle?: string;
+  bio?: string;
+  following: boolean;
+  followsMe: boolean;
+}
+class NeoPubDexie extends Dexie {
+  subscriptions!: Dexie.Table<IDBSubscription, string>;
+  followers!: Dexie.Table<IDBFollower, string>;
+  posts!: Dexie.Table<IDBPost, string>;
+  postKeys!: Dexie.Table<IDBPostKey, string>;
+  indexes!: Dexie.Table<IDBIndex, string>;
+  profiles!: Dexie.Table<IDBProfile, string>;
+
+  constructor() {
+    super("neopub");
+
+    this.version(10).stores({
+      subscriptions: "pubKey, host, worldKeyHex, handle",
+      followers: "pubKey, host",
+      posts: "hash, publisherPubKey, createdAt, post, replyToHash",
+      postKeys: "keyLoc, postHash, subPubKey", // TODO: record post key and derive location instead?
+      indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
+      profiles: "pubKey, host, worldKey, handle, bio, following, followsMe",
+    });
+  }
+}
+
+const DB = new NeoPubDexie();
 
 export async function wipeDB() {
   await DB.delete();
