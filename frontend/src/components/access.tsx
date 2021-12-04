@@ -1,20 +1,21 @@
 import { createProfile } from "models/profile";
 import { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Access() {
   const [status, setStatus] = useState("");
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const next = history.location.search;
+  const next = location.search;
 
   async function handleCreateIDClicked() {
     await createProfile(setStatus);
-    history.push(`/creds/dump${next}`)
+    navigate(`/creds/dump${next}`)
   }
 
   function handleLoadIDClicked() {
-    history.push(`/creds/load${next}`)
+    navigate(`/creds/load${next}`)
   }
 
   return (

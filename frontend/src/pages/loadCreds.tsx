@@ -1,13 +1,14 @@
 import CredFields from "components/credFields";
 import { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { identify } from "models/id";
 
 export default function LoadCreds() {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [status, setStatus] = useState("");
 
-  const next = new URLSearchParams(history.location.search).get('next');
+  const next = new URLSearchParams(location.search).get('next');
 
   async function handleLoad(id?: string, creds?: string) {
     if (!creds) {
@@ -19,7 +20,7 @@ export default function LoadCreds() {
       return;
     }
 
-    history.push(next ? next : "/");
+    navigate(next ? next : "/");
   }
 
   return (

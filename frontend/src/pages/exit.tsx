@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CredFields from "components/credFields";
 import KnowMore from "components/knowMore";
 import { deidentify } from "models/id";
 
 export default function Exit() {
   const [credState, setCredState] = useState<string>();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCredState(dumpState());
@@ -20,7 +20,7 @@ export default function Exit() {
 
   async function exit() {
     await deidentify();
-    history.push("/");
+    navigate("/");
   }
 
   function handleExit(id?: string, creds?: string) {

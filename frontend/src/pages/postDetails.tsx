@@ -56,7 +56,7 @@ function Audience({ postHash, worldKeyHex }: { postHash: string, worldKeyHex?: s
 }
 
 export default function PostDetails() {
-  const { userId, postId } = useParams<{ userId: string, postId: string }>();
+  const { userId, postId } = useParams();
   const ident = useContext(IdentityContext);
 
   const [profile] = useProfile(userId);
@@ -83,6 +83,9 @@ export default function PostDetails() {
   const isPoster = userId === ident?.pubKey.hex;
 
   function handleDelete() {
+    if (!(userId && postId)) {
+      return null;
+    }
     deletePost(postId);
   }
 

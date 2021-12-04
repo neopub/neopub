@@ -8,18 +8,24 @@ import { follow, useProfile } from "models/profile";
 import { IdentityContext } from "models/id";
 import { useContext, useEffect } from "react";
 import { useState } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import HexIDCard from "components/hexIdCard";
 
 export default function Sub() {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const ident = useContext(IdentityContext);
   const [sentReq, setSentReq] = useState(false);
 
-  const { id: pubId } = useParams<{ id: string }>();
+  const params = useParams<"id">();
+  const pubId = params["id"];
 
   const [following, setFollowing] = useState(false);
   useEffect(() => {
+    if (!pubId) {
+      return;
+    }
+
     DB.subscriptions.get(pubId)
       .then((sub: any) => {
         setFollowing(sub !== undefined);
@@ -37,13 +43,13 @@ export default function Sub() {
   }
 
   async function handleSubscribe() {
-    if (!pubId || !history || !profile || profile === "notfound") {
+    if (!pubId || !navigate || !location || !profile || profile === "notfound") {
       return;
     }
 
     if (!ident) {
       alert('You need an identity first.')
-      history.push(`/?next=${encodeURIComponent(history.location.pathname)}`);
+      navigate(`/?next=${encodeURIComponent(location.pathname)}`);
       return;
     }
 

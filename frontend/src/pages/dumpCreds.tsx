@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { dumpState } from "lib/storage";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CredFields from "components/credFields";
 import KnowMore from "components/knowMore";
 import { IdentityContext } from "models/id";
@@ -54,7 +54,7 @@ function More() {
 
 function CredDumper({ nextURL }: { nextURL: string | undefined }) {
   const [credState, setCredState] = useState<string>();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const creds = dumpState();
@@ -69,7 +69,7 @@ function CredDumper({ nextURL }: { nextURL: string | undefined }) {
       return;
     }
 
-    history.push(nextURL);
+    navigate(nextURL);
   }
 
   return (

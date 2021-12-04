@@ -1,7 +1,7 @@
 import { IIndex, PostVisibility } from "core/types";
 import { useJSON } from "lib/useJSON";
 import { useContext, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import KnowMore from "components/knowMore";
 import { publishTextPost } from "models/post";
 import { IdentityContext } from "models/id";
@@ -12,7 +12,7 @@ export default function Post() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setIndex] = useJSON<IIndex>(ident?.pubKey.hex, "index.json", { posts: [], updatedAt: "" });
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [text, setText] = useState("");
 
@@ -41,7 +41,7 @@ export default function Post() {
 
     setIndex(newIndex);
 
-    history.push(`/users/${ident.pubKey.hex}`);
+    navigate(`/users/${ident.pubKey.hex}`);
   }
 
   return (

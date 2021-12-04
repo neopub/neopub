@@ -2,7 +2,7 @@ import { IEncPost, IReply } from "core/types";
 import { replyId, sendReply } from "models/reply";
 import { useEffect } from "react";
 import { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function ViewReplyButton({ reply }: { reply: IReply }) {
   const [id, setId] = useState<string>();
@@ -20,14 +20,15 @@ function ViewReplyButton({ reply }: { reply: IReply }) {
 }
 
 export default function ReplyButton({ post, pubKeyHex, id, host }: { post: IEncPost; id: string; worldKeyHex?: string; pubKeyHex?: string; host: string; }) {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [replyState, setReplyState] = useState<"sending" | "sent">();
   const [sentReply, setSentReply] = useState<IReply>();
 
   async function handleReply(postId: string) {
     if (!pubKeyHex) {
       alert('You need an identity first.');
-      history.push(`/?next=${encodeURIComponent(history.location.pathname)}`);
+      navigate(`/?next=${encodeURIComponent(location.pathname)}`);
       return;
     }
 

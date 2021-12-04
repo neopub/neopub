@@ -1,7 +1,7 @@
  import type { IProfile } from "core/types";
 import { useIndex, useIsSubscribedTo, useProfile } from "models/profile";
 import Hexatar from "./hexatar";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { hostPrefix } from "lib/net";
 import HexQR from "./hexQR";
 import PostList from "./postList";
@@ -20,8 +20,8 @@ function BracketButton({ label, onClick }: { label: string, onClick: () => void 
 }
 
 function ButtonLink({ label, to }: { label: string, to: string }) {
-  const history = useHistory();
-  return <button onClick={() => history.push(to)} className="border-0">{`${label} »`}</button>
+  const navigate = useNavigate();
+  return <button onClick={() => navigate(to)} className="border-0">{`${label} »`}</button>
 }
 
 function Handle({ handle, setHandle, editable }: { handle?: string, setHandle: (newHandle: string) => void, editable: boolean}) {
@@ -88,7 +88,7 @@ interface IProps {
   id: string;
 }
 export default function Profile({ id }: IProps) {
-  const history = useHistory();
+  const navigate = useNavigate();
   const ident = useContext(IdentityContext);
   const isAuthedUser = ident && id === ident.pubKey.hex;
 
@@ -114,7 +114,7 @@ export default function Profile({ id }: IProps) {
       name: "Posts",
       el: (
         <>
-          {isAuthedUser && <button onClick={() => history.push("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
+          {isAuthedUser && <button onClick={() => navigate("/post")} className="py-2 px-6 w-full md:max-w-sm">New Post</button>}
           {
             index === "notfound" || !index
               ? emptyPostList
@@ -168,7 +168,7 @@ export default function Profile({ id }: IProps) {
           }
         />
         {isAuthedUser && <ButtonLink to="/creds/dump" label="Creds" />}
-        {!isAuthedUser && (isSubscribed ? "Following" : <button className="px-4 py-2" onClick={() => history.push(`/users/${id}/sub`)}>Follow</button>)}
+        {!isAuthedUser && (isSubscribed ? "Following" : <button className="px-4 py-2" onClick={() => navigate(`/users/${id}/sub`)}>Follow</button>)}
       </div>
 
       <Tabs tabs={tabs} initialActiveTab="Posts" />
