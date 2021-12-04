@@ -71,11 +71,10 @@ export async function wipeDB() {
   return DB.open();
 }
 
-// TODO: stronger types.
 interface ILocalState {
-  following: any[];
-  followers: any[];
-  profiles: any[];
+  following: IDBSubscription[];
+  followers: IDBFollower[];
+  profiles: IDBProfile[];
 }
 
 export async function dumpState(): Promise<ILocalState> {
