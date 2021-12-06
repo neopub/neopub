@@ -11,5 +11,4 @@ export const pubKeyHeader = "neopub-pub-key";
 export const sigHeader = "neopub-sig";
 export const postKeyHeader = "neopub-post-key";
 export const subDhKey = "neopub-sub-key";
-export const locationHeader = "neopub-location";
 export const powHeader = "neopub-pow";

@@ -20,7 +20,7 @@ interface IResponse {
   statusMessage?: string;
   data: any;
 }
-async function req(path: string, method: "GET" | "POST", headers: Record<string, string> = {}, data?: any): Promise<IResponse> {
+async function req(path: string, method: "GET" | "POST" | "PUT", headers: Record<string, string> = {}, data?: any): Promise<IResponse> {
   return new Promise((resolve, reject) => {
     const opts = {
       hostname: host,
@@ -54,6 +54,10 @@ async function req(path: string, method: "GET" | "POST", headers: Record<string,
 
 async function post(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
   return req(path, "POST", headers, data);
+}
+
+async function put(path: string, data: any, headers: Record<string, string> = {}): Promise<IResponse> {
+  return req(path, "PUT", headers, data);
 }
 
 async function get(path: string, headers: Record<string, string> = {}): Promise<IResponse> {
@@ -117,11 +121,10 @@ async function test() {
     "neopub-pub-key": pubKeyHex,
     'neopub-sig': postSig,
     'neopub-token': expectedToken,
-    'neopub-location': loc,
   }
 
   async function testPut() {
-    const { statusCode, statusMessage, data } = await post('/put', postEnc, putHeaders);
+    const { statusCode, statusMessage, data } = await put(loc, postEnc, putHeaders);
     if (statusCode !== 200) {
       throw new Error(`[${statusCode}] ${statusMessage}`);
     }
@@ -189,6 +192,8 @@ async function test() {
   await testInboxPostPreflight();
   await testInboxPost();
   await testInboxGet();
+
+  // TODO: test DELETE.
 }
 
 console.log("Running tests...");

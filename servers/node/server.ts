@@ -109,7 +109,7 @@ export default class Server {
 
       res.setHeader("Access-Control-Allow-Headers", req.headers["access-control-request-headers"] ?? "");
     } else {
-      res.setHeader("Allow", "GET, POST, DELETE, OPTIONS");
+      res.setHeader("Allow", "GET, PUT, POST, DELETE, OPTIONS");
     }
 
     res.writeHead(200);
@@ -124,13 +124,16 @@ export default class Server {
       return this.handleOptions(req, res);
     }
 
+    const path = req.url ?? "";
+
     const context: IHandlerContext = {
       body: () => body2buf(req),
       success: (body: any, hdrs: Record<string, string>) => success(body, hdrs, res),
       failure: (code: number, msg: string) => failure(code, msg, res),
       header: (header: string) => (req.headers[header] ?? "") as string,
+      path,
     }
 
-    return this.api.handle(req.url ?? "", req.method ?? "", context);
+    return this.api.handle(path, req.method ?? "", context);
   }
 }
