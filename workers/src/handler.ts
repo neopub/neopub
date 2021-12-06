@@ -50,13 +50,16 @@ export async function handleRequest(request: Request): Promise<Response> {
     return handleOptions(request);
   }
 
+  const url = new URL(request.url);
+  const path = url.pathname;
+
   const context: IHandlerContext = {
     body: () => request.arrayBuffer(),
     success,
     failure,
     header: (header: string) => request.headers.get(header) ?? "",
+    path,
   }
 
-  const url = new URL(request.url);
-  return api.handle(url.pathname, request.method, context);
+  return api.handle(path, request.method, context);
 }

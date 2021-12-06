@@ -5,7 +5,7 @@ import Lib from "./lib";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,DELETE,HEAD,POST,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,PUT,DELETE,HEAD,POST,OPTIONS",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -18,6 +18,7 @@ export interface IHandlerContext {
   success: SuccessFunc,
   failure: FailureFunc,
   header: HeaderFunc,
+  path: string,
 }
 
 export interface IDataLayer {
@@ -77,19 +78,17 @@ export default class API {
     const handlers: Record<string, Handler> = {
       "POST /auth": this.auth,
       "POST /chal": this.chal,
-      "POST /put": this.put,
+      "PUT *": this.put,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
       "DELETE /rm": this.rm,
+      "GET *": this.get,
     };
 
-    const key = `${method.toUpperCase()} ${url}`;
-    const handler = handlers[key];
-
-    // Serve non-inbox GETs.
-    if (!handler && method.toUpperCase() === 'GET') {
-      return this.get.bind(this)(context, url);
-    }
+    const meth = method.toUpperCase();
+    const key = `${meth} ${url}`;
+    const wildcard = `${meth} *`;
+    const handler = handlers[key] ?? handlers[wildcard];
 
     if (!handler) {
       return context.failure(404, "Invalid route");
@@ -155,7 +154,7 @@ export default class API {
     return success(tokenHex, { "Content-Type": "text/plain" });
   }
 
-  private async put({ body, success, failure, header }: IHandlerContext) {
+  private async put({ body, success, failure, header, path }: IHandlerContext) {
     const pubKey = parsePublicKey(header);
     if (!pubKey) {
       return failure(400, "Missing/invalid pubKey");
@@ -178,7 +177,7 @@ export default class API {
       return failure(400, "Invalid signature");
     }
 
-    const loc = header(locationHeader);
+    const loc = path;
     try {
       await this.data.writeFile(loc, data);
     } catch (e) {
@@ -189,7 +188,8 @@ export default class API {
     return success(null, { "Content-Type": "text/plain" });
   }
 
-  private async get({ success, failure, header }: IHandlerContext, loc: string) {
+  private async get({ success, failure, header, path }: IHandlerContext) {
+    const loc = path;
     if (!loc) {
       return failure(400, "Invalid location");
     }

@@ -159,12 +159,11 @@ export async function putFile(
 ): Promise<void> {
   const sigHex = bytes2hex(new Uint8Array(sig));
 
-  await fetch(`${hostPrefix}/put`, {
-    method: "POST",
+  await fetch(`${hostPrefix}${location}`, {
+    method: "PUT",
     headers: {
       Accept: "application/json",
       "Content-Type": contentType,
-      [locationHeader]: location,
       [pubKeyHeader]: pubKeyHex,
       [tokenHeader]: token,
       [sigHeader]: sigHex,
