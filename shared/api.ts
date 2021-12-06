@@ -77,7 +77,6 @@ export default class API {
     const handlers: Record<string, Handler> = {
       "POST /auth": this.auth,
       "POST /chal": this.chal,
-      "GET /get": this.get,
       "POST /put": this.put,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
@@ -86,6 +85,12 @@ export default class API {
 
     const key = `${method.toUpperCase()} ${url}`;
     const handler = handlers[key];
+
+    // Serve non-inbox GETs.
+    if (!handler && method.toUpperCase() === 'GET') {
+      return this.get.bind(this)(context, url);
+    }
+
     if (!handler) {
       return context.failure(404, "Invalid route");
     }
@@ -184,13 +189,15 @@ export default class API {
     return success(null, { "Content-Type": "text/plain" });
   }
 
-  private async get({ success, failure, header }: IHandlerContext) {
-    const loc = header(locationHeader);
+  private async get({ success, failure, header }: IHandlerContext, loc: string) {
     if (!loc) {
       return failure(400, "Invalid location");
     }
 
     try {
+      // NOTE: insecure. A loc with embedded ".." can walk up your filesystem.
+      // This is really just for local testing. Ideally you serve files out of
+      // a cloud file bucket that only contains data that is ok to publish.
       const data = await this.data.readFile(loc);
       if (data === null) {
         return failure(404, "Not found");

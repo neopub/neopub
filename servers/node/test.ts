@@ -127,11 +127,8 @@ async function test() {
     }
   }
 
-  const getHeaders = {
-    'neopub-location': loc,
-  }
   async function testGet() {
-    const { statusCode, statusMessage, data } = await get('/get', getHeaders);
+    const { statusCode, statusMessage, data } = await get(loc);
     if (statusCode !== 200 || data.equals(postEnc) !== true) {
       throw new Error(`[${statusCode}] ${statusMessage}`);
     }
