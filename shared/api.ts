@@ -300,6 +300,9 @@ export default class API {
       return failure(400, "Invalid token");
     }
 
+    // NOTE: insecure.
+    // TODO: prevent user from rm-ing someone else's data.
+
     const loc = header(locationHeader);
     try {
       await this.data.deleteFile(loc);
