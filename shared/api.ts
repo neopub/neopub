@@ -1,6 +1,6 @@
 import { buf2hex, hex2bytes } from "./core/bytes";
 import { ECDSA_PUBKEY_BYTES } from "./core/consts";
-import { locationHeader, pubKeyHeader, sigHeader, subDhKey, tokenHeader, powHeader } from "./core/consts";
+import { pubKeyHeader, sigHeader, subDhKey, tokenHeader, powHeader } from "./core/consts";
 import Lib from "./lib";
 
 export const corsHeaders = {
@@ -78,11 +78,11 @@ export default class API {
     const handlers: Record<string, Handler> = {
       "POST /auth": this.auth,
       "POST /chal": this.chal,
-      "PUT *": this.put,
       "POST /inbox": this.inbox,
       "GET /inbox": this.inboxGet,
-      "DELETE /rm": this.rm,
       "GET *": this.get,
+      "PUT *": this.put,
+      "DELETE *": this.rm,
     };
 
     const meth = method.toUpperCase();
@@ -289,7 +289,7 @@ export default class API {
     }
   }
 
-  private async rm({ success, failure, header }: IHandlerContext) {
+  private async rm({ success, failure, header, path }: IHandlerContext) {
     const pubKey = parsePublicKey(header);
     if (!pubKey) {
       return failure(400, "Missing/invalid pubKey");
@@ -303,7 +303,7 @@ export default class API {
     // NOTE: insecure.
     // TODO: prevent user from rm-ing someone else's data.
 
-    const loc = header(locationHeader);
+    const loc = path;
     try {
       await this.data.deleteFile(loc);
 

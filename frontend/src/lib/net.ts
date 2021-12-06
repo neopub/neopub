@@ -1,4 +1,4 @@
-import { locationHeader, pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams, NUM_SIG_BYTES } from "core/consts";
+import { pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams, NUM_SIG_BYTES } from "core/consts";
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
 import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "core/types";
 import { hex2ECDSAKey } from "core/crypto";
@@ -70,37 +70,14 @@ export async function getFile(location: string): Promise<ArrayBuffer | undefined
 }
 
 export async function deleteFile(pubKeyHex: string, token: string, location: string): Promise<Response> {
-  return fetch(`${hostPrefix}/rm`, {
+  return fetch(`${hostPrefix}${location}`, {
     method: "DELETE",
     headers: {
       Accept: "application/octet-stream",
       [pubKeyHeader]: pubKeyHex,
       [tokenHeader]: token,
-      [locationHeader]: location,
     },
   });
-}
-
-export async function getFileJSON<T>(location: string, host?: string): Promise<T | undefined | NotFound> {
-  try {
-    const resp = await fetch(`${host ?? hostPrefix}/get`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        [locationHeader]: location,
-      },
-    });
-    if (resp.status === 404) {
-      return "notfound";
-    }
-    if (!resp.ok) {
-      return;
-    }
-    const json = await resp.json();
-    return json;
-  } catch {
-    return;
-  }
 }
 
 export async function getFileSignedJSON<T>(signerPubKeyHex: string, location: string, host?: string): Promise<T | undefined | NotFound> {

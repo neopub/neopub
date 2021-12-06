@@ -1,5 +1,4 @@
-import { IIndex, PostVisibility } from "core/types";
-import { useJSON } from "lib/useJSON";
+import { PostVisibility } from "core/types";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import KnowMore from "components/knowMore";
@@ -10,8 +9,6 @@ import { TabBar } from "components/tabs";
 export default function Post() {
   const ident = useContext(IdentityContext);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setIndex] = useJSON<IIndex>(ident?.pubKey.hex, "index.json", { posts: [], updatedAt: "" });
   const navigate = useNavigate();
 
   const [text, setText] = useState("");
@@ -28,18 +25,16 @@ export default function Post() {
     }
   }
   
-  if (!ident || !setIndex) {
+  if (!ident) {
     return <div>Can't post.</div>
   }
 
   async function handlePostClicked(visibility: PostVisibility) {
-    if (!ident || !setIndex) {
+    if (!ident) {
       return;
     }
 
-    const newIndex = await publishTextPost(ident, text, visibility);
-
-    setIndex(newIndex);
+    await publishTextPost(ident, text, visibility);
 
     navigate(`/users/${ident.pubKey.hex}`);
   }

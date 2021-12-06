@@ -192,6 +192,8 @@ async function test() {
   await testInboxPostPreflight();
   await testInboxPost();
   await testInboxGet();
+
+  // TODO: test DELETE.
 }
 
 console.log("Running tests...");
