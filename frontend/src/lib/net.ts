@@ -53,11 +53,10 @@ export async function fetchPost(
 
 export async function getFile(location: string): Promise<ArrayBuffer | undefined> {
   try {
-    const resp = await fetch(`${hostPrefix}/get`, {
+    const resp = await fetch(`${hostPrefix}${location}`, {
       method: "GET",
       headers: {
         Accept: "application/octet-stream",
-        [locationHeader]: location,
       },
     });
     if (!resp.ok) {
@@ -106,11 +105,10 @@ export async function getFileJSON<T>(location: string, host?: string): Promise<T
 
 export async function getFileSignedJSON<T>(signerPubKeyHex: string, location: string, host?: string): Promise<T | undefined | NotFound> {
   try {
-    const resp = await fetch(`${host ?? hostPrefix}/get`, {
+    const resp = await fetch(`${host ?? hostPrefix}${location}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
-        [locationHeader]: location,
       },
     });
     if (resp.status === 404) {
