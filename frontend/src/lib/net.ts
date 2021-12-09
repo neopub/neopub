@@ -192,27 +192,6 @@ export async function putMessage(
   });
 }
 
-export async function putSubReq(
-  pubPubKeyHex: string,
-  ephemDHPubBuf: ArrayBuffer,
-  encReqBuf: ArrayBuffer,
-  host?: string,
-): Promise<void> {
-  const ephemDHPubBytes = new Uint8Array(ephemDHPubBuf);
-  const ephemDHPubHex = bytes2hex(ephemDHPubBytes);
-
-  await fetch(`${host ?? hostPrefix}/sub`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      [pubKeyHeader]: pubPubKeyHex,
-      [subDhKey]: ephemDHPubHex,
-    },
-    body: encReqBuf,
-  });
-}
-
 export async function fetchAuthChallenge(
   capDesc: CapabilityDescription,
   host?: string,
