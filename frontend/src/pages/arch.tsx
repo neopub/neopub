@@ -25,6 +25,9 @@ export default function Arch() {
       <div>
         <Link to="/host">Read about hosting »</Link>
       </div>
+      <div>
+        <Link to="/arch/api">API docs »</Link>
+      </div>
     </div>
   );
 }

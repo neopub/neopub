@@ -28,6 +28,7 @@ import DataArch from 'pages/dataArch';
 import Inbox from 'pages/inbox';
 import { InboxContext, useInbox } from 'models/inbox';
 import { IdentityContext, useID } from 'models/id';
+import API from 'pages/api';
 
 interface IMenuItemProps {
   curPath: string;
@@ -118,6 +119,7 @@ function Main() {
                 <Route path="/arch/sub" element={<SubArch />} />
                 <Route path="/arch/post" element={<PostArch />} />
                 <Route path="/arch/data" element={<DataArch />} />
+                <Route path="/arch/api" element={<API />} />
               </Routes>
             </Router>
           </div>
