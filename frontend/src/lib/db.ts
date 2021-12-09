@@ -53,13 +53,13 @@ class NeoPubDexie extends Dexie {
   constructor() {
     super("neopub");
 
-    this.version(10).stores({
-      subscriptions: "pubKey, host, worldKeyHex, handle",
-      followers: "pubKey, host",
-      posts: "hash, publisherPubKey, createdAt, post, replyToHash",
-      postKeys: "keyLoc, postHash, subPubKey", // TODO: record post key and derive location instead?
-      indexes: "pubKey, index, updatedAt", // Is this used? delete if dead
-      profiles: "pubKey, host, worldKey, handle, bio, following, followsMe",
+    this.version(11).stores({
+      subscriptions: "pubKey",
+      followers: "pubKey",
+      posts: "hash, publisherPubKey, createdAt, replyToHash",
+      postKeys: "postHash", // TODO: record post key and derive location instead?
+      indexes: "pubKey", // Is this used? delete if dead
+      profiles: "pubKey",
     });
   }
 }
