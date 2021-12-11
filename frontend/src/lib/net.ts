@@ -17,14 +17,6 @@ export async function fetchInboxItem(
   return getFile(location);
 }
 
-export async function fetchSubReq(
-  pubKeyHex: string,
-  reqName: string,
-): Promise<ArrayBuffer | undefined> {
-  const location = fileLoc(pubKeyHex, `reqs/${reqName}`);
-  return getFile(location);
-}
-
 export async function fetchPostKey(
   posterPubKeyHex: string,
   postKeyLocHex: string,
