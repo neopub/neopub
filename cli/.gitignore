@@ -1,0 +1,5 @@
+shared
+node_modules
+dist
+yarn.lock
+id.json
