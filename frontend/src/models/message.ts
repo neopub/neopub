@@ -1,7 +1,7 @@
 import { concatArrayBuffers } from "core/bytes";
 import solvePoWChallenge from "core/challenge";
 import { ecdsaParams, NUM_SIG_BYTES } from "core/consts";
-import { hex2ECDHKey, deriveDHKey, hex2ECDSAKey, pubECDSA2ECDH, genECDHKeys, key2buf, sign, encryptBuf, decryptBuf } from "core/crypto";
+import Crypto from "lib/crypto";
 import { IMessage } from "core/types";
 import { getMessageAuthChallenge } from "lib/api";
 import Net from "lib/net";
@@ -12,18 +12,18 @@ export async function unwrapInboxItem(
   pubKeyHex: string,
   privKey: CryptoKey,
 ): Promise<IMessage | undefined> {
-  const ephemDHPub = await hex2ECDHKey(id);
+  const ephemDHPub = await Crypto.hex2ECDHKey(id);
   if (!ephemDHPub) {
     return;
   }
 
-  const ephemDH = await deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
+  const ephemDH = await Crypto.deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
 
   const enc = await Net.fetchInboxItem(pubKeyHex, id);
   if (!enc) {
     return;
   }
-  const decBuf = await decryptBuf(enc, ephemDH);
+  const decBuf = await Crypto.decryptBuf(enc, ephemDH);
   const sig = decBuf.slice(0, NUM_SIG_BYTES);
   const rest = decBuf.slice(NUM_SIG_BYTES);
 
@@ -31,7 +31,7 @@ export async function unwrapInboxItem(
   const msg = JSON.parse(json) as IMessage;
 
   const signerPubKeyHex = msg.pubKey;
-  const signerPubKey = await hex2ECDSAKey(signerPubKeyHex);
+  const signerPubKey = await Crypto.hex2ECDSAKey(signerPubKeyHex);
   if (!signerPubKey) {
     return; // TODO: signal error.
   }
@@ -54,7 +54,7 @@ export async function sendMessage(
   message: IMessage,
   host?: string,
 ): Promise<void> {
-  const userPubKey = await hex2ECDSAKey(destPubKeyHex);
+  const userPubKey = await Crypto.hex2ECDSAKey(destPubKeyHex);
   if (!userPubKey) {
     return;
   }
@@ -68,17 +68,17 @@ export async function sendMessage(
   // Sign message.
   const msgJson = JSON.stringify(message);
   const msgBuf =  new TextEncoder().encode(msgJson);
-  const sig = await sign(ident.privKey.key, msgBuf);
+  const sig = await Crypto.sign(ident.privKey.key, msgBuf);
   const signed = concatArrayBuffers(sig, msgBuf);
 
-  const pubECDH = await pubECDSA2ECDH(userPubKey);
+  const pubECDH = await Crypto.pubECDSA2ECDH(userPubKey);
 
   // Gen ephem keypair for outer DH.
-  const ephemKeys = await genECDHKeys();
-  const ephemDH = await deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
+  const ephemKeys = await Crypto.genECDHKeys();
+  const ephemDH = await Crypto.deriveDHKey(pubECDH, ephemKeys.privateKey, ["encrypt"]);
 
   // Encrypt request.
-  const encReqBuf = await encryptBuf(signed, ephemDH);
+  const encReqBuf = await Crypto.encryptBuf(signed, ephemDH);
 
   // Get PoW challenge and solve it.
   const { chal, diff } =  await getMessageAuthChallenge(encReqBuf, host);
@@ -88,6 +88,6 @@ export async function sendMessage(
     return;
   }
 
-  const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
+  const ephemDHPubBuf = await Crypto.key2buf(ephemKeys.publicKey);
   return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, solution, host);
 }

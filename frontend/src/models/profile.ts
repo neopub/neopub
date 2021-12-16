@@ -1,5 +1,5 @@
 import { buf2hex, concatArrayBuffers } from "core/bytes";
-import { key2buf, sign } from "core/crypto";
+import Crypto from "lib/crypto";
 import { IIndex, IProfile, ISubReq, NotFound } from "core/types";
 import { getPublicKeyHex } from "lib/auth";
 import DB from "lib/db";
@@ -122,11 +122,11 @@ export async function fetchAndStoreOwnProfile() {
 }
 
 export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token: string, profile: IProfile) {
-  const pubKeyBuf = await key2buf(pubKey);
+  const pubKeyBuf = await Crypto.key2buf(pubKey);
   const pubKeyHex = buf2hex(pubKeyBuf);
 
   const payload = new TextEncoder().encode(JSON.stringify(profile));
-  const sig = await sign(privKey, payload);
+  const sig = await Crypto.sign(privKey, payload);
   const signed = concatArrayBuffers(sig, payload);
 
   return putFile(pubKeyHex, "profile.json", privKey, token, signed, "application/json");

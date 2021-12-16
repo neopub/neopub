@@ -1,15 +1,5 @@
 import { hex2bytes, concatArrayBuffers, buf2hex } from "core/bytes";
-import {
-  decryptString,
-  deriveDHKey,
-  encryptString,
-  genSymmetricKey,
-  hex2ECDHKey,
-  importAESKey,
-  key2buf,
-  sha,
-  sign,
-} from "core/crypto";
+import Crypto from "lib/crypto";
 import {
   TPost,
   IIndex,
@@ -34,14 +24,14 @@ async function fetchAndDecryptPostWithOuterKey(
     return;
   }
 
-  const postKeyHex = await decryptString(postKeyEncBytes, outerKey);
+  const postKeyHex = await Crypto.decryptString(postKeyEncBytes, outerKey);
   const postKeyBytes = hex2bytes(postKeyHex);
   if (!postKeyBytes) {
     return;
   }
 
-  const decKey = await importAESKey(postKeyBytes, ["decrypt"]);
-  const postJson = await decryptString(encBuf, decKey);
+  const decKey = await Crypto.importAESKey(postKeyBytes, ["decrypt"]);
+  const postJson = await Crypto.decryptString(encBuf, decKey);
   const post = JSON.parse(postJson);
   return post;
 }
@@ -52,12 +42,12 @@ async function fetchAndDecryptPostWithSubKey(
   encBuf: ArrayBuffer,
   postHash: Uint8Array,
 ) {
-  const pubECDH = await hex2ECDHKey(posterPubKeyHex);
+  const pubECDH = await Crypto.hex2ECDHKey(posterPubKeyHex);
   if (!pubECDH) {
     return;
   }
 
-  const outerKey = await deriveDHKey(pubECDH, privDH, ["decrypt"]);
+  const outerKey = await Crypto.deriveDHKey(pubECDH, privDH, ["decrypt"]);
 
   return fetchAndDecryptPostWithOuterKey(
     posterPubKeyHex,
@@ -77,7 +67,7 @@ async function fetchAndDecryptPost(
   if (!outerKeyBytes) {
     return;
   }
-  const outerKey = await importAESKey(outerKeyBytes, ["decrypt"]);
+  const outerKey = await Crypto.importAESKey(outerKeyBytes, ["decrypt"]);
 
   return fetchAndDecryptPostWithOuterKey(
     posterPubKeyHex,
@@ -138,7 +128,7 @@ export async function publishPostAndKeys(
   token: string,
   visibility: PostVisibility,
 ) {
-  const postKey = await genSymmetricKey();
+  const postKey = await Crypto.genSymmetricKey();
 
   const [newIndex, postHash] = await publishPost(
     post,
@@ -196,7 +186,7 @@ export async function publishPostWorldKey(
   if (!worldKeyBytes) {
     return;
   }
-  const worldKey = await importAESKey(worldKeyBytes, ["encrypt"]);
+  const worldKey = await Crypto.importAESKey(worldKeyBytes, ["encrypt"]);
 
   // TODO: cleanup.
   const keyLoc = await postKeyLocation(worldKey, postHash);
@@ -218,12 +208,12 @@ export async function publishPostSubKey(
   privKey: CryptoKey,
   token: string,
 ) {
-  const subDHPub = await hex2ECDHKey(subPubKey);
+  const subDHPub = await Crypto.hex2ECDHKey(subPubKey);
   if (!subDHPub) {
     return;
   }
 
-  const encDH = await deriveDHKey(subDHPub, privDH, ["encrypt", "decrypt"]);
+  const encDH = await Crypto.deriveDHKey(subDHPub, privDH, ["encrypt", "decrypt"]);
 
   // TODO: cleanup.
   const keyLoc = await postKeyLocation(encDH, postHash);
@@ -261,7 +251,7 @@ export async function publishPost(
   token: string,
 ): Promise<[IIndex, ArrayBuffer]> {
   const body = JSON.stringify(post);
-  const ciphertext = await encryptString(body, postKey);
+  const ciphertext = await Crypto.encryptString(body, postKey);
 
   let index: IIndex = { posts: [], updatedAt: new Date().toISOString() };
   const idx = await Net.getIndex(pubKey);
@@ -270,7 +260,7 @@ export async function publishPost(
   }
 
   // Compute content-based ID.
-  const hash = await sha(ciphertext);
+  const hash = await Crypto.sha(ciphertext);
   const hashHex = await buf2hex(hash);
 
   // Put post.
@@ -279,7 +269,7 @@ export async function publishPost(
   // Update index.
   index.posts.push({ id: hashHex });
   const indexEnc = new TextEncoder().encode(JSON.stringify(index));
-  const indexSig = await sign(privKey, indexEnc);
+  const indexSig = await Crypto.sign(privKey, indexEnc);
   const signedIndex = concatArrayBuffers(indexSig, indexEnc);
   // putFile already signs the file for the host to check. Redundant? Cleaner way?
 
@@ -292,8 +282,8 @@ export async function postKeyLocation(
   outerKey: CryptoKey,
   postHash: ArrayBuffer,
 ): Promise<string> {
-  const encKeyBytes = await key2buf(outerKey);
-  const locBytes = await sha(concatArrayBuffers(encKeyBytes, postHash)); // TODO: don't stick post hash on end of this... that makes it trivial to analyze number of distinct posts and people with access to each.
+  const encKeyBytes = await Crypto.key2buf(outerKey);
+  const locBytes = await Crypto.sha(concatArrayBuffers(encKeyBytes, postHash)); // TODO: don't stick post hash on end of this... that makes it trivial to analyze number of distinct posts and people with access to each.
   const locHex = buf2hex(locBytes);
   return locHex;
 }
@@ -308,9 +298,9 @@ export async function publishPostKey(
 ): Promise<void> {
   const locHex = await postKeyLocation(encKey, postHash);
 
-  const postKeyRaw = await key2buf(postKey);
+  const postKeyRaw = await Crypto.key2buf(postKey);
   const postKeyHex = buf2hex(postKeyRaw);
-  const ciphertext = await encryptString(postKeyHex, encKey);
+  const ciphertext = await Crypto.encryptString(postKeyHex, encKey);
 
   return putFile(pubKey, `keys/${locHex}`, privKey, token, ciphertext, "application/json");
 }
@@ -324,7 +314,7 @@ export async function putFile(
   contentType: "application/json" | "application/octet-stream",
 ): Promise<void> {
   // Sign.
-  const sig = await sign(signPrivKey, data);
+  const sig = await Crypto.sign(signPrivKey, data);
 
   // Send.
   const location = Net.fileLoc(pubKeyHex, path);
@@ -334,7 +324,7 @@ export async function putFile(
 export async function getUserAuthChallenge(
   publicKey: CryptoKey,
 ): Promise<IAuthChallenge> {
-  const rawPubKey = await key2buf(publicKey);
+  const rawPubKey = await Crypto.key2buf(publicKey);
   const pubKeyHex = buf2hex(rawPubKey);
   const capDesc = {
     type: "user",
@@ -347,7 +337,7 @@ export async function getMessageAuthChallenge(
   message: ArrayBuffer,
   host?: string,
 ): Promise<IAuthChallenge> {
-  const hash = await sha(message);
+  const hash = await Crypto.sha(message);
   const hashHex = buf2hex(hash);
 
   const capDesc = {
@@ -363,7 +353,7 @@ export async function getSessionToken(
   publicKey: CryptoKey,
   solution: Uint8Array,
 ): Promise<string> {
-  const pubKeyBuf = await key2buf(publicKey);
-  const sig = await sign(privateKey, solution);
+  const pubKeyBuf = await Crypto.key2buf(publicKey);
+  const sig = await Crypto.sign(privateKey, solution);
   return Net.fetchSessionToken(pubKeyBuf, sig, solution);
 }

@@ -1,5 +1,5 @@
 import { hex2bytes } from "core/bytes";
-import { hex2ECDHKey, deriveDHKey } from "core/crypto";
+import Crypto from "lib/crypto";
 import { IEncPost, IIndex, ITextPost, PostVisibility, TPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost, postKeyLocation, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
@@ -157,7 +157,7 @@ export async function removeAccess(postHash: string, viewerPubKey: string) {
   //   alert("Failed to delete.");
   // }
 
-  const subDHPub = await hex2ECDHKey(viewerPubKey);
+  const subDHPub = await Crypto.hex2ECDHKey(viewerPubKey);
   if (!subDHPub) {
     return;
   }
@@ -167,7 +167,7 @@ export async function removeAccess(postHash: string, viewerPubKey: string) {
     return; // TODO.
   }
 
-  const encDH = await deriveDHKey(subDHPub, ident.privKey.dhKey, ["encrypt", "decrypt"]);
+  const encDH = await Crypto.deriveDHKey(subDHPub, ident.privKey.dhKey, ["encrypt", "decrypt"]);
 
   const keyLoc = await postKeyLocation(encDH, hashBuf);
 

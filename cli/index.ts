@@ -1,10 +1,164 @@
 import fs from "fs";
+import { bytes2hex, hex2bytes } from "./shared/core/bytes";
+import nodeCrypto from "crypto";
+import http from "http";
+import Net from "./shared/core/client/net";
+import Crypto from "./shared/core/crypto";
+
+const crypto = nodeCrypto.webcrypto as any;
+
+// const hostPrefix = "http://localhost:8888";
+const hostPrefix = "";
+const host = "localhost";
+const port = "8888"
+
+async function fetch(path: string, init?: { method: "GET" | "POST" | "PUT" | "DELETE", headers?: Record<string, string>, body?: any }): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const opts = {
+      hostname: host,
+      port,
+      path,
+      method: init?.method,
+      headers: init?.headers,
+    };
+
+    const req = http.request(opts, res => {
+      let resData: any;
+      res.on("data", d => {
+        resData = d;
+      });
+      res.on("close", () => {
+        resolve({
+          ok: res.statusCode === 200,
+          statusCode: res.statusCode,
+          statusMessage: res.statusMessage,
+          data: resData,
+          async arrayBuffer() {
+            return resData;
+          },
+        });
+      })
+    });
+
+    if (init?.body) {
+      req.write(init?.body);
+    }
+
+    req.end();
+  });
+}
+
+const net = new Net(hostPrefix, fetch, new Crypto(nodeCrypto.webcrypto as any), nodeCrypto.webcrypto as any);
 
 async function loadID() {
   const id = await fs.promises.readFile("id.json");
   const json = id.toString();
   const creds = JSON.parse(json);
-  console.log(creds)
+  // console.log(creds)
+
+  const result = await loadFromJSON(json);
+  if (result instanceof Error) {
+    console.error("uh oh");
+    return;
+  }
+
+  // console.log(result);
+
+  const pubKeyJWK = JSON.stringify(creds.pubKey);
+  const pubKeyHex = await json2hex(pubKeyJWK);
+  // console.log(pubKeyHex);
+
+  if (!pubKeyHex) {
+    console.error("asdf");
+    return;
+  }
+
+  const pubKey = result.idKeys.publicKey;
+  if (!pubKey) {
+    return;
+  }
+  const res = await net.getIndex(pubKeyHex, hostPrefix)
+  if (!res || res === "notfound") {
+    console.error("shit");
+    return;
+  }
+
+  console.log(res)
+}
+
+export interface ICreds {
+  idKeys: CryptoKeyPair;
+  stateKey: CryptoKey;
+  worldKey: CryptoKey;
+}
+
+export async function loadFromJSON(json: string): Promise<ICreds | Error> {
+  try {
+    const id = JSON.parse(json);
+
+    const publicKey = await crypto.subtle.importKey("jwk", id.pubKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
+    const privateKey = await crypto.subtle.importKey("jwk", id.privKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
+
+    const idKeys = { publicKey, privateKey };
+
+    const worldKeyBufResult = hex2bytes(id.worldKey);
+    if (worldKeyBufResult == null) {
+      return new Error("Parsing world key");
+    }
+    const worldKey = await crypto.subtle.importKey("raw", worldKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
+
+    const stateKeyBufResult = hex2bytes(id.stateKey);
+    if (stateKeyBufResult == null) {
+      return new Error("Parsing state key");
+    }
+    const stateKey = await crypto.subtle.importKey("raw", stateKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
+
+    return { idKeys, stateKey, worldKey };
+  } catch (e) {
+    console.error(e)
+    return new Error("dunno");
+  }
+}
+
+async function json2hex(json: string): Promise<string | undefined> {
+  const key = await json2key(json, "ECDSA", []);
+  if (!key) {
+    return;
+  }
+
+  try {
+    const raw = await crypto.subtle.exportKey("raw", key);
+    const bytes = new Uint8Array(raw);
+    return bytes2hex(bytes);
+  } catch (e) {
+    return undefined;
+  }
+}
+
+async function json2key(json: string, keyType: "ECDSA" | "ECDH", usages: KeyUsage[]): Promise<CryptoKey | undefined> {
+  let jwk;
+  try {
+    jwk = JSON.parse(json);
+  } catch {
+    return undefined;
+  }
+
+  try {
+    if (keyType === "ECDH") {
+      jwk.key_ops = ["deriveKey"];
+    }
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      jwk,
+      { name: keyType, namedCurve: "P-256" },
+      true,
+      usages,
+    );
+    return key;
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
 }
 
 loadID();

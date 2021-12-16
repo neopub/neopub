@@ -1,5 +1,5 @@
 import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
-import { genIDKeyPair, genSymmetricKey, key2buf } from "core/crypto";
+import Crypto from "lib/crypto";
 import { IProfile } from "core/types";
 import { hostPrefix } from "lib/net";
 import { getToken } from "./host";
@@ -46,9 +46,9 @@ export default class User {
   }
 
   static async create(): Promise<User> {
-    const idKeys = await genIDKeyPair();
-    const stateKey = await genSymmetricKey();
-    const worldKey = await genSymmetricKey();
+    const idKeys = await Crypto.genIDKeyPair();
+    const stateKey = await Crypto.genSymmetricKey();
+    const worldKey = await Crypto.genSymmetricKey();
 
     return new User(idKeys, stateKey, worldKey);
   }
@@ -90,7 +90,7 @@ export default class User {
   }
 
   async profile(): Promise<IProfile> {
-    const worldKeyBuf = await key2buf(this.worldKey);
+    const worldKeyBuf = await Crypto.key2buf(this.worldKey);
     const worldKeyHex = buf2hex(worldKeyBuf);
     return { worldKey: worldKeyHex, host: hostPrefix };
   }

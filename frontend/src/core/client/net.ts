@@ -1,17 +1,21 @@
 import { pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams, NUM_SIG_BYTES } from "../consts";
 import { buf2hex, bytes2hex, hex2bytes } from "../bytes";
 import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "../types";
-import { hex2ECDSAKey } from "../crypto";
+import NPCrypto from "../crypto";
 
-type FetchFn = (input: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
+type FetchFn = (input: string, init?: { method: "GET" | "POST" | "PUT" | "DELETE", headers?: Record<string, string>, body?: any }) => Promise<Response>;
 
 export default class Net {
   hostPrefix: string;
   fetch: FetchFn;
+  npCrypto: NPCrypto;
+  crypto: Crypto;
 
-  constructor(hostPrefix: string, fetch: FetchFn) {
+  constructor(hostPrefix: string, fetch: FetchFn, npCrypto: NPCrypto, crypto: Crypto) {
     this.hostPrefix = hostPrefix;
     this.fetch = fetch;
+    this.npCrypto = npCrypto;
+    this.crypto = crypto;
   }
 
   fileLoc(pubKeyHex: string, path: string): string {
@@ -100,14 +104,14 @@ export default class Net {
       const sig = buf.slice(0, NUM_SIG_BYTES);
 
       // TODO: check.
-      const signerPubKey = await hex2ECDSAKey(signerPubKeyHex);
+      const signerPubKey = await this.npCrypto.hex2ECDSAKey(signerPubKeyHex);
       if (!signerPubKey) {
         return; // TODO: signal error.
       }
 
       const rest = buf.slice(NUM_SIG_BYTES);
 
-      const valid = await crypto.subtle.verify(
+      const valid = await this.crypto.subtle.verify(
         ecdsaParams,
         signerPubKey,
         sig,

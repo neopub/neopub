@@ -1,183 +1,190 @@
 import { concatArrayBuffers, hex2bytes } from "./bytes";
 
-export async function genIDKeyPair(): Promise<CryptoKeyPair> {
-  return crypto.subtle.generateKey(
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["sign", "verify"],
-  );
-}
-
-export async function deriveDHKey(
-  publicKey: CryptoKey,
-  privateKey: CryptoKey,
-  usages: KeyUsage[],
-): Promise<CryptoKey> {
-  return crypto.subtle.deriveKey(
-    { name: "ECDH", public: publicKey },
-    privateKey,
-    { name: "AES-CBC", length: 256 },
-    true,
-    usages,
-  );
-}
-
-export async function pubECDSA2ECDH(pubKey: CryptoKey): Promise<CryptoKey> {
-  // HACK: dump ECDSA pub key and load it as an ECDH pub key.
-  // This is only used 1-way, for a subscriber to send a request to the pub key's owner.
-  // Is this a problem?
-  const dump = await crypto.subtle.exportKey("jwk", pubKey);
-  return await crypto.subtle.importKey(
-    "jwk",
-    dump,
-    { name: "ECDH", namedCurve: "P-256" },
-    true,
-    [],
-  );
-}
-
-export async function genECDHKeys(): Promise<CryptoKeyPair> {
-  return crypto.subtle.generateKey(
-    { name: "ECDH", namedCurve: "P-256" },
-    true,
-    ["deriveKey"],
-  );
-}
-
-export async function importAESKey(
-  buf: ArrayBuffer,
-  usages: KeyUsage[],
-): Promise<CryptoKey> {
-  return crypto.subtle.importKey("raw", buf, { name: "AES-CBC" }, true, usages);
-}
-
-export async function hex2ECDHKey(hex: string): Promise<CryptoKey | undefined> {
-  const bytes = hex2bytes(hex);
-  if (!bytes) {
-    return;
+export default class NPCrypto {
+  crypto: Crypto;
+  constructor(crypto: Crypto) {
+    this.crypto = crypto;
   }
-  return crypto.subtle.importKey(
-    "raw",
-    bytes,
-    { name: "ECDH", namedCurve: "P-256" },
-    true,
-    [],
-  );
-}
 
-export async function hex2ECDSAKey(
-  hex: string,
-): Promise<CryptoKey | undefined> {
-  const bytes = hex2bytes(hex);
-  if (!bytes) {
-    return;
+  async genIDKeyPair(): Promise<CryptoKeyPair> {
+    return this.crypto.subtle.generateKey(
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["sign", "verify"],
+    );
   }
-  return crypto.subtle.importKey(
-    "raw",
-    bytes,
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["verify"],
-  );
-}
 
-export async function sign(
-  ecdsaPrivKey: CryptoKey,
-  bytes: ArrayBuffer,
-): Promise<ArrayBuffer> {
-  return crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    ecdsaPrivKey,
-    bytes,
-  );
-}
+  async deriveDHKey(
+    publicKey: CryptoKey,
+    privateKey: CryptoKey,
+    usages: KeyUsage[],
+  ): Promise<CryptoKey> {
+    return this.crypto.subtle.deriveKey(
+      { name: "ECDH", public: publicKey },
+      privateKey,
+      { name: "AES-CBC", length: 256 },
+      true,
+      usages,
+    );
+  }
 
-export async function key2buf(key: CryptoKey): Promise<ArrayBuffer> {
-  return crypto.subtle.exportKey("raw", key);
-}
+  async pubECDSA2ECDH(pubKey: CryptoKey): Promise<CryptoKey> {
+    // HACK: dump ECDSA pub key and load it as an ECDH pub key.
+    // This is only used 1-way, for a subscriber to send a request to the pub key's owner.
+    // Is this a problem?
+    const dump = await this.crypto.subtle.exportKey("jwk", pubKey);
+    return await this.crypto.subtle.importKey(
+      "jwk",
+      dump,
+      { name: "ECDH", namedCurve: "P-256" },
+      true,
+      [],
+    );
+  }
 
-export async function sha(data: ArrayBuffer): Promise<ArrayBuffer> {
-  return crypto.subtle.digest("SHA-256", data);
-}
+  async genECDHKeys(): Promise<CryptoKeyPair> {
+    return this.crypto.subtle.generateKey(
+      { name: "ECDH", namedCurve: "P-256" },
+      true,
+      ["deriveKey"],
+    );
+  }
 
-export async function genSymmetricKey(): Promise<CryptoKey> {
-  // Generate a new key.
-  const key = await window.crypto.subtle.generateKey(
-    {
-      name: "AES-CBC",
-      length: 256,
-    },
-    true,
-    ["encrypt", "decrypt"],
-  );
-  return key;
-}
+  async importAESKey(
+    buf: ArrayBuffer,
+    usages: KeyUsage[],
+  ): Promise<CryptoKey> {
+    return this.crypto.subtle.importKey("raw", buf, { name: "AES-CBC" }, true, usages);
+  }
 
-const numIvBytes = 16;
+  async hex2ECDHKey(hex: string): Promise<CryptoKey | undefined> {
+    const bytes = hex2bytes(hex);
+    if (!bytes) {
+      return;
+    }
+    return this.crypto.subtle.importKey(
+      "raw",
+      bytes,
+      { name: "ECDH", namedCurve: "P-256" },
+      true,
+      [],
+    );
+  }
 
-async function genIV(
-  plaintext: ArrayBuffer,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
-  const rawKey = await window.crypto.subtle.exportKey("raw", key);
+  async hex2ECDSAKey(
+    hex: string,
+  ): Promise<CryptoKey | undefined> {
+    const bytes = hex2bytes(hex);
+    if (!bytes) {
+      return;
+    }
+    return this.crypto.subtle.importKey(
+      "raw",
+      bytes,
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["verify"],
+    );
+  }
 
-  const combined = concatArrayBuffers(rawKey, plaintext);
+  async sign(
+    ecdsaPrivKey: CryptoKey,
+    bytes: ArrayBuffer,
+  ): Promise<ArrayBuffer> {
+    return this.crypto.subtle.sign(
+      { name: "ECDSA", hash: "SHA-256" },
+      ecdsaPrivKey,
+      bytes,
+    );
+  }
 
-  const sha = await window.crypto.subtle.digest("SHA-256", combined);
-  const iv = sha.slice(0, numIvBytes);
+  async key2buf(key: CryptoKey): Promise<ArrayBuffer> {
+    return this.crypto.subtle.exportKey("raw", key);
+  }
 
-  return iv;
-}
+  async sha(data: ArrayBuffer): Promise<ArrayBuffer> {
+    return this.crypto.subtle.digest("SHA-256", data);
+  }
 
-export async function encryptBuf(plaintext: ArrayBuffer, key: CryptoKey): Promise<ArrayBuffer> {
-  const iv = await genIV(plaintext, key);
+  async genSymmetricKey(): Promise<CryptoKey> {
+    // Generate a new key.
+    const key = await this.crypto.subtle.generateKey(
+      {
+        name: "AES-CBC",
+        length: 256,
+      },
+      true,
+      ["encrypt", "decrypt"],
+    );
+    return key;
+  }
 
-  const ciphertext = await window.crypto.subtle.encrypt(
-    {
-      name: "AES-CBC",
-      iv,
-    },
-    key,
-    plaintext,
-  );
+  numIvBytes = 16;
 
-  const payload = concatArrayBuffers(iv, ciphertext);
-  return payload;
-}
+  async genIV(
+    plaintext: ArrayBuffer,
+    key: CryptoKey,
+  ): Promise<ArrayBuffer> {
+    const rawKey = await this.crypto.subtle.exportKey("raw", key);
 
-export async function encryptString(
-  data: string,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
-  const plaintext = new TextEncoder().encode(data);
-  return encryptBuf(plaintext, key);
-}
+    const combined = concatArrayBuffers(rawKey, plaintext);
 
-export async function decryptBuf(
-  payload: ArrayBuffer,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
-  const bytes = new Uint8Array(payload);
-  const iv = bytes.slice(0, numIvBytes);
-  const ciphertext = bytes.slice(numIvBytes);
+    const sha = await this.crypto.subtle.digest("SHA-256", combined);
+    const iv = sha.slice(0, this.numIvBytes);
 
-  const decrypted = await window.crypto.subtle.decrypt(
-    {
-      name: "AES-CBC",
-      iv,
-    },
-    key,
-    ciphertext,
-  );
+    return iv;
+  }
 
-  return decrypted;
-}
+  async encryptBuf(plaintext: ArrayBuffer, key: CryptoKey): Promise<ArrayBuffer> {
+    const iv = await this.genIV(plaintext, key);
 
-export async function decryptString(
-  payload: ArrayBuffer,
-  key: CryptoKey,
-): Promise<string> {
-  const decrypted = await decryptBuf(payload, key);
-  const plaintext = new TextDecoder().decode(decrypted);
-  return plaintext;
+    const ciphertext = await this.crypto.subtle.encrypt(
+      {
+        name: "AES-CBC",
+        iv,
+      },
+      key,
+      plaintext,
+    );
+
+    const payload = concatArrayBuffers(iv, ciphertext);
+    return payload;
+  }
+
+  async encryptString(
+    data: string,
+    key: CryptoKey,
+  ): Promise<ArrayBuffer> {
+    const plaintext = new TextEncoder().encode(data);
+    return this.encryptBuf(plaintext, key);
+  }
+
+  async decryptBuf(
+    payload: ArrayBuffer,
+    key: CryptoKey,
+  ): Promise<ArrayBuffer> {
+    const bytes = new Uint8Array(payload);
+    const iv = bytes.slice(0, this.numIvBytes);
+    const ciphertext = bytes.slice(this.numIvBytes);
+
+    const decrypted = await this.crypto.subtle.decrypt(
+      {
+        name: "AES-CBC",
+        iv,
+      },
+      key,
+      ciphertext,
+    );
+
+    return decrypted;
+  }
+
+  async decryptString(
+    payload: ArrayBuffer,
+    key: CryptoKey,
+  ): Promise<string> {
+    const decrypted = await this.decryptBuf(payload, key);
+    const plaintext = new TextDecoder().decode(decrypted);
+    return plaintext;
+  }
 }

@@ -1,5 +1,5 @@
 import { buf2hex } from "core/bytes";
-import { sha } from "core/crypto";
+import Crypto from "lib/crypto";
 import { IEncPost, IReply } from "core/types";
 import DB from "lib/db";
 import { recordReplyInDB } from "lib/storage";
@@ -31,7 +31,7 @@ export async function sendReply(
 export async function replyId(reply: IReply): Promise<string> {
   // TODO: compute hash to encompass full reply struct. Just hashing the msg field means every identical text message will collide.
   const buf = new TextEncoder().encode(reply.msg);
-  const hash = await sha(buf);
+  const hash = await Crypto.sha(buf);
   const hashHex = await buf2hex(hash);
   return hashHex;
 }
