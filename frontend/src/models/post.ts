@@ -3,7 +3,7 @@ import { hex2ECDHKey, deriveDHKey } from "core/crypto";
 import { IEncPost, IIndex, ITextPost, PostVisibility, TPost } from "core/types";
 import { fetchAndDecryptWorldOrSubPost, postKeyLocation, publishPostAndKeys } from "lib/api";
 import DB from "lib/db";
-import { deleteFile, fileLoc, getIndex } from "lib/net";
+import Net from "lib/net";
 import { useEffect, useState } from "react";
 import { ID, loadID } from "./id";
 
@@ -37,7 +37,7 @@ export async function fetchPosts(privDH: CryptoKey) {
 
   await Promise.all(subs.map(async (sub) => {
     const { pubKey, host, worldKeyHex } = sub;
-    const index = await getIndex(pubKey, host);
+    const index = await Net.getIndex(pubKey, host);
     if (index === "notfound" || !index) {
       return;
     }
@@ -171,9 +171,9 @@ export async function removeAccess(postHash: string, viewerPubKey: string) {
 
   const keyLoc = await postKeyLocation(encDH, hashBuf);
 
-  const location = fileLoc(ident.pubKey.hex, `keys/${keyLoc}`);
+  const location = Net.fileLoc(ident.pubKey.hex, `keys/${keyLoc}`);
   try {
-    await deleteFile(ident.pubKey.hex, ident.token, location);
+    await Net.deleteFile(ident.pubKey.hex, ident.token, location);
   } catch (err) {
     // TODO: handle in UI code.
     alert("Failed to delete from host.");
@@ -189,9 +189,9 @@ export async function deletePost(postHash: string) {
     return;
   }
 
-  const location = fileLoc(ident.pubKey.hex, `posts/${postHash}`);
+  const location = Net.fileLoc(ident.pubKey.hex, `posts/${postHash}`);
   try {
-    await deleteFile(ident.pubKey.hex, ident.token, location);
+    await Net.deleteFile(ident.pubKey.hex, ident.token, location);
   } catch (err) {
     // TODO: handle in UI code.
     alert("Failed to delete from host.");

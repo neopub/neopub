@@ -1,19 +1,19 @@
 import { buf2hex, concatArrayBuffers } from "core/bytes";
-import { genIDKeyPair, genSymmetricKey, key2buf, sign } from "core/crypto";
+import { key2buf, sign } from "core/crypto";
 import { IIndex, IProfile, ISubReq, NotFound } from "core/types";
 import { getPublicKeyHex } from "lib/auth";
 import DB from "lib/db";
-import { fileLoc, getFileSignedJSON, hostPrefix } from "lib/net";
+import Net from "lib/net";
 import { useState, useEffect } from "react";
-import { loadID, storeCredentials } from "./id";
+import { loadID } from "./id";
 import { putFile } from "lib/api";
-import { getToken } from "models/host";
 import { mutateState } from "./state";
+import User from "./user";
 
 // TODO: standardize userId vs. pubKeyHex.
 export function fetchProfile(userId: string, host?: string): Promise<IProfile | "notfound" | undefined> {
-  const location = fileLoc(userId, "profile.json");
-  return getFileSignedJSON<IProfile>(userId, location, host);
+  const location = Net.fileLoc(userId, "profile.json");
+  return Net.getFileSignedJSON<IProfile>(userId, location, host);
 }
 
 export function useIndex(id: string, host?: string): IIndex | "notfound" {
@@ -30,8 +30,8 @@ export function useIndex(id: string, host?: string): IIndex | "notfound" {
         updatedAt = row.index.updatedAt;
       }
 
-      const location = fileLoc(id, "index.json");
-      const remoteIndex = await getFileSignedJSON<IIndex>(id, location, host);
+      const location = Net.fileLoc(id, "index.json");
+      const remoteIndex = await Net.getFileSignedJSON<IIndex>(id, location, host);
       if (remoteIndex && remoteIndex !== "notfound" && remoteIndex.updatedAt > updatedAt) {
         setIndex(remoteIndex);
       }
@@ -133,32 +133,15 @@ export async function uploadProfile(pubKey: CryptoKey, privKey: CryptoKey, token
 }
 
 export async function createProfile(setStatus: (status: string) => void) {
-  const idKeys = await genIDKeyPair();
-  const stateKey = await genSymmetricKey();
-
-  const token = await getToken(idKeys.publicKey, idKeys.privateKey, setStatus);
-  if (!token) {
+  const user = await User.create()
+  const authedUser = await user.getToken(setStatus);
+  if (authedUser instanceof Error) {
     return; // TODO: handle these intermediate errors.
   }
 
-  const worldKey = await genSymmetricKey();
+  await authedUser.storeCreds();
 
-  await storeCredentials(idKeys, token, worldKey, stateKey);
-
-  const pubKeyHex = await getPublicKeyHex();
-  if (!pubKeyHex) {
-    return;
-  }
-
-  // Create profile.
-  const worldKeyBuf = await key2buf(worldKey);
-  const worldKeyHex = buf2hex(worldKeyBuf);
-  const profile = { worldKey: worldKeyHex, host: hostPrefix };
-
-  return Promise.all([
-    storeProfile(pubKeyHex, profile),
-    uploadProfile(idKeys.publicKey, idKeys.privateKey, token, profile),
-  ]);
+  await authedUser.storeAndUploadProfile();
 }
 
 export function useIsSubscribedTo(pubKeyHex: string): boolean {

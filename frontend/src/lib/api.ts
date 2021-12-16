@@ -18,7 +18,7 @@ import {
   ISubReq,
 } from "core/types";
 import { getSubscriberPubKeyList } from "lib/storage";
-import * as Net from "lib/net";
+import Net from "lib/net";
 import DB from "./db";
 import { sendMessage } from "models/message";
 

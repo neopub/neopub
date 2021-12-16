@@ -2,7 +2,7 @@ import solvePoWChallenge from "core/challenge";
 import { getUserAuthChallenge, getSessionToken } from "lib/api";
 
 
-export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus: (status: string) => void) {
+export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus: (status: string) => void): Promise<string | Error> {
   setStatus("Initiating challenge...");
   const { chal, diff } = await getUserAuthChallenge(pubKey);
 
@@ -10,7 +10,7 @@ export async function getToken(pubKey: CryptoKey, privKey: CryptoKey, setStatus:
   const solution = await solvePoWChallenge(chal, diff);
   if (!solution) {
     setStatus("No solution found.");
-    return;
+    return new Error("No solution found");
   }
   setStatus("Found solution.");
 

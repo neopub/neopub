@@ -1,6 +1,6 @@
 import { ISubReq } from "core/types";
 import EventBus from "lib/eventBus";
-import { deleteFile, fetchInbox, fileLoc } from "lib/net";
+import Net from "lib/net";
 import { useState, useEffect, createContext } from "react";
 import { ID, loadID } from "./id";
 import { addSubscriber } from "./profile";
@@ -14,7 +14,7 @@ const inboxChange = new EventBus();
 async function loadInbox(ident: ID, force?: boolean): Promise<Inbox | undefined> {
   const shouldRefetch = force || !inbox;
   if (shouldRefetch) {
-    const newInbox = await fetchInbox(ident.pubKey.hex, ident.token);
+    const newInbox = await Net.fetchInbox(ident.pubKey.hex, ident.token);
     inbox = newInbox;
   }
 
@@ -64,9 +64,9 @@ export async function deleteInboxItem(id: string) {
   }
 
   // TODO: manage the prefixing with pubkeyhex all on the server side. Client doesn't need to care about that.
-  const location = fileLoc(ident.pubKey.hex, `inbox/${id}`);
+  const location = Net.fileLoc(ident.pubKey.hex, `inbox/${id}`);
   try {
-    deleteFile(ident.pubKey.hex, ident.token, location);
+    Net.deleteFile(ident.pubKey.hex, ident.token, location);
     inboxChange.emit();
   } catch (err) {
     // TODO: handle in UI code.

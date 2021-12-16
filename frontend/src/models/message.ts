@@ -4,7 +4,7 @@ import { ecdsaParams, NUM_SIG_BYTES } from "core/consts";
 import { hex2ECDHKey, deriveDHKey, hex2ECDSAKey, pubECDSA2ECDH, genECDHKeys, key2buf, sign, encryptBuf, decryptBuf } from "core/crypto";
 import { IMessage } from "core/types";
 import { getMessageAuthChallenge } from "lib/api";
-import { fetchInboxItem, putMessage } from "lib/net";
+import Net from "lib/net";
 import { loadID } from "./id";
 
 export async function unwrapInboxItem(
@@ -19,7 +19,7 @@ export async function unwrapInboxItem(
 
   const ephemDH = await deriveDHKey(ephemDHPub, privKey, ["decrypt"]);
 
-  const enc = await fetchInboxItem(pubKeyHex, id);
+  const enc = await Net.fetchInboxItem(pubKeyHex, id);
   if (!enc) {
     return;
   }
@@ -89,5 +89,5 @@ export async function sendMessage(
   }
 
   const ephemDHPubBuf = await key2buf(ephemKeys.publicKey);
-  return putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, solution, host);
+  return Net.putMessage(destPubKeyHex, ephemDHPubBuf, encReqBuf, solution, host);
 }

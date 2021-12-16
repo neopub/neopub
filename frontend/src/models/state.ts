@@ -1,7 +1,7 @@
 // State models client state that should sync with the host via an E2E-encrypted file.
 // Excludes posts, because those already sync up to the host for distribution.
 
-import * as Net from "lib/net";
+import Net from "lib/net";
 import { hex2bytes } from "core/bytes";
 import { importAESKey, encryptString, decryptString } from "core/crypto";
 import { getPublicKeyHex } from "lib/auth";
