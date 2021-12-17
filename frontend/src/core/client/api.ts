@@ -22,7 +22,9 @@ export default class API {
     const body = JSON.stringify(post);
     const ciphertext = await this.crypto.encryptString(body, postKey);
 
-    let index: IIndex = { posts: [], updatedAt: new Date().toISOString() };
+    const now = new Date().toISOString();
+
+    let index: IIndex = { posts: [], updatedAt: now };
     const idx = await this.net.getIndex(pubKey);
     if (idx && idx !== "notfound") {
       index = idx;
@@ -37,6 +39,7 @@ export default class API {
 
     // Update index.
     index.posts.push({ id: hashHex });
+    index.updatedAt = now;
     const indexEnc = new TextEncoder().encode(JSON.stringify(index));
     const indexSig = await this.crypto.sign(privKey, indexEnc);
     const signedIndex = concatArrayBuffers(indexSig, indexEnc);
