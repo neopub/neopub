@@ -4,6 +4,10 @@ import nodeCrypto from "crypto";
 import http from "http";
 import Net from "./shared/core/client/net";
 import Crypto from "./shared/core/crypto";
+import API from "./shared/core/client/api";
+import { ITextPost } from "./shared/core/types";
+import solvePoWChallenge from "./shared/core/challenge";
+import PoW, { numHashBits } from "./shared/core/pow";
 
 const crypto = nodeCrypto.webcrypto as any;
 
@@ -36,6 +40,9 @@ async function fetch(path: string, init?: { method: "GET" | "POST" | "PUT" | "DE
           async arrayBuffer() {
             return resData;
           },
+          async text() {
+            return new TextDecoder().decode(resData);
+          },
         });
       })
     });
@@ -48,9 +55,10 @@ async function fetch(path: string, init?: { method: "GET" | "POST" | "PUT" | "DE
   });
 }
 
-const net = new Net(hostPrefix, fetch, new Crypto(nodeCrypto.webcrypto as any), nodeCrypto.webcrypto as any);
+const npCrypto = new Crypto(crypto);
+const net = new Net(hostPrefix, fetch, npCrypto, crypto);
 
-async function loadID() {
+async function yeet() {
   const id = await fs.promises.readFile("id.json");
   const json = id.toString();
   const creds = JSON.parse(json);
@@ -84,6 +92,50 @@ async function loadID() {
   }
 
   console.log(res)
+
+  const api = new API(net, npCrypto);
+
+  // Get token.
+  const { chal, diff } = await api.getUserAuthChallenge(pubKey);
+
+  const pow = new PoW(crypto);
+  const solution = await pow.solve(chal, numHashBits - diff);
+
+  if (!solution) {
+    console.error("insoluble");
+    return;
+  }
+
+  const privKey = result.idKeys.privateKey;
+  if (!privKey) {
+    return;
+  }
+
+  const token = await api.getSessionToken(
+    privKey,
+    pubKey,
+    solution
+  );
+
+
+  // Publish post.
+  const now = new Date();
+  const text = "yeet";
+  const post: ITextPost = {
+    createdAt: now.toISOString(),
+    type: "text",
+    content: {
+      text,
+    },
+  };
+
+  const postKey = await npCrypto.genSymmetricKey();
+  const [newIndex, postHash] = await api.publishPost(post, postKey, pubKeyHex, privKey, token);
+
+  // Publish world key.
+  await api.publishPostKey(postKey, postHash, result.worldKey, pubKeyHex, privKey, token);
+
+  console.log(newIndex);
 }
 
 export interface ICreds {
@@ -105,7 +157,7 @@ export async function loadFromJSON(json: string): Promise<ICreds | Error> {
     if (worldKeyBufResult == null) {
       return new Error("Parsing world key");
     }
-    const worldKey = await crypto.subtle.importKey("raw", worldKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
+    const worldKey = await crypto.subtle.importKey("raw", worldKeyBufResult, { name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"]);
 
     const stateKeyBufResult = hex2bytes(id.stateKey);
     if (stateKeyBufResult == null) {
@@ -161,9 +213,4 @@ async function json2key(json: string, keyType: "ECDSA" | "ECDH", usages: KeyUsag
   }
 }
 
-loadID();
-
-// Get index.
-
-// Get auth token.
-// 
+yeet();

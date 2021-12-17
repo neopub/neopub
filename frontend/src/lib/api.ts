@@ -11,6 +11,7 @@ import { getSubscriberPubKeyList } from "lib/storage";
 import Net from "lib/net";
 import DB from "./db";
 import { sendMessage } from "models/message";
+import API from "core/client/api";
 
 async function fetchAndDecryptPostWithOuterKey(
   posterPubKeyHex: string,
@@ -250,42 +251,16 @@ export async function publishPost(
   privKey: CryptoKey,
   token: string,
 ): Promise<[IIndex, ArrayBuffer]> {
-  const body = JSON.stringify(post);
-  const ciphertext = await Crypto.encryptString(body, postKey);
-
-  let index: IIndex = { posts: [], updatedAt: new Date().toISOString() };
-  const idx = await Net.getIndex(pubKey);
-  if (idx && idx !== "notfound") {
-    index = idx;
-  }
-
-  // Compute content-based ID.
-  const hash = await Crypto.sha(ciphertext);
-  const hashHex = await buf2hex(hash);
-
-  // Put post.
-  await putFile(pubKey, `posts/${hashHex}`, privKey, token, ciphertext, "application/octet-stream");
-
-  // Update index.
-  index.posts.push({ id: hashHex });
-  const indexEnc = new TextEncoder().encode(JSON.stringify(index));
-  const indexSig = await Crypto.sign(privKey, indexEnc);
-  const signedIndex = concatArrayBuffers(indexSig, indexEnc);
-  // putFile already signs the file for the host to check. Redundant? Cleaner way?
-
-  await putFile(pubKey, `index.json`, privKey, token, signedIndex, "application/json");
-
-  return [index, hash];
+  const api = new API(Net, Crypto);
+  return api.publishPost(post, postKey, pubKey, privKey, token);
 }
 
 export async function postKeyLocation(
   outerKey: CryptoKey,
   postHash: ArrayBuffer,
 ): Promise<string> {
-  const encKeyBytes = await Crypto.key2buf(outerKey);
-  const locBytes = await Crypto.sha(concatArrayBuffers(encKeyBytes, postHash)); // TODO: don't stick post hash on end of this... that makes it trivial to analyze number of distinct posts and people with access to each.
-  const locHex = buf2hex(locBytes);
-  return locHex;
+  const api = new API(Net, Crypto);
+  return api.postKeyLocation(outerKey, postHash);
 }
 
 export async function publishPostKey(
@@ -296,13 +271,8 @@ export async function publishPostKey(
   privKey: CryptoKey,
   token: string,
 ): Promise<void> {
-  const locHex = await postKeyLocation(encKey, postHash);
-
-  const postKeyRaw = await Crypto.key2buf(postKey);
-  const postKeyHex = buf2hex(postKeyRaw);
-  const ciphertext = await Crypto.encryptString(postKeyHex, encKey);
-
-  return putFile(pubKey, `keys/${locHex}`, privKey, token, ciphertext, "application/json");
+  const api = new API(Net, Crypto);
+  return api.publishPostKey(postKey, postHash, encKey, pubKey, privKey, token);
 }
 
 export async function putFile(
@@ -313,24 +283,15 @@ export async function putFile(
   data: ArrayBuffer,
   contentType: "application/json" | "application/octet-stream",
 ): Promise<void> {
-  // Sign.
-  const sig = await Crypto.sign(signPrivKey, data);
-
-  // Send.
-  const location = Net.fileLoc(pubKeyHex, path);
-  Net.putFile(location, pubKeyHex, token, data, sig, contentType)
+  const api = new API(Net, Crypto);
+  return api.putFile(pubKeyHex, path, signPrivKey, token, data, contentType);
 }
 
 export async function getUserAuthChallenge(
   publicKey: CryptoKey,
 ): Promise<IAuthChallenge> {
-  const rawPubKey = await Crypto.key2buf(publicKey);
-  const pubKeyHex = buf2hex(rawPubKey);
-  const capDesc = {
-    type: "user",
-    pubKey: pubKeyHex,
-  } as const;
-  return Net.fetchAuthChallenge(capDesc);
+  const api = new API(Net, Crypto);
+  return api.getUserAuthChallenge(publicKey);
 }
 
 export async function getMessageAuthChallenge(
@@ -353,7 +314,6 @@ export async function getSessionToken(
   publicKey: CryptoKey,
   solution: Uint8Array,
 ): Promise<string> {
-  const pubKeyBuf = await Crypto.key2buf(publicKey);
-  const sig = await Crypto.sign(privateKey, solution);
-  return Net.fetchSessionToken(pubKeyBuf, sig, solution);
+  const api = new API(Net, Crypto);
+  return api.getSessionToken(privateKey, publicKey, solution);
 }
