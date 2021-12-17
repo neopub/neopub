@@ -1,4 +1,4 @@
-import { hex2bytes, concatArrayBuffers, buf2hex } from "core/bytes";
+import { hex2bytes, buf2hex } from "core/bytes";
 import Crypto from "lib/crypto";
 import {
   TPost,
