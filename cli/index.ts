@@ -5,7 +5,6 @@ import Net from "./shared/core/client/net";
 import Crypto from "./shared/core/crypto";
 import API from "./shared/core/client/api";
 import { ITextPost } from "./shared/core/types";
-import solvePoWChallenge from "./shared/core/challenge";
 import PoW, { numHashBits } from "./shared/core/pow";
 import { fetch } from "./lib";
 
