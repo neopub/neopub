@@ -3,4 +3,14 @@
 ## Usage
 
 To run a local server, `cd servers/node && yarn start`.
+
 To point the client at that, `echo "REACT_APP_HOST_PREFIX=http://localhost:8888" > frontend/.env.local && cd frontend && yarn start`.
+
+To post from the CLI, 
+1. run the web server and client,
+1. create an ID,
+1. save credentials to a file (`id.json`),
+1. put that file in the `cli` directory,
+1. `cd cli`
+1. `yarn`
+1. `echo "your message" | yarn cli`.

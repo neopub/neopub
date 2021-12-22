@@ -24,7 +24,7 @@ function More() {
     }
 
     const blob = new Blob([credState], { type: "application/json;charset=utf-8" });
-    saveAs(blob, "creds.json");
+    saveAs(blob, "id.json");
   }
 
   const placeholder = credState?.replace(/\w/g, "*");
