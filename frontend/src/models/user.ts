@@ -5,6 +5,7 @@ import { hostPrefix } from "lib/net";
 import { getToken } from "./host";
 import { storeCredentials } from "./id";
 import { storeProfile, uploadProfile } from "./profile";
+import { loadFromJSON } from "core/client/creds";
 
 export class AuthorizedUser {
   user: User;
@@ -54,30 +55,12 @@ export default class User {
   }
 
   static async loadFromJSON(json: string): Promise<User | Error> {
-    try {
-      const id = JSON.parse(json);
-
-      const publicKey = await crypto.subtle.importKey("jwk", id.pubKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-      const privateKey = await crypto.subtle.importKey("jwk", id.privKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-
-      const idKeys = { publicKey, privateKey };
-
-      const worldKeyBufResult = hex2bytes(id.worldKey);
-      if (worldKeyBufResult == null) {
-        return new Error("Parsing world key");
-      }
-      const worldKey = await crypto.subtle.importKey("raw", worldKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
-
-      const stateKeyBufResult = hex2bytes(id.stateKey);
-      if (stateKeyBufResult == null) {
-        return new Error("Parsing state key");
-      }
-      const stateKey = await crypto.subtle.importKey("raw", stateKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
-
-      return new User(idKeys, stateKey, worldKey);
-    } catch (e) {
-      return e;
+    const creds = await loadFromJSON(json, crypto);
+    if (creds instanceof Error) {
+      return creds;
     }
+
+    return new User(creds.idKeys, creds.stateKey, creds.worldKey);
   }
 
   async getToken(setStatus: (status: string) => void): Promise<Error | AuthorizedUser> {

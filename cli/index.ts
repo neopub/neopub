@@ -1,5 +1,4 @@
 import fs from "fs";
-import { hex2bytes } from "./shared/core/bytes";
 import nodeCrypto from "crypto";
 import Net from "./shared/core/client/net";
 import Crypto from "./shared/core/crypto";
@@ -8,6 +7,7 @@ import { ITextPost } from "./shared/core/types";
 import PoW, { numHashBits } from "./shared/core/pow";
 import { fetch } from "./lib";
 import { json2hex } from "./shared/core/client/lib";
+import { loadFromJSON } from "./shared/core/client/creds";
 
 const hostPrefix = "";
 
@@ -16,13 +16,13 @@ const crypto = nodeCrypto.webcrypto as any;
 const npCrypto = new Crypto(crypto);
 const net = new Net(hostPrefix, fetch, npCrypto, crypto);
 
-async function yeet() {
+async function yeet(text: string) {
   const id = await fs.promises.readFile("id.json");
   const json = id.toString();
   const creds = JSON.parse(json);
   // console.log(creds)
 
-  const result = await loadFromJSON(json);
+  const result = await loadFromJSON(json, crypto);
   if (result instanceof Error) {
     console.error("uh oh");
     return;
@@ -78,7 +78,6 @@ async function yeet() {
 
   // Publish post.
   const now = new Date();
-  const text = "yeet";
   const post: ITextPost = {
     createdAt: now.toISOString(),
     type: "text",
@@ -96,38 +95,16 @@ async function yeet() {
   console.log(newIndex);
 }
 
-export interface ICreds {
-  idKeys: CryptoKeyPair;
-  stateKey: CryptoKey;
-  worldKey: CryptoKey;
-}
+let chunks: string[] = [];
 
-export async function loadFromJSON(json: string): Promise<ICreds | Error> {
-  try {
-    const id = JSON.parse(json);
-
-    const publicKey = await crypto.subtle.importKey("jwk", id.pubKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
-    const privateKey = await crypto.subtle.importKey("jwk", id.privKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-
-    const idKeys = { publicKey, privateKey };
-
-    const worldKeyBufResult = hex2bytes(id.worldKey);
-    if (worldKeyBufResult == null) {
-      return new Error("Parsing world key");
-    }
-    const worldKey = await crypto.subtle.importKey("raw", worldKeyBufResult, { name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"]);
-
-    const stateKeyBufResult = hex2bytes(id.stateKey);
-    if (stateKeyBufResult == null) {
-      return new Error("Parsing state key");
-    }
-    const stateKey = await crypto.subtle.importKey("raw", stateKeyBufResult, { name: "AES-CBC", length: 256 }, false, ["encrypt", "decrypt"]);
-
-    return { idKeys, stateKey, worldKey };
-  } catch (e) {
-    console.error(e)
-    return new Error("dunno");
+process.stdin.on('readable', () => {
+  let chunk: string;
+  while (chunk = process.stdin.read()) {
+    chunks.push(chunk);
   }
-}
+});
 
-yeet();
+process.stdin.on('end', () => {
+  const input = chunks.join();
+  yeet(input);
+});
