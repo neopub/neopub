@@ -1,5 +1,5 @@
 import fs from "fs";
-import { bytes2hex, hex2bytes } from "./shared/core/bytes";
+import { hex2bytes } from "./shared/core/bytes";
 import nodeCrypto from "crypto";
 import Net from "./shared/core/client/net";
 import Crypto from "./shared/core/crypto";
@@ -7,6 +7,7 @@ import API from "./shared/core/client/api";
 import { ITextPost } from "./shared/core/types";
 import PoW, { numHashBits } from "./shared/core/pow";
 import { fetch } from "./lib";
+import { json2hex } from "./shared/core/client/lib";
 
 const hostPrefix = "";
 
@@ -30,7 +31,7 @@ async function yeet() {
   // console.log(result);
 
   const pubKeyJWK = JSON.stringify(creds.pubKey);
-  const pubKeyHex = await json2hex(pubKeyJWK);
+  const pubKeyHex = await json2hex(pubKeyJWK, crypto);
   // console.log(pubKeyHex);
 
   if (!pubKeyHex) {
@@ -126,47 +127,6 @@ export async function loadFromJSON(json: string): Promise<ICreds | Error> {
   } catch (e) {
     console.error(e)
     return new Error("dunno");
-  }
-}
-
-async function json2hex(json: string): Promise<string | undefined> {
-  const key = await json2key(json, "ECDSA", []);
-  if (!key) {
-    return;
-  }
-
-  try {
-    const raw = await crypto.subtle.exportKey("raw", key);
-    const bytes = new Uint8Array(raw);
-    return bytes2hex(bytes);
-  } catch (e) {
-    return undefined;
-  }
-}
-
-async function json2key(json: string, keyType: "ECDSA" | "ECDH", usages: KeyUsage[]): Promise<CryptoKey | undefined> {
-  let jwk;
-  try {
-    jwk = JSON.parse(json);
-  } catch {
-    return undefined;
-  }
-
-  try {
-    if (keyType === "ECDH") {
-      jwk.key_ops = ["deriveKey"];
-    }
-    const key = await crypto.subtle.importKey(
-      "jwk",
-      jwk,
-      { name: keyType, namedCurve: "P-256" },
-      true,
-      usages,
-    );
-    return key;
-  } catch (e) {
-    console.log(e);
-    return undefined;
   }
 }
 
