@@ -9,18 +9,15 @@ import { fetch } from "./lib";
 import { json2hex } from "./shared/core/client/lib";
 import { loadFromJSON } from "./shared/core/client/creds";
 
-const hostPrefix = "";
-
 const crypto = nodeCrypto.webcrypto as any;
-
 const npCrypto = new Crypto(crypto);
+const hostPrefix = "";
 const net = new Net(hostPrefix, fetch, npCrypto, crypto);
 
 async function yeet(text: string) {
   const id = await fs.promises.readFile("id.json");
   const json = id.toString();
   const creds = JSON.parse(json);
-  // console.log(creds)
 
   const result = await loadFromJSON(json, crypto);
   if (result instanceof Error) {
@@ -28,11 +25,8 @@ async function yeet(text: string) {
     return;
   }
 
-  // console.log(result);
-
   const pubKeyJWK = JSON.stringify(creds.pubKey);
   const pubKeyHex = await json2hex(pubKeyJWK, crypto);
-  // console.log(pubKeyHex);
 
   if (!pubKeyHex) {
     console.error("asdf");
@@ -48,8 +42,6 @@ async function yeet(text: string) {
     console.error("shit");
     return;
   }
-
-  console.log(res)
 
   const api = new API(net, npCrypto);
 
@@ -75,7 +67,6 @@ async function yeet(text: string) {
     solution
   );
 
-
   // Publish post.
   const now = new Date();
   const post: ITextPost = {
@@ -91,8 +82,6 @@ async function yeet(text: string) {
 
   // Publish world key.
   await api.publishPostKey(postKey, postHash, result.worldKey, pubKeyHex, privKey, token);
-
-  console.log(newIndex);
 }
 
 let chunks: string[] = [];
