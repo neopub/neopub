@@ -1,4 +1,4 @@
-import { buf2hex, bytes2hex, hex2bytes } from "core/bytes";
+import { buf2hex, bytes2hex } from "core/bytes";
 import Crypto from "lib/crypto";
 import { IProfile } from "core/types";
 import { hostPrefix } from "lib/net";
