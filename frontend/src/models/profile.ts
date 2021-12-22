@@ -19,11 +19,10 @@ export function fetchProfile(userId: string, host?: string): Promise<IProfile | 
 export function useIndex(id: string, host?: string): IIndex | "notfound" {
   const [index, setIndex] = useState<IIndex | "notfound">({ posts: [], updatedAt: "" });
   useEffect(() => {
-    // TODO: manage potential local/remote index conflicts.
+    // TODO: manage potential local/remote index conflicts (CRDT). Currently it is most-recent wins.
     async function load() {
       let updatedAt = "";
 
-      // Must put an updatedAt timestamp on index, to know which should win.
       const row = await DB.indexes.get(id);
       if (row) {
         setIndex(row.index);
