@@ -12,7 +12,7 @@ import { loadFromJSON } from "./shared/core/client/creds";
 const crypto = nodeCrypto.webcrypto as any;
 const npCrypto = new Crypto(crypto);
 const hostPrefix = "";
-const net = new Net(hostPrefix, fetch, npCrypto, crypto);
+const net = new Net(hostPrefix, fetch, npCrypto);
 
 async function yeet(text: string) {
   const id = await fs.promises.readFile("id.json");

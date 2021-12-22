@@ -1,4 +1,5 @@
 import { concatArrayBuffers, hex2bytes } from "./bytes";
+import { ecdsaParams } from "./consts";
 
 export default class NPCrypto {
   crypto: Crypto;
@@ -47,6 +48,15 @@ export default class NPCrypto {
       { name: "ECDH", namedCurve: "P-256" },
       true,
       ["deriveKey"],
+    );
+  }
+
+  async verify(signerPubKey: CryptoKey, sig: ArrayBuffer, data: ArrayBuffer) {
+    return this.crypto.subtle.verify(
+      ecdsaParams,
+      signerPubKey,
+      sig,
+      data,
     );
   }
 

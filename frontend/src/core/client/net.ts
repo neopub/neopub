@@ -1,4 +1,4 @@
-import { pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, ecdsaParams, NUM_SIG_BYTES } from "../consts";
+import { pubKeyHeader, tokenHeader, sigHeader, subDhKey, powHeader, NUM_SIG_BYTES } from "../consts";
 import { buf2hex, bytes2hex, hex2bytes } from "../bytes";
 import { IAuthChallenge, IIndex, IProfile, NotFound, CapabilityDescription } from "../types";
 import NPCrypto from "../crypto";
@@ -9,13 +9,11 @@ export default class Net {
   hostPrefix: string;
   fetch: FetchFn;
   npCrypto: NPCrypto;
-  crypto: Crypto;
 
-  constructor(hostPrefix: string, fetch: FetchFn, npCrypto: NPCrypto, crypto: Crypto) {
+  constructor(hostPrefix: string, fetch: FetchFn, npCrypto: NPCrypto) {
     this.hostPrefix = hostPrefix;
     this.fetch = fetch;
     this.npCrypto = npCrypto;
-    this.crypto = crypto;
   }
 
   fileLoc(pubKeyHex: string, path: string): string {
@@ -111,12 +109,7 @@ export default class Net {
 
       const rest = buf.slice(NUM_SIG_BYTES);
 
-      const valid = await this.crypto.subtle.verify(
-        ecdsaParams,
-        signerPubKey,
-        sig,
-        rest,
-      );
+      const valid = await this.npCrypto.verify(signerPubKey, sig, rest);
       if (!valid) {
         return; // TODO blow up.
       }
