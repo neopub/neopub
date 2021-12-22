@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import CredFields from "components/credFields";
 import KnowMore from "components/knowMore";
 import { IdentityContext } from "models/id";
+import { saveAs } from 'file-saver';
 
 function More() {
   const [reveal, setReveal] = useState(false);
@@ -17,18 +18,13 @@ function More() {
     setCredState(creds);
   }, []);
 
-  async function handleCopy() {
+  async function handleSave() {
     if (!credState) {
       return;
     }
 
-    try {
-      await navigator.clipboard.writeText(credState);
-    } catch (err) {
-      console.error(err);
-    }
-
-    alert("Copied creds to clipboard. Save these somewhere secure.");
+    const blob = new Blob([credState], { type: "application/json;charset=utf-8" });
+    saveAs(blob, "id.json");
   }
 
   const placeholder = credState?.replace(/\w/g, "*");
@@ -36,7 +32,7 @@ function More() {
   return (
     <div className="flex flex-col my-4 space-y-2">
       <p className="">These are your credentials (an ECDSA keypair, etc...). They are pre-populated into the password field, so you can easily store them in your password manager.</p>
-      <p>To manually save your credentials, use the copy button, below.</p>
+      <p>To manually save your credentials, use the save button, below.</p>
       <textarea
         className="w-full h-48 rounded font-mono text-xs mt-2"
         value={reveal ? credState : placeholder}
@@ -46,7 +42,7 @@ function More() {
         <button onClick={() => setReveal(!reveal)} className="flex-1">
           {reveal ? "Conceal" : "Reveal"}
         </button>
-        <button onClick={handleCopy}>Copy</button>
+        <button onClick={handleSave}>Save</button>
       </div>
     </div>
   );

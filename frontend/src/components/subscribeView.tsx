@@ -1,5 +1,5 @@
 import { sendSubRequest } from "lib/api";
-import { getProfile, hostPrefix } from "lib/net";
+import Net, { hostPrefix } from "lib/net";
 import { mutateState } from "models/state";
 import { addSubscriptionPubKey } from "lib/storage";
 import { useState } from "react";
@@ -36,7 +36,7 @@ export default function SubscribeView({ pubKeyHex }: { pubKeyHex: string }) {
       return;
     }
 
-    const profile = await getProfile(pubPubKeyHex, destHost);
+    const profile = await Net.getProfile(pubPubKeyHex, destHost);
     if (!profile || profile === "notfound") {
       return;
     }

@@ -95,7 +95,7 @@ export async function identify(creds: string, setStatus: (status: string) => voi
   }
   const token = await Host.getToken(pubKey, privKey, setStatus);
 
-  if (!token) {
+  if (token instanceof Error) {
     setStatus("Failed to get token.");
     return true;
   }

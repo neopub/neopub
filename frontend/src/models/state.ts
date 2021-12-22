@@ -1,9 +1,9 @@
 // State models client state that should sync with the host via an E2E-encrypted file.
 // Excludes posts, because those already sync up to the host for distribution.
 
-import * as Net from "lib/net";
+import Net from "lib/net";
 import { hex2bytes } from "core/bytes";
-import { importAESKey, encryptString, decryptString } from "core/crypto";
+import Crypto from "lib/crypto";
 import { getPublicKeyHex } from "lib/auth";
 import { dumpState, loadStateDangerously } from "lib/db";
 import { putFile } from "lib/api";
@@ -30,9 +30,9 @@ async function putState(): Promise<void> {
   if (!stateKeyBytes) {
     return;
   }
-  const stateKey = await importAESKey(stateKeyBytes, ["encrypt"]);
+  const stateKey = await Crypto.importAESKey(stateKeyBytes, ["encrypt"]);
 
-  const ciphertext = await encryptString(plaintext, stateKey);
+  const ciphertext = await Crypto.encryptString(plaintext, stateKey);
 
   // Obscure filename?
   return putFile(pubKeyHex, "state.json", ident.privKey.key, ident.token, ciphertext, "application/json");
@@ -58,9 +58,9 @@ export async function fetchState(): Promise<void> {
   if (!stateKeyBytes) {
     return;
   }
-  const stateKey = await importAESKey(stateKeyBytes, ["decrypt"]);
+  const stateKey = await Crypto.importAESKey(stateKeyBytes, ["decrypt"]);
 
-  const plaintext = await decryptString(ciphertext, stateKey);
+  const plaintext = await Crypto.decryptString(ciphertext, stateKey);
 
   // TODO: test this blows up if it fails to decrypt.
 

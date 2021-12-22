@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { buf2hex } from "core/bytes";
-import { key2buf } from "core/crypto";
+import Crypto from "lib/crypto";
 import DB from "lib/db";
 import { IReply } from "core/types";
 import { replyId } from "models/reply";
@@ -35,13 +35,13 @@ export async function setIDKeys(idKeys: CryptoKeyPair) {
 }
 
 export async function setWorldKey(key: CryptoKey) {
-  const buf = await key2buf(key);
+  const buf = await Crypto.key2buf(key);
   const hex = buf2hex(buf);
   localStorage[worldKeyKey] = hex;
 }
 
 export async function setStateKey(key: CryptoKey) {
-  const buf = await key2buf(key);
+  const buf = await Crypto.key2buf(key);
   const hex = buf2hex(buf);
   localStorage[stateKeyKey] = hex;
 }
