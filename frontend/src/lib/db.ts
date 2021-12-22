@@ -58,7 +58,7 @@ class NeoPubDexie extends Dexie {
       followers: "pubKey",
       posts: "hash, publisherPubKey, createdAt, replyToHash",
       postKeys: "postHash", // TODO: record post key and derive location instead?
-      indexes: "pubKey", // Is this used? delete if dead
+      indexes: "pubKey",
       profiles: "pubKey",
     });
   }
